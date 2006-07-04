@@ -83,26 +83,14 @@ static ID s_read, s_to_str;
   NameCap = Name >_tag %tag;
   NameAttr = Name >_akey %akey ;
   Q1Attr = [^']* >_aval %aval ;
-  Q1Attr2 = [^'<>]* >_aval %aval ;
   Q2Attr = [^"]* >_aval %aval ;
-  Q2Attr2 = [^"<>]* >_aval %aval ;
-  NameCharAttr = NameChar* >_aval %aval ;
+  NameCharAttr = NameChar+ >_aval %aval ;
   Nmtoken = NameChar+ >_akey %akey ;
-  InvalidAttr = [^\t <>"']* >_aval %aval ;
 
-  ValidAttr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | NameCharAttr ) ;
-  InvalidAttr1 = NameAttr space* "=" space* ("'" Q1Attr "'" | '"' Q2Attr '"' | InvalidAttr ) ;
-  InvalidAttr1End = NameAttr space* "=" space* ("'" Q1Attr2 | '"' Q2Attr2 ) ;
-  ValidStartTag = "<" NameCap (space+ ValidAttr >new_attr %save_attr | space+ Nmtoken >new_attr %save_attr )* space* ">" ;
-  InvalidStartTag = "<" NameCap ( [\t ]+ InvalidAttr1 >new_attr %save_attr )? ( [\t ]* InvalidAttr1 >new_attr %save_attr )* 
-    ( [\t ]* InvalidAttr1End >new_attr %save_attr )? space* ">" ;
-  StartTag = ValidStartTag | InvalidStartTag ;
-
-  ValidEmptyTag = "<" NameCap (space+ ValidAttr >new_attr %save_attr )* space* "/>" ;
-  InvalidEmptyTag = "<" NameCap ( [\t ]+ InvalidAttr1 >new_attr %save_attr )? ( [\t ]* InvalidAttr1 >new_attr %save_attr )* 
-    ( [\t ]* InvalidAttr1End >new_attr %save_attr )? space* "/>" ;
-  PartialTag = "<" NameCap ;
-  EmptyTag = ValidEmptyTag | InvalidEmptyTag ;
+  Attr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | NameCharAttr ) ;
+  AttrSet = (Attr >new_attr %save_attr | Nmtoken >new_attr %save_attr);
+  StartTag = "<" NameCap (space+ AttrSet)* space* ">" ;
+  EmptyTag = "<" NameCap (space+ AttrSet)* space* "/>" ;
 
   EndTag = "</" NameCap space* ">" ;
   XmlVersionNum = [a-zA-Z0-9_.:\-]+ >_aval %xmlver ;
