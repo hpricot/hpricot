@@ -1,0 +1,5 @@
+= 0.1
+=== 3rd July, 2006
+
+* For whatever reason, wrote this HTML parser in C.
+  I guess Ragel is addictive and I want to improve HTree.
