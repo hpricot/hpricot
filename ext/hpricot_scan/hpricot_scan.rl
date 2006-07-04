@@ -8,10 +8,11 @@
  */
 #include <ruby.h>
 
-static VALUE sym_xmldecl, sym_doctype, sym_xmlprocins, sym_starttag, sym_endtag, sym_starttag, sym_comment,
+static VALUE sym_xmldecl, sym_doctype, sym_xmlprocins, sym_stag, sym_etag, sym_emptytag, sym_comment,
       sym_cdata, sym_text;
+static ID s_read, s_to_str;
 
-#define ELE(N) rb_yield(rb_ary_new3(3, sym_##N, tag, attr));
+#define ELE(N) rb_yield_tokens(sym_##N, tag, attr, tokstart == 0 ? Qnil : rb_str_new(tokstart, tokend-tokstart), taint);
 
 #define SET(N, E) \
   if (mark_##N == NULL) \
@@ -47,11 +48,14 @@ static VALUE sym_xmldecl, sym_doctype, sym_xmlprocins, sym_starttag, sym_endtag,
   action _aval { mark_aval = p; }
   action _akey { mark_akey = p; }
   action tag { SET(tag, p); }
+  action tagc { SET(tag, p-1); }
   action aval { SET(aval, p); }
   action akey { SET(akey, p); }
   action xmlver { SET(aval, p); ATTR(rb_str_new2("version"), aval); }
   action xmlenc { SET(aval, p); ATTR(rb_str_new2("encoding"), aval); }
   action xmlsd  { SET(aval, p); ATTR(rb_str_new2("standalone"), aval); }
+  action pubid  { SET(aval, p); ATTR(rb_str_new2("publid_id"), aval); }
+  action sysid  { SET(aval, p); ATTR(rb_str_new2("system_id"), aval); }
 
   action new_attr { 
     akey = Qnil;
@@ -111,29 +115,28 @@ static VALUE sym_xmldecl, sym_doctype, sym_xmlprocins, sym_starttag, sym_endtag,
 
   SystemLiteral = '"' [^"]* '"' | "'" [^']* "'" ;
   PubidLiteral = '"' [\t a-zA-Z0-9\-'()+,./:=?;!*\#@$_%]* '"' | "'" [\t a-zA-Z0-9\-'()+,./:=?;!*\#@$_%]* "'" ;
-  ExternalID = ( "SYSTEM" | "PUBLIC" space+ PubidLiteral ) (space+ SystemLiteral)? ;
-  DocType = "<!DOCTYPE" space+ Name (space+ ExternalID)? space* ("[" [^\]]* "]" space*)? ">" ;
+  ExternalID = ( "SYSTEM" | "PUBLIC" space+ PubidLiteral ) >_aval %pubid (space+ SystemLiteral >_aval %sysid)? ;
+  DocType = "<!DOCTYPE" space+ NameCap (space+ ExternalID)? space* ("[" [^\]]* "]" space*)? ">" ;
   StartXmlProcIns = "<?" Name space+ ;
   EndXmlProcIns = "?>" ;
 
-  html_comment := (any | newline )* :>> EndComment >tag @{ ELE(comment); fgoto main; };
+  html_comment := (any | newline )* >_tag :>> EndComment >tagc @{ ELE(comment); fgoto main; };
 
-  html_cdata := (any | newline )* :>> EndCdata >tag @{ ELE(cdata); fgoto main; };
+  html_cdata := (any | newline )* >_tag :>> EndCdata >tagc @{ ELE(cdata); fgoto main; };
+
+  html_procins := (any | newline )* >_tag :>> EndXmlProcIns >tagc @{ ELE(cdata); fgoto main; };
 
   main := |*
     XmlDecl >newEle { ELE(xmldecl); };
     DocType >newEle { ELE(doctype); };
-    StartXmlProcIns >newEle { mark_tag = p; };
-    EndXmlProcIns { ELE(xmlprocins); };
-    StartTag >newEle { ELE(starttag); };
-    EndTag >newEle { ELE(endtag); };
-    EmptyTag >newEle { ELE(starttag); };
-    StartComment >newEle { mark_tag = p; fgoto html_comment; };
-    StartCdata >newEle { mark_tag = p; fgoto html_cdata; };
+    StartXmlProcIns >newEle { fgoto html_procins; };
+    StartTag >newEle { ELE(stag); };
+    EndTag >newEle { ELE(etag); };
+    EmptyTag >newEle { ELE(emptytag); };
+    StartComment >newEle { fgoto html_comment; };
+    StartCdata >newEle { fgoto html_cdata; };
 
-    newline;
-
-    any {
+    any | newline {
       if (text == 0)
       {
         mark_tag = p;
@@ -147,18 +150,48 @@ static VALUE sym_xmldecl, sym_doctype, sym_xmlprocins, sym_starttag, sym_endtag,
 
 %% write data nofinal;
 
-#define BUFSIZE 1024
+#define BUFSIZE 16384
+
+void rb_yield_tokens(VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
+{
+  VALUE ary;
+  if (sym == sym_text) {
+    raw = tag;
+  }
+  ary = rb_ary_new3(4, sym, tag, attr, raw);
+  if (taint) { 
+    OBJ_TAINT(ary);
+    OBJ_TAINT(tag);
+    OBJ_TAINT(attr);
+    OBJ_TAINT(raw);
+  }
+  rb_yield(ary);
+}
 
 VALUE hpricot_scan(VALUE self, VALUE port)
 {
   static char buf[BUFSIZE];
-  int cs, act, have = 0, curline = 1, text = 0;
+  int cs, act, have = 0, nread = 0, curline = 1, text = 0;
   char *tokstart = 0, *tokend = 0;
 
   VALUE attr = Qnil, tag = Qnil, akey = Qnil, aval = Qnil;
   char *mark_tag = 0, *mark_akey = 0, *mark_aval = 0;
   int done = 0;
-  
+
+  int taint = OBJ_TAINTED( port );
+  if ( !rb_respond_to( port, s_read ) )
+  {
+    if ( rb_respond_to( port, s_to_str ) )
+    {
+      port = rb_funcall( port, s_to_str, 0 );
+      StringValue(port);
+    }
+    else
+    {
+      rb_raise( rb_eArgError, "bad argument, String or IO only please." );
+    }
+  }
+
   %% write init;
   
   while ( !done ) {
@@ -173,10 +206,19 @@ VALUE hpricot_scan(VALUE self, VALUE port)
       exit(1);
     }
 
-    str = rb_funcall( port, rb_intern("read"), 1, INT2FIX(space) );
+    if ( rb_respond_to( port, s_read ) )
+    {
+      str = rb_funcall( port, s_read, 1, INT2FIX(space) );
+    }
+    else
+    {
+      str = rb_str_substr( port, nread, space );
+    }
+
     StringValue(str);
     memcpy( p, RSTRING(str)->ptr, RSTRING(str)->len );
     len = RSTRING(str)->len;
+    nread += len;
 
     /* If this is the last buffer, tack on an EOF. */
     if ( len < space ) {
@@ -220,12 +262,14 @@ void Init_hpricot_scan()
   VALUE mHpricot = rb_define_module("Hpricot");
   rb_define_singleton_method(mHpricot, "scan", hpricot_scan, 1);
 
+  s_read = rb_intern("read");
+  s_to_str = rb_intern("to_str");
   sym_xmldecl = ID2SYM(rb_intern("xmldecl"));
   sym_doctype = ID2SYM(rb_intern("doctype"));
   sym_xmlprocins = ID2SYM(rb_intern("xmlprocins"));
-  sym_starttag = ID2SYM(rb_intern("starttag"));
-  sym_endtag = ID2SYM(rb_intern("endtag"));
-  sym_starttag = ID2SYM(rb_intern("starttag"));
+  sym_stag = ID2SYM(rb_intern("stag"));
+  sym_etag = ID2SYM(rb_intern("etag"));
+  sym_emptytag = ID2SYM(rb_intern("emptytag"));
   sym_comment = ID2SYM(rb_intern("comment"));
   sym_cdata = ID2SYM(rb_intern("cdata"));
   sym_text = ID2SYM(rb_intern("text"));

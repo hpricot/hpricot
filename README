@@ -1,0 +1,6 @@
+Hpricot is a fast, flexible HTML parser written in C.  It's designed to be very
+accomodating (like Tanaka Akira's HTree) and to have a very helpful library (like
+some JavaScript libs -- JQuery, Prototype -- give you.)
+
+Right now, there's not much here.  The scanner works, but I'm still writing all
+the support libraries.

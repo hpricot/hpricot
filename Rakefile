@@ -18,14 +18,13 @@ spec =
         s.name = NAME
         s.version = VERS
         s.platform = Gem::Platform::RUBY
-        s.has_rdoc = true
+        s.has_rdoc = false
         s.extra_rdoc_files = ["README", "CHANGELOG", "COPYING"]
         s.summary = "a swift, liberal HTML parser with a fantastic library"
         s.description = s.summary
         s.author = "why the lucky stiff"
         s.email = 'why@ruby-lang.org'
         s.homepage = 'http://code.whytheluckystiff.net/hpricot/'
-        s.executables = ['camping']
 
         s.files = %w(COPYING README Rakefile) +
           Dir.glob("{bin,doc,test,lib,extras}/**/*") + 
