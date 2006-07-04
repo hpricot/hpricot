@@ -237,6 +237,7 @@ module Hpricot
   end
 
   def Text.parse_pcdata(raw_string)
+    raw_string = raw_string.to_s
     fixed = raw_string.gsub(/&(?:(?:#[0-9]+|#x[0-9a-fA-F]+|([A-Za-z][A-Za-z0-9]*));?)?/o) {|s|
       name = $1
       case s

@@ -2,16 +2,38 @@ require 'rake'
 require 'rake/clean'
 require 'rake/gempackagetask'
 require 'rake/rdoctask'
+require 'rake/testtask'
 require 'fileutils'
 include FileUtils
 
 NAME = "hpricot"
 VERS = "0.1"
-CLEAN.include ['**/.*.sw?', '*.gem', '.config']
+CLEAN.include ['ext/hpricot_scan/*.{bundle,so,obj,pdb,lib,def,exp}', 'ext/hpricot_scan/Makefile', 
+               '**/.*.sw?', '*.gem', '.config']
+
+desc "Does a full compile, test run"
+task :default => [:compile, :test]
+
+desc "Compiles all extensions"
+task :compile => [:hpricot_scan] do
+  if Dir.glob(File.join("lib","hpricot_scan.*")).length == 0
+    STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    STDERR.puts "Gem actually failed to build.  Your system is"
+    STDERR.puts "NOT configured properly to build Mongrel."
+    STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+    exit(1)
+  end
+end
 
 desc "Packages up Hpricot."
-task :default => [:package]
 task :package => [:clean]
+
+desc "Run all the tests"
+Rake::TestTask.new do |t|
+    t.libs << "test"
+    t.test_files = FileList['test/test_*.rb']
+    t.verbose = true
+end
 
 spec =
     Gem::Specification.new do |s|
@@ -39,6 +61,35 @@ spec =
 Rake::GemPackageTask.new(spec) do |p|
     p.need_tar = true
     p.gem_spec = spec
+end
+
+extension = "hpricot_scan"
+ext = "ext/hpricot_scan"
+ext_so = "#{ext}/#{extension}.#{Config::CONFIG['DLEXT']}"
+ext_files = FileList[
+  "#{ext}/*.c",
+  "#{ext}/*.h",
+  "#{ext}/extconf.rb",
+  "#{ext}/Makefile",
+  "lib"
+] 
+
+task "lib" do
+  directory "lib"
+end
+
+desc "Builds just the #{extension} extension"
+task extension.to_sym => ["#{ext}/Makefile", ext_so ]
+
+file "#{ext}/Makefile" => ["#{ext}/extconf.rb"] do
+  Dir.chdir(ext) do ruby "extconf.rb" end
+end
+
+file ext_so => ext_files do
+  Dir.chdir(ext) do
+    sh(PLATFORM =~ /win32/ ? 'nmake' : 'make')
+  end
+  cp ext_so, "lib"
 end
 
 task :ragel do
