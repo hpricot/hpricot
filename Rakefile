@@ -92,6 +92,7 @@ file ext_so => ext_files do
   cp ext_so, "lib"
 end
 
+desc "Generates the scanner code with Ragel."
 task :ragel do
   sh %{/usr/local/bin/ragel ext/hpricot_scan/hpricot_scan.rl | /usr/local/bin/rlcodegen -G2 -o ext/hpricot_scan/hpricot_scan.c}
 end
