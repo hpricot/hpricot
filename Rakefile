@@ -7,7 +7,7 @@ require 'fileutils'
 include FileUtils
 
 NAME = "hpricot"
-VERS = "0.1"
+VERS = "0.2"
 CLEAN.include ['ext/hpricot_scan/*.{bundle,so,obj,pdb,lib,def,exp}', 'ext/hpricot_scan/Makefile', 
                '**/.*.sw?', '*.gem', '.config']
 
