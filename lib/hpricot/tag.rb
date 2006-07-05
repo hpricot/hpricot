@@ -4,22 +4,24 @@ module Hpricot
   class Doc
     attr_accessor :children
     def initialize(children)
-      @children = children
+      @children = children ? children.each { |c| c.parent = self }  : []
     end
   end
 
   class BaseEle
-    attr_accessor :raw_string
+    attr_accessor :raw_string, :parent
   end
 
   class Elem
     attr_accessor :stag, :etag, :children
     def initialize(stag, children=nil, etag=nil)
-      @stag, @children, @etag = stag, children, etag
+      @stag, @etag = stag, etag
+      @children = children ? children.each { |c| c.parent = self }  : []
     end
-    def empty?; @children && @children.empty? end
-    def name; @stag.name end
-    def attributes; @stag.attributes end
+    def empty?; @children.empty? end
+    [:name, :attributes, :parent, :parent=].each do |m|
+      define_method(m) { |*a| @stag.send(m, *a) }
+    end
   end
 
   class STag < BaseEle

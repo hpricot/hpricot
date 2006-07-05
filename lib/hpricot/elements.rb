@@ -84,8 +84,7 @@ module Hpricot
     end
 
     filter '' do |name,i|
-      name == '*' || self.name.downcase == name.downcase || 
-        name.downcase == self.qualified_name.downcase
+      name == '*' || self.name.downcase == name.downcase
     end
 
     filter '#' do |id,i|
@@ -146,23 +145,23 @@ module Hpricot
     end
 
     filter ":first-of-type" do |i|
-      self == parent.containers.detect { |x| x.qualified_name == arg }
+      self == parent.containers.detect { |x| x.name == arg }
     end
 
     filter ":nth-of-type" do |arg,i|
-      self == parent.containers.find_all { |x| x.qualified_name == arg }[arg.to_i]
+      self == parent.containers.find_all { |x| x.name == arg }[arg.to_i]
     end
 
     filter ":last-of-type" do |i|
-      self == parent.containers.find_all { |x| x.qualified_name == self.qualified_name }.last
+      self == parent.containers.find_all { |x| x.name == self.name }.last
     end
 
     filter :"nth-last-of-type" do |arg,i|
-      self == parent.containers.find_all { |x| x.qualified_name == arg }[-1-arg.to_i]
+      self == parent.containers.find_all { |x| x.name == arg }[-1-arg.to_i]
     end
 
     filter ":only-of-type" do |arg,i|
-      of_type = parent.containers.find_all { |x| x.qualified_name == arg }
+      of_type = parent.containers.find_all { |x| x.name == arg }
       of_type.length == 1
     end
 

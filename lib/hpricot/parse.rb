@@ -1,3 +1,5 @@
+require 'hpricot/htmlinfo'
+
 module Hpricot
   # Hpricot.parse parses <i>input</i> and return a document tree.
   # represented by Hpricot::Doc.
@@ -18,7 +20,12 @@ module Hpricot
       case token[0]
       when :stag
         stagname = token[0] = token[1].downcase
-        stack << [stagname, token, []]
+        if ElementContent[stagname] == :EMPTY
+          token[0] = :emptytag
+          stack.last[2] << token
+        else
+          stack << [stagname, token, []]
+        end
       when :etag
         etagname = token[0] = token[1].downcase
         matched_elem = nil
@@ -34,6 +41,9 @@ module Hpricot
         }
         unless matched_elem
           stack.last[2] << [:bogus_etag, token]
+        else
+          ele = stack.pop
+          stack.last[2] << ele
         end
       else
         stack.last[2] << token
@@ -45,8 +55,9 @@ module Hpricot
       stack.last[2] << ele
     end
 
+    structure_list = stack[0][2]
     # structure_list = fix_structure_list(stack[0][2])
-    nodes = stack[0][2].map {|s| build_node(s) }
+    nodes = structure_list.map {|s| build_node(s) }
     Doc.new(nodes)
   end
 
@@ -70,10 +81,12 @@ module Hpricot
     tagname, _, attrs, sraw, _, _, _, eraw = elem[1]
     children = elem[2]
     if eraw
-      return [:elem, tagname, attrs, fix_structure_list(children), sraw, eraw], []
+      elem[2] = fix_structure_list(children)
+      return elem, []
     else
       if ElementContent[tagname] == :EMPTY
-        return [:elem, tagname, attrs, [], sraw], children
+        elem[2] = []
+        return elem, children
       else
         if ElementContent[tagname] == :CDATA
           possible_tags = []
@@ -95,9 +108,9 @@ module Hpricot
         fixed_children = []
         rest = children
         until rest.empty?
-          if rest[0][0] == :elem
+          if String === rest[0][0]
             elem = rest.shift
-            elem_tagname = elem[1]
+            elem_tagname = elem[0]
             elem_tagname = elem_tagname.downcase
             if uncontainable_tags.include? elem_tagname
               rest.unshift elem
@@ -111,7 +124,8 @@ module Hpricot
             fixed_children << rest.shift
           end
         end
-        return [:elem, tagname, attrs, fixed_children, sraw], rest
+        elem[2] = fixed_children
+        return elem, rest
       end
     end
   end
