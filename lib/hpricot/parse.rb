@@ -10,11 +10,6 @@ module Hpricot
   # :stopdoc:
 
   def Hpricot.parse_as(input)
-    input_charset = input.charset if input.respond_to? :charset
-    if input_charset && input_charset != Encoder.internal_charset
-      input = Iconv.conv(Encoder.internal_charset, input_charset, input)
-    end
-
     stack = [[nil, nil, []]]
     Hpricot.scan(input) do |token|
       case token[0]
