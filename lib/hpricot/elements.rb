@@ -25,15 +25,14 @@ module Hpricot
 
     def set(k, v)
         each do |node|
-            l = node.make_loc
-            copy_node(node, l.subst(l.get_subnode(k) => v).to_node)
+          node.set_attribute(k, v)
         end
     end
 
-    ATTR_RE = %r!\[ *(@)([a-z0-9\(\)_-]+) *([~\!\|\*$\^=]*) *'?"?([^'"]*)'?"? *\]!i
+    ATTR_RE = %r!\[ *(@)([a-zA-Z0-9\(\)_-]+) *([~\!\|\*$\^=]*) *'?"?([^'"]*)'?"? *\]!i
     BRACK_RE = %r!(\[) *([^\]]*) *\]!i
-    FUNC_RE = %r!(:)([a-z0-9\*_-]*)\( *[\"']?([^ \)'\"]*)['\"]? *\)!
-    CATCH_RE = %r!([:\.#]*)([a-z0-9\*_-]+)!
+    FUNC_RE = %r!(:)([a-zA-Z0-9\*_-]*)\( *[\"']?([^ \)'\"]*)['\"]? *\)!
+    CATCH_RE = %r!([:\.#]*)([a-zA-Z0-9\*_-]+)!
 
     def self.filter(nodes, expr, truth = true)
         until expr.empty?

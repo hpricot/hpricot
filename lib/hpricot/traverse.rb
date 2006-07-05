@@ -447,6 +447,13 @@ module Hpricot
   end
 
   module Elem::Trav
+    def get_attribute(name)
+      attributes && attributes[name]
+    end
+    def set_attribute(name, val)
+      attributes ||= {}
+      attributes[name] = val
+    end
   end
 
 end
