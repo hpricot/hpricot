@@ -1,10 +1,4 @@
 require 'pp'
-require 'hpricot/doc'
-require 'hpricot/elem'
-require 'hpricot/leaf'
-require 'hpricot/tag'
-require 'hpricot/output'
-require 'hpricot/raw_string'
 
 module Hpricot
   # :stopdoc:
@@ -17,14 +11,16 @@ module Hpricot
 
   class Elem
     def pretty_print(q)
-      if @empty
+      if empty?
         q.group(1, '{emptyelem', '}') {
           q.breakable; q.pp @stag
         }
       else
         q.group(1, "{elem", "}") {
           q.breakable; q.pp @stag
-          @children.each {|elt| q.breakable; q.pp elt }
+          if @children
+            @children.each {|elt| q.breakable; q.pp elt }
+          end
           if @etag
             q.breakable; q.pp @etag
           end
@@ -43,40 +39,26 @@ module Hpricot
             q.breakable
             q.pp line
           }
-        elsif self.respond_to? :display_xml
+        elsif self.respond_to? :to_s
           q.breakable
-          q.text self.display_xml('')
+          q.text self.to_s
         end
       }
     end
     alias inspect pretty_print_inspect
   end
 
-  class Name
-    def inspect
-      if xmlns?
-        @local_name ? "xmlns:#{@local_name}" : "xmlns"
-      elsif !@namespace_uri || @namespace_uri.empty?
-        @local_name
-      elsif @namespace_prefix
-        "#{@namespace_prefix}{#{@namespace_uri}}#{@local_name}"
-      elsif @namespace_prefix == false
-        "-{#{@namespace_uri}}#{@local_name}"
-      else
-        "{#{@namespace_uri}}#{@local_name}"
-      end
-    end
-  end
-
   class STag
     def pretty_print(q)
       q.group(1, '<', '>') {
-        q.text @name.inspect
+        q.text @name
 
-        @attributes.each {|n, t|
-          q.breakable
-          q.text "#{n.inspect}=\"#{t.to_attvalue_content}\""
-        }
+        if @attributes
+          @attributes.each {|n, t|
+            q.breakable
+            q.text "#{n}=\"#{t}\""
+          }
+        end
       }
     end
     alias inspect pretty_print_inspect
@@ -85,7 +67,7 @@ module Hpricot
   class ETag
     def pretty_print(q)
       q.group(1, '</', '>') {
-        q.text @qualified_name
+        q.text @name
       }
     end
     alias inspect pretty_print_inspect
@@ -99,7 +81,7 @@ module Hpricot
           q.breakable
           q.text rs
         else
-          q.text "</#{@qualified_name}>"
+          q.text "</#{@name}>"
         end
       }
     end

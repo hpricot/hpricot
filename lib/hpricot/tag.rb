@@ -1,111 +1,77 @@
-require 'hpricot/raw_string'
-require 'hpricot/text'
-require 'hpricot/context'
-require 'hpricot/name'
-require 'hpricot/fstr'
-
 module Hpricot
   # :stopdoc:
 
-  class STag
-    def initialize(name, attributes=[], inherited_context=DefaultContext)
-      init_raw_string
-      # normalize xml declaration name and attribute value.
-      attributes = attributes.map {|aname, val|
-        if !(Name === aname) && /\A(?:#{Pat::Name}?\{.*\})?#{Pat::Nmtoken}\z/o !~ aname
-          raise Hpricot::Error, "invalid attribute name: #{aname.inspect}"
-        end
-        if !(Name === aname) && /\Axmlns(?:\z|:)/ =~ aname
-          aname = Name.parse_attribute_name(aname, nil)
-        end
-        val = val.to_node if Hpricot::Location === val
-        val = Text.new(val) unless Text === val
-        [aname, val]
-      }
-
-      @inherited_context = inherited_context
-      @xmlns_decls = {}
-
-      # validate namespace consistency of given Name objects.
-      if Name === name
-        @xmlns_decls[name.namespace_prefix] = name.namespace_uri
-      end
-      attributes.each {|aname, text|
-        next unless Name === aname
-        next if aname.xmlns?
-        if aname.namespace_prefix && aname.namespace_uri
-          if @xmlns_decls.include? aname.namespace_prefix
-            if @xmlns_decls[aname.namespace_prefix] != aname.namespace_uri
-              raise ArgumentError, "inconsistent namespace use: #{aname.namespace_prefix} is used as #{@xmlns_decls[aname.namespace_prefix]} and #{aname.namespace_uri}"
-            end
-          else
-            @xmlns_decls[aname.namespace_prefix] = aname.namespace_uri
-          end
-        end
-      }
-
-      attributes.each {|aname, text|
-        next unless Name === aname
-        next unless aname.xmlns?
-        next if @xmlns_decls.include? aname.local_name
-        if aname.local_name
-          @xmlns_decls[aname.local_name] = text.to_s
-        else
-          uri = text.to_s
-          @xmlns_decls[nil] = uri
-        end
-      }
-
-      @context = make_context(@inherited_context)
-
-      if Name === name
-        @name = name
-      else
-        @name = Name.parse_element_name(name, @context)
-      end
-
-      @attributes = attributes.map {|aname, text|
-        aname = Name.parse_attribute_name(aname, @context) unless Name === aname
-        if !aname.namespace_prefix && !aname.namespace_uri.empty?
-          # xxx: should recover error?
-          raise Hpricot::Error, "global attribute without namespace prefix: #{aname.inspect}"
-        end
-        [aname, text]
-      }
-      @attributes.freeze
-    end
-    attr_reader :attributes, :inherited_context, :context
-
-    def element_name
-      @name
-    end
-
-    def make_context(inherited_context)
-      inherited_context.subst_namespaces(@xmlns_decls)
-    end
-
-    def each_namespace_attribute
-      @xmlns_decls.each {|name, uri|
-        yield name, uri
-      }
-      nil
-    end
-
-    def each_attribute
-      @attributes.each {|name, text|
-        next if name.xmlns?
-        yield name, text
-      }
-      nil
+  class Doc
+    attr_accessor :children
+    def initialize(children)
+      @children = children
     end
   end
 
-  class ETag
-    def initialize(qualified_name)
-      init_raw_string
-      @qualified_name = Hpricot.frozen_string(qualified_name)
+  class BaseEle
+    attr_accessor :raw_string
+  end
+
+  class Elem
+    attr_accessor :stag, :etag, :children
+    def initialize(stag, children=nil, etag=nil)
+      @stag, @children, @etag = stag, children, etag
     end
-    attr_reader :qualified_name
+    def empty?; @children && @children.empty? end
+    def name; @stag.name end
+    def attributes; @stag.attributes end
+  end
+
+  class STag < BaseEle
+    def initialize(name, attributes=nil)
+      @name = name
+      @attributes = attributes
+    end
+    attr_reader :name, :attributes
+  end
+
+  class ETag < BaseEle
+    def initialize(qualified_name)
+      @name = qualified_name
+    end
+    attr_reader :name
+  end
+
+  class BogusETag < ETag; end
+
+  class Text < BaseEle
+    def initialize(text)
+      @content = text
+    end
+    attr_reader :content
+  end
+
+  class XMLDecl < BaseEle
+    def initialize(version, encoding, standalone)
+      @version, @encoding, @standalone = version, encoding, standalone
+    end
+    attr_reader :version, :encoding, :standalone
+  end
+
+  class DocType < BaseEle
+    def initialize(name, pubid, sysid)
+      @name, @public_id, @system_id = name, pubid, sysid
+    end
+    attr_reader :name, :public_id, :system_id
+  end
+
+  class ProcIns < BaseEle
+    def initialize(target, content)
+      @target, @content = target, content
+    end
+    attr_reader :target, :content
+  end
+
+  class Comment < BaseEle
+    def initialize(content)
+      @content = content
+    end
+    attr_reader :content
   end
 
   # :startdoc:

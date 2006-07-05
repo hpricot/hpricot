@@ -112,7 +112,7 @@ static ID s_read, s_to_str;
 
   html_cdata := (any | newline )* >_tag :>> EndCdata >tagc @{ ELE(cdata); fgoto main; };
 
-  html_procins := (any | newline )* >_tag :>> EndXmlProcIns >tagc @{ ELE(cdata); fgoto main; };
+  html_procins := (any | newline )* >_tag :>> EndXmlProcIns >tagc @{ ELE(xmlprocins); fgoto main; };
 
   main := |*
     XmlDecl >newEle { ELE(xmldecl); };

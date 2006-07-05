@@ -1,7 +1,3 @@
-require 'hpricot/doc'
-require 'hpricot/elem'
-require 'hpricot/loc'
-require 'hpricot/extract_text'
 require 'hpricot/elements'
 require 'uri'
 
@@ -297,14 +293,14 @@ module Hpricot
 
   module Doc::Trav
     def traverse_some_element(name_set, &block)
-      children.each {|c| c.traverse_some_element(name_set, &block) }
+      children.each {|c| c.traverse_some_element(name_set, &block) } if children
     end
   end
 
   module Elem::Trav
     def traverse_some_element(name_set, &block)
       yield self if name_set.include? self.name
-      children.each {|c| c.traverse_some_element(name_set, &block) }
+      children.each {|c| c.traverse_some_element(name_set, &block) } if children
     end
   end
 
@@ -451,116 +447,6 @@ module Hpricot
   end
 
   module Elem::Trav
-    # +name+ returns the universal name of the element as a string.
-    #
-    #   p Hpricot('<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>').root.name
-    #   # =>
-    #   "{http://www.w3.org/1999/02/22-rdf-syntax-ns#}RDF"
-    #
-    def name() element_name.universal_name end
-
-    # +qualified_name+ returns the qualified name of the element as a string.
-    #
-    #   p Hpricot('<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>').root.qualified_name
-    #   # =>
-    #   "rdf:RDF"
-    def qualified_name() element_name.qualified_name end
-
-    # +attributes+ returns attributes as a hash.
-    # The hash keys are Hpricot::Name objects.
-    # The hash values are Hpricot::Text or Hpricot::Location objects.
-    #
-    #   p Hpricot('<a name="xx" href="uu">').root.attributes
-    #   # =>
-    #   {href=>{text "uu"}, name=>{text "xx"}}
-    #
-    #   p Hpricot('<a name="xx" href="uu">').make_loc.root.attributes
-    #   # =>
-    #   {href=>#<Hpricot::Location: doc()/a/@href>, name=>#<Hpricot::Location: doc()/a/@name>}
-    #
-    def attributes
-      result = {}
-      each_attribute {|name, text|
-        result[name] = text
-      }
-      result
-    end
-
-    def each_attr
-      each_attribute {|name, text|
-        uname = name.universal_name
-        str = text.to_s
-        yield uname, str
-      }
-    end
-
-    # call-seq:
-    #   elem.fetch_attribute(name) -> text or raise IndexError
-    #   elem.fetch_attribute(name, default) -> text or default
-    #   elem.fetch_attribute(name) {|uname| default } -> text or default
-    #
-    # +fetch_attribute+ returns an attribute value as a text.
-    #
-    # elem may be an instance of Hpricot::Elem or a location points to it.
-    def fetch_attribute(uname, *rest, &block)
-      if 1 < rest.length
-        raise ArgumentError, "wrong number of arguments (#{1+rest.length} for 2)"
-      end
-      if !rest.empty? && block_given?
-        raise ArgumentError, "block supersedes default value argument"
-      end
-      uname = uname.universal_name if uname.respond_to? :universal_name
-      return update_attribute_hash.fetch(uname) {
-        if block_given?
-          return yield(uname)
-        elsif !rest.empty?
-          return rest[0]
-        else
-          raise IndexError, "attribute not found: #{uname.inspect}"
-        end
-      }
-    end
-
-    # call-seq:
-    #   elem.fetch_attr(name) -> string or raise IndexError
-    #   elem.fetch_attr(name, default) -> string or default
-    #   elem.fetch_attr(name) {|uname| default } -> string or default
-    #
-    # +fetch_attr+ returns an attribute value as a string.
-    #
-    # elem may be an instance of Hpricot::Elem or a location points to it.
-    def fetch_attr(uname, *rest, &block)
-      if 1 < rest.length
-        raise ArgumentError, "wrong number of arguments (#{1+rest.length} for 2)"
-      end
-      if !rest.empty? && block_given?
-        raise ArgumentError, "block supersedes default value argument"
-      end
-      uname = uname.universal_name if uname.respond_to? :universal_name
-      return update_attribute_hash.fetch(uname) {
-        if block_given?
-          return yield(uname)
-        elsif !rest.empty?
-          return rest[0]
-        else
-          raise IndexError, "attribute not found: #{uname.inspect}"
-        end
-      }.to_s
-    end
-
-    def get_attribute(uname)
-      uname = uname.universal_name if uname.respond_to? :universal_name
-      update_attribute_hash[uname]
-    end 
-
-    def get_attr(uname)
-      if text = update_attribute_hash[uname]
-        text.to_s
-      else
-        nil 
-      end
-    end
-
   end
 
 end

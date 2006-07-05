@@ -1,107 +1,62 @@
 module Hpricot
   # Hpricot.parse parses <i>input</i> and return a document tree.
   # represented by Hpricot::Doc.
-  #
-  # <i>input</i> should be a String or
-  # an object which respond to read or open method.
-  # For example, IO, StringIO, Pathname, URI::HTTP and URI::FTP are acceptable.
-  # Note that the URIs need open-uri.
-  #
-  # Hpricot.parse guesses <i>input</i> is HTML or not and XML or not.
-  #
-  # If it is guessed as HTML, the default namespace in the result is set to http://www.w3.org/1999/xhtml
-  # regardless of <i>input</i> has XML namespace declaration or not nor even it is pre-XML HTML.
-  #
-  # If it is guessed as HTML and not XML, all element and attribute names are downcaseed. 
-  #
-  # If opened file or read content has charset method,
-  # Hpricot.parse decode it according to $KCODE before parsing.
-  # Otherwise Hpricot.parse assumes the character encoding of the content is
-  # compatible to $KCODE.
-  # Note that the charset method is provided by URI::HTTP with open-uri.
   def Hpricot.parse(input)
-    Hpricot.with_frozen_string_hash {
-      parse_as(input, false)
-    }
-  end
-
-  # Hpricot.parse_xml parses <i>input</i> as XML and
-  # return a document tree represented by Hpricot::Doc.
-  #
-  # It behaves almost same as Hpricot.parse but it assumes <i>input</> is XML
-  # even if no XML declaration.
-  # The assumption causes following differences.
-  # * doesn't downcase element name.
-  # * The content of <script> and <style> element is PCDATA, not CDATA.
-  def Hpricot.parse_xml(input)
-    Hpricot.with_frozen_string_hash {
-      parse_as(input, true)
-    }
+    parse_as(input)
   end
 
   # :stopdoc:
 
-  def Hpricot.parse_as(input, is_xml)
+  def Hpricot.parse_as(input)
     input_charset = input.charset if input.respond_to? :charset
     if input_charset && input_charset != Encoder.internal_charset
       input = Iconv.conv(Encoder.internal_charset, input_charset, input)
     end
 
-    stack = [[nil, nil, nil, []]]
-    is_xml, is_html = false, true
+    stack = [[nil, nil, []]]
     Hpricot.scan(input) do |token|
       case token[0]
       when :stag
-        stagname = token[1]
-        stagname = stagname.downcase if !is_xml && is_html
-        stagname = Hpricot.frozen_string(stagname)
-        stack << [stagname, token[2], token[3], []]
+        stagname = token[0] = token[1].downcase
+        stack << [stagname, token, []]
       when :etag
-        etagname = token[1]
-        etagname = etagname.downcase if !is_xml && is_html
-        etagname = Hpricot.frozen_string(etagname)
+        etagname = token[0] = token[1].downcase
         matched_elem = nil
-        stack.reverse_each {|elem|
-          stagname, _, _ = elem
+        (stack.length-1).downto(0) {|i|
+          stagname, = stack[i]
           if stagname == etagname
-            matched_elem = elem
+            matched_elem = stack[i]
+            stack[i][1] += token
+            eles = stack.slice!((i+1)..-1)
+            stack.last[2] += eles
             break
           end
         }
-        if matched_elem
-          until matched_elem.equal? stack.last
-            stagname, attrs, stag_raw_string, children = stack.pop
-            stack.last[3] << [:elem, stagname, attrs, children, stag_raw_string]
-          end
-          stagname, attrs, stag_raw_string, children = stack.pop
-          stack.last[3] << [:elem, stagname, attrs, children, stag_raw_string, token[3]]
-        else
-          stack.last[3] << [:bogus_etag, etagname, token[3]]
+        unless matched_elem
+          stack.last[2] << [:bogus_etag, token]
         end
       else
-        stack.last[3] << token
+        stack.last[2] << token
       end
     end
 
-    context = is_html ? HTMLContext: DefaultContext
-    elem = nil
     while 1 < stack.length
-      stagname, attrs, stag_raw_string, children = stack.pop
-      stack.last[3] << [:elem, stagname, attrs, children, stag_raw_string]
+      ele = stack.pop
+      stack.last[2] << ele
     end
 
-    structure_list = fix_structure_list(stack[0][3], is_xml, is_html)
-    nodes = structure_list.map {|s| build_node(s, is_xml, is_html, context) }
+    # structure_list = fix_structure_list(stack[0][2])
+    nodes = stack[0][2].map {|s| build_node(s) }
     Doc.new(nodes)
   end
 
-  def Hpricot.fix_structure_list(structure_list, is_xml, is_html)
+  def Hpricot.fix_structure_list(structure_list)
     result = []
     rest = structure_list.dup
     until rest.empty?
       structure = rest.shift
-      if structure[0] == :elem
-        elem, rest2 = fix_element(structure, [], [], is_xml, is_html)
+      if String === structure[0]
+        elem, rest2 = fix_element(structure, [], [])
         result << elem
         rest = rest2 + rest
       else
@@ -111,14 +66,14 @@ module Hpricot
     result
   end
 
-  def Hpricot.fix_element(elem, excluded_tags, included_tags, is_xml, is_html)
-    _, tagname, attrs, children, stag_raw_string, etag_raw_string = elem
-    if etag_raw_string
-      return [:elem, tagname, attrs, fix_structure_list(children, is_xml, is_html), stag_raw_string, etag_raw_string], []
+  def Hpricot.fix_element(elem, excluded_tags, included_tags)
+    tagname, _, attrs, sraw, _, _, _, eraw = elem[1]
+    children = elem[2]
+    if eraw
+      return [:elem, tagname, attrs, fix_structure_list(children), sraw, eraw], []
     else
-      tagname = tagname.downcase if !is_xml && is_html
       if ElementContent[tagname] == :EMPTY
-        return [:elem, tagname, attrs, [], stag_raw_string], children
+        return [:elem, tagname, attrs, [], sraw], children
       else
         if ElementContent[tagname] == :CDATA
           possible_tags = []
@@ -143,12 +98,12 @@ module Hpricot
           if rest[0][0] == :elem
             elem = rest.shift
             elem_tagname = elem[1]
-            elem_tagname = elem_tagname.downcase if !is_xml && is_html
+            elem_tagname = elem_tagname.downcase
             if uncontainable_tags.include? elem_tagname
               rest.unshift elem
               break
             else
-              fixed_elem, rest2 = fix_element(elem, excluded_tags, included_tags, is_xml, is_html)
+              fixed_elem, rest2 = fix_element(elem, excluded_tags, included_tags)
               fixed_children << fixed_elem
               rest = rest2 + rest
             end
@@ -156,34 +111,35 @@ module Hpricot
             fixed_children << rest.shift
           end
         end
-        return [:elem, tagname, attrs, fixed_children, stag_raw_string], rest
+        return [:elem, tagname, attrs, fixed_children, sraw], rest
       end
     end
   end
 
-  def Hpricot.build_node(structure, is_xml, is_html, inherited_context=DefaultContext)
+  def Hpricot.build_node(structure)
     case structure[0]
-    when :text
-      Text.parse_pcdata(structure[1])
-    when :elem
-      _, stagname, attrs, children, stag_rawstring, etag_rawstring = structure
-      etag = etag_rawstring && ETag.parse(stagname, etag_rawstring, is_xml, is_html)
-      stag = STag.parse(stagname, attrs, stag_rawstring, true, is_xml, is_html, inherited_context)
+    when String
+      tagname, _, attrs, sraw, _, _, _, eraw = structure[1]
+      children = structure[2]
+      etag = eraw && ETag.parse(tagname, eraw)
+      stag = STag.parse(tagname, attrs, sraw, true)
       if !children.empty? || etag
-        Elem.new!(stag,
-                  children.map {|c| build_node(c, is_xml, is_html, stag.context) },
+        Elem.new(stag,
+                  children.map {|c| build_node(c) },
                   etag)
       else
-        Elem.new!(stag)
+        Elem.new(stag)
       end
+    when :text
+      Text.parse_pcdata(structure[1])
     when :emptytag
-      Elem.new!(STag.parse(structure[1], structure[2], structure[3], false, is_xml, is_html, inherited_context))
+      Elem.new(STag.parse(structure[1], structure[2], structure[3], false))
     when :bogus_etag
-      BogusETag.parse(structure[1], structure[2], is_xml, is_html)
+      BogusETag.parse(structure[1], structure[2])
     when :xmldecl
       XMLDecl.parse(structure[2], structure[3])
     when :doctype
-      DocType.parse(structure[1], structure[2], structure[3], is_xml, is_html)
+      DocType.parse(structure[1], structure[2], structure[3])
     when :procins
       ProcIns.parse(structure[1], structure[2], structure[3])
     when :comment
@@ -197,66 +153,26 @@ module Hpricot
     end
   end
 
-  def STag.parse(qname, attrs, raw_string, is_stag, is_xml, is_html, inherited_context=DefaultContext)
-    qname = qname.downcase if !is_xml && is_html
-
-    attrs = (attrs || {}).map {|aname, aval|
-      if aname
-        aname = (!is_xml && is_html) ? aname.downcase : aname
-        [aname, Text.parse_pcdata(aval)]
-      else
-        if val2name = OmittedAttrName[qname]
-          aval_downcase = aval.downcase
-          aname = val2name.fetch(aval_downcase, aval_downcase)
-        else
-          aname = aval
-        end
-        [aname, Text.new(aval)]
-      end
-    }
-
-    result = STag.new(qname, attrs, inherited_context)
+  def STag.parse(qname, attrs, raw_string, is_stag)
+    result = STag.new(qname, attrs)
     result.raw_string = raw_string
     result
   end
 
-  def ETag.parse(qname, raw_string, is_xml, is_html)
-    qname = qname.downcase if !is_xml && is_html
-
+  def ETag.parse(qname, raw_string)
     result = self.new(qname)
     result.raw_string = raw_string
     result
   end
 
-  def BogusETag.parse(qname, raw_string, is_xml, is_html)
-    qname = qname.downcase if !is_xml && is_html
-
+  def BogusETag.parse(qname, raw_string)
     result = self.new(qname)
     result.raw_string = raw_string
     result
   end
 
   def Text.parse_pcdata(raw_string)
-    raw_string = raw_string.to_s
-    fixed = raw_string.gsub(/&(?:(?:#[0-9]+|#x[0-9a-fA-F]+|([A-Za-z][A-Za-z0-9]*));?)?/o) {|s|
-      name = $1
-      case s
-      when /;\z/
-        s
-      when /\A&#/
-        "#{s};"
-      when '&'
-        '&amp;'
-      else 
-        if NamedCharactersPattern =~ name
-          "&#{name};"
-        else
-          "&amp;#{name}"
-        end
-      end
-    }
-    fixed = raw_string if fixed == raw_string
-    result = Text.new_internal(fixed)
+    result = Text.new(raw_string)
     result.raw_string = raw_string
     result
   end
@@ -292,12 +208,12 @@ module Hpricot
     result
   end
 
-  def DocType.parse(root_element_name, attrs, raw_string, is_xml, is_html)
+  def DocType.parse(root_element_name, attrs, raw_string)
     attrs ||= {}
     public_identifier = attrs['public_id']
     system_identifier = attrs['system_id']
 
-    root_element_name = root_element_name.downcase if !is_xml && is_html
+    root_element_name = root_element_name.downcase
 
     result = DocType.new(root_element_name, public_identifier, system_identifier)
     result.raw_string = raw_string

@@ -32,18 +32,6 @@ module Hpricot
   class Comment;   module Trav; include Leaf::Trav      end; include Trav end
   class BogusETag; module Trav; include Leaf::Trav      end; include Trav end
 
-  class Location; include Hpricot end
-  module Container::Loc end
-  module Leaf::Loc end
-  class Doc;       class Loc < Location; include Trav, Container::Loc end end
-  class Elem;      class Loc < Location; include Trav, Container::Loc end end
-  class Text;      class Loc < Location; include Trav, Leaf::Loc      end end
-  class XMLDecl;   class Loc < Location; include Trav, Leaf::Loc      end end
-  class DocType;   class Loc < Location; include Trav, Leaf::Loc      end end
-  class ProcIns;   class Loc < Location; include Trav, Leaf::Loc      end end
-  class Comment;   class Loc < Location; include Trav, Leaf::Loc      end end
-  class BogusETag; class Loc < Location; include Trav, Leaf::Loc      end end
-
   class Error < StandardError; end
 end
 
