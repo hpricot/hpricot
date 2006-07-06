@@ -12,12 +12,15 @@ static VALUE sym_xmldecl, sym_doctype, sym_xmlprocins, sym_stag, sym_etag, sym_e
       sym_cdata, sym_text;
 static ID s_read, s_to_str;
 
-#define ELE(N) rb_yield_tokens(sym_##N, tag, attr, tokstart == 0 ? Qnil : rb_str_new(tokstart, tokend-tokstart), taint);
+#define ELE(N) \
+  if (tokend > tokstart) { \
+    rb_yield_tokens(sym_##N, tag, attr, tokstart == 0 ? Qnil : rb_str_new(tokstart, tokend-tokstart), taint); \
+  }
 
 #define SET(N, E) \
   if (mark_##N == NULL) \
     N = rb_str_new2(""); \
-  else \
+  else if (E > mark_##N) \
     N = rb_str_new(mark_##N, E - mark_##N);
 
 #define CAT(N, E) if (NIL_P(N)) { SET(N, E); } else { rb_str_cat(N, mark_##N, E - mark_##N); }
