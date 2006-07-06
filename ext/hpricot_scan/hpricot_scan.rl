@@ -18,7 +18,7 @@ static ID s_read, s_to_str;
   }
 
 #define SET(N, E) \
-  if (mark_##N == NULL) \
+  if (mark_##N == NULL || E == mark_##N) \
     N = rb_str_new2(""); \
   else if (E > mark_##N) \
     N = rb_str_new(mark_##N, E - mark_##N);
