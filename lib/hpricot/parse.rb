@@ -218,9 +218,10 @@ module Hpricot
   end
 
   def DocType.parse(root_element_name, attrs, raw_string)
-    attrs ||= {}
-    public_identifier = attrs['public_id']
-    system_identifier = attrs['system_id']
+    if attrs
+      public_identifier = attrs['public_id']
+      system_identifier = attrs['system_id']
+    end
 
     root_element_name = root_element_name.downcase
 

@@ -25,29 +25,38 @@ class TestParser < Test::Unit::TestCase
     assert_equal 'link1', @basic.get_elements_by_tag_name('body')[0].get_element_by_id('link1').get_attribute('id').to_s
   end
 
+  def test_output_basic
+    @basic2 = Hpricot.parse(@basic.innerHTML)
+    scan_basic @basic2
+  end
+
   def test_scan_basic
-    assert_equal 'link1', @basic./('#link1').first.get_attribute('id').to_s
-    assert_equal 'link1', @basic./('p a').first.get_attribute('id').to_s
-    assert_equal 'link1', (@basic/:p/:a).first.get_attribute('id').to_s
-    assert_equal 'link1', @basic.search('p').search('a').first.get_attribute('id').to_s
-    assert_equal 'link2', (@basic/'p').filter('.ohmy').search('a').first.get_attribute('id').to_s
-    assert_equal (@basic/'p')[2], (@basic/'p').filter(':nth(2)')[0]
-    assert_equal 4, (@basic/'p').filter('*').length
-    assert_equal 4, (@basic/'p').filter('* *').length
-    eles = (@basic/'p').filter('.ohmy')
+    scan_basic @basic
+  end
+
+  def scan_basic doc
+    assert_equal 'link1', doc./('#link1').first.get_attribute('id').to_s
+    assert_equal 'link1', doc./('p a').first.get_attribute('id').to_s
+    assert_equal 'link1', (doc/:p/:a).first.get_attribute('id').to_s
+    assert_equal 'link1', doc.search('p').search('a').first.get_attribute('id').to_s
+    assert_equal 'link2', (doc/'p').filter('.ohmy').search('a').first.get_attribute('id').to_s
+    assert_equal (doc/'p')[2], (doc/'p').filter(':nth(2)')[0]
+    assert_equal 4, (doc/'p').filter('*').length
+    assert_equal 4, (doc/'p').filter('* *').length
+    eles = (doc/'p').filter('.ohmy')
     assert_equal 1, eles.length
     assert_equal 'ohmy', eles.first.get_attribute('class').to_s
-    assert_equal 3, (@basic/'p:not(.ohmy)').length
-    assert_equal 3, (@basic/'p').not('.ohmy').length
-    assert_equal 3, (@basic/'p').not(eles.first).length
-    assert_equal 2, (@basic/'p').filter('[@class]').length
-    assert_equal 'last final', (@basic/'p[@class~="final"]').first.get_attribute('class').to_s
-    assert_equal 1, (@basic/'p').filter('[@class~="final"]').length
-    assert_equal 2, (@basic/'p > a').length
-    assert_equal 1, (@basic/'p.ohmy > a').length
-    assert_equal 2, (@basic/'p / a').length
-    assert_equal 2, (@basic/'link ~ link').length
-    assert_equal 3, (@basic/'title ~ link').length
+    assert_equal 3, (doc/'p:not(.ohmy)').length
+    assert_equal 3, (doc/'p').not('.ohmy').length
+    assert_equal 3, (doc/'p').not(eles.first).length
+    assert_equal 2, (doc/'p').filter('[@class]').length
+    assert_equal 'last final', (doc/'p[@class~="final"]').first.get_attribute('class').to_s
+    assert_equal 1, (doc/'p').filter('[@class~="final"]').length
+    assert_equal 2, (doc/'p > a').length
+    assert_equal 1, (doc/'p.ohmy > a').length
+    assert_equal 2, (doc/'p / a').length
+    assert_equal 2, (doc/'link ~ link').length
+    assert_equal 3, (doc/'title ~ link').length
   end
 
   def test_scan_boingboing
@@ -58,35 +67,38 @@ class TestParser < Test::Unit::TestCase
   def test_abs_xpath
     assert_equal 60, @boingboing.search("/html/body//p[@class='posted']").length
     assert_equal 60, @boingboing.search("/*/body//p[@class='posted']").length
+    assert_equal 18, @boingboing.search("//script").length
     divs = @boingboing.search("//script/../div")
     assert_equal 2,  divs.length
     assert_equal 1,  divs.search('a').length
-    assert_equal 16, @boingboing.search('//div').search('p/a/img').length
     imgs = @boingboing.search('//div/p/a/img')
-    assert_equal 16, imgs.length
-    assert imgs.all? { |x| x.qualified_name == 'img' }
+    assert_equal 15, imgs.length
+    assert_equal 17, @boingboing.search('//div').search('p/a/img').length
+    assert imgs.all? { |x| x.name == 'img' }
   end
 
   def test_predicates
-    assert_equal 1, @boingboing.search('//input[@checked]').length
     assert_equal 2, @boingboing.search('//link[@rel="alternate"]').length
     p_imgs = @boingboing.search('//div/p[/a/img]')
-    assert_equal 16, p_imgs.length
-    assert p_imgs.all? { |x| x.qualified_name == 'p' }
+    assert_equal 15, p_imgs.length
+    assert p_imgs.all? { |x| x.name == 'p' }
     p_imgs = @boingboing.search('//div/p[a/img]')
-    assert_equal 21, p_imgs.length
-    assert p_imgs.all? { |x| x.qualified_name == 'p' }
+    assert_equal 18, p_imgs.length
+    assert p_imgs.all? { |x| x.name == 'p' }
+    assert_equal 1, @boingboing.search('//input[@checked]').length
   end
 
   def test_alt_predicates
     assert_equal 2, @boingboing.search('//table/tr:last').length
-    assert_equal "<p xmlns=\"http://www.w3.org/1999/xhtml\"\n>The third paragraph</p\n>",
+    assert_equal "<p>The third paragraph</p>",
         @basic.search('p:eq(2)').html
+    assert_equal '<p class="last final"><b>THE FINAL PARAGRAPH</b></p>',
+        @basic.search('p:last').html
     assert_equal 'last final', @basic.search('//p:last-of-type').first.get_attribute('class').to_s
   end
 
   def test_many_paths
-    assert_equal 23, @boingboing.search('//div/p[a/img]|//link[@rel="alternate"]').length
     assert_equal 62, @boingboing.search('p.posted, link[@rel="alternate"]').length
+    assert_equal 20, @boingboing.search('//div/p[a/img]|//link[@rel="alternate"]').length
   end
 end

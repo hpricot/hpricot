@@ -6,10 +6,19 @@ module Hpricot
     def initialize(children)
       @children = children ? children.each { |c| c.parent = self }  : []
     end
+    def output(out)
+      @children.each do |n|
+        n.output(out)
+      end
+      out
+    end
   end
 
   class BaseEle
     attr_accessor :raw_string, :parent
+    def html_quote(str)
+      "\"" + str.gsub('"', '\\"') + "\""
+    end
   end
 
   class Elem
@@ -22,6 +31,16 @@ module Hpricot
     [:name, :attributes, :parent, :parent=].each do |m|
       define_method(m) { |*a| @stag.send(m, *a) }
     end
+    def output(out)
+      if empty?
+        @stag.output(out, :style => :empty)
+      else
+        @stag.output(out)
+        @children.each { |n| n.output(out) }
+        @stag.output(out, :style => :end)
+      end
+      out
+    end
   end
 
   class STag < BaseEle
@@ -30,6 +49,24 @@ module Hpricot
       @attributes = attributes
     end
     attr_reader :name, :attributes
+    def attributes_as_html
+      if @attributes
+        @attributes.map do |aname, aval|
+          " #{aname}=#{html_quote(aval)}"
+        end.join
+      end
+    end
+    def output(out, opts = {})
+      out <<
+        case opts[:style]
+        when :end
+          "</#{@name}>"
+        else
+          "<#{@name}#{attributes_as_html}" +
+            (opts[:style] == :empty ? " /" : "") +
+            ">"
+        end
+    end
   end
 
   class ETag < BaseEle
@@ -39,13 +76,18 @@ module Hpricot
     attr_reader :name
   end
 
-  class BogusETag < ETag; end
+  class BogusETag < ETag
+    def output(out); end
+  end
 
   class Text < BaseEle
     def initialize(text)
       @content = text
     end
     attr_reader :content
+    def output(out)
+      out << @content
+    end
   end
 
   class XMLDecl < BaseEle
@@ -53,6 +95,13 @@ module Hpricot
       @version, @encoding, @standalone = version, encoding, standalone
     end
     attr_reader :version, :encoding, :standalone
+    def output(out)
+      out <<
+        "<?xml version=\"#{@version}\"" +
+          (@encoding ? " encoding=\"#{encoding}\"" : "") +
+          (@standalone != nil ? " standalone=\"#{standalone ? 'yes' : 'no'}\"" : "") +
+          "?>"
+    end
   end
 
   class DocType < BaseEle
@@ -60,6 +109,12 @@ module Hpricot
       @name, @public_id, @system_id = name, pubid, sysid
     end
     attr_reader :name, :public_id, :system_id
+    def output(out)
+      out <<
+        "<!DOCTYPE #{@name} " +
+          (@public_id ? "PUBLIC \"#{@public_id}\"" : "SYSTEM") +
+          (@system_id ? " #{html_quote(@system_id)}" : "") + ">"
+    end
   end
 
   class ProcIns < BaseEle
@@ -67,6 +122,11 @@ module Hpricot
       @target, @content = target, content
     end
     attr_reader :target, :content
+    def output(out)
+      out << "<?#{@target}" +
+        (@content ? " #{@content}" : "") +
+        "?>"
+    end
   end
 
   class Comment < BaseEle
@@ -74,6 +134,9 @@ module Hpricot
       @content = content
     end
     attr_reader :content
+    def output(out)
+      out << "<!--#{@content}-->"
+    end
   end
 
   # :startdoc:

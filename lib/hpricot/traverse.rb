@@ -25,8 +25,8 @@ module Hpricot
     def containers
       children.grep(Container::Trav)
     end
-    def html
-      display_xml("")
+    def innerHTML
+      output("")
     end
     def search(expr, &blk)
       last = nil
@@ -447,6 +447,9 @@ module Hpricot
   end
 
   module Elem::Trav
+    def has_attribute?(name)
+      attributes && attributes.has_key?(name)
+    end
     def get_attribute(name)
       attributes && attributes[name]
     end

@@ -6,7 +6,11 @@ module Hpricot
     alias_method :/, :search
 
     def html
-      map { |x| x.display_xml("") }.join
+      map { |x| x.innerHTML }.join
+    end
+
+    def html=(str)
+      each { |x| x.innerHTML = str }
     end
 
     def filter(expr)
@@ -214,7 +218,7 @@ module Hpricot
     end
 
     filter '@' do |attr,val,i|
-      get_attribute(attr)
+      has_attribute? attr
     end
 
     filter '[' do |val,i|

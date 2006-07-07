@@ -57,7 +57,7 @@ static ID s_read, s_to_str;
   action xmlver { SET(aval, p); ATTR(rb_str_new2("version"), aval); }
   action xmlenc { SET(aval, p); ATTR(rb_str_new2("encoding"), aval); }
   action xmlsd  { SET(aval, p); ATTR(rb_str_new2("standalone"), aval); }
-  action pubid  { SET(aval, p); ATTR(rb_str_new2("publid_id"), aval); }
+  action pubid  { SET(aval, p); ATTR(rb_str_new2("public_id"), aval); }
   action sysid  { SET(aval, p); ATTR(rb_str_new2("system_id"), aval); }
 
   action new_attr { 
@@ -104,9 +104,10 @@ static ID s_read, s_to_str;
   XmlSDDecl = space+ "standalone" space* "=" space* ("'" XmlYesNo "'" | '"' XmlYesNo '"') ;
   XmlDecl = "<?xml" XmlVersionInfo XmlEncodingDecl? XmlSDDecl? space* "?>" ;
 
-  SystemLiteral = '"' [^"]* '"' | "'" [^']* "'" ;
-  PubidLiteral = '"' [\t a-zA-Z0-9\-'()+,./:=?;!*\#@$_%]* '"' | "'" [\t a-zA-Z0-9\-'()+,./:=?;!*\#@$_%]* "'" ;
-  ExternalID = ( "SYSTEM" | "PUBLIC" space+ PubidLiteral ) >_aval %pubid (space+ SystemLiteral >_aval %sysid)? ;
+  SystemLiteral = '"' [^"]* >_aval %sysid '"' | "'" [^']* >_aval %sysid "'" ;
+  PubidLiteral = '"' [\t a-zA-Z0-9\-'()+,./:=?;!*\#@$_%]*  >_aval %pubid '"' |
+    "'" [\t a-zA-Z0-9\-'()+,./:=?;!*\#@$_%]* >_aval %pubid "'" ;
+  ExternalID = ( "SYSTEM" | "PUBLIC" space+ PubidLiteral ) (space+ SystemLiteral)? ;
   DocType = "<!DOCTYPE" space+ NameCap (space+ ExternalID)? space* ("[" [^\]]* "]" space*)? ">" ;
   StartXmlProcIns = "<?" Name space+ ;
   EndXmlProcIns = "?>" ;
