@@ -15,6 +15,10 @@ class TestParser < Test::Unit::TestCase
   #   assert_equal '', @basic.search('//p').map { |x| x.attributes }
   # end
 
+  def test_scan_text
+    assert_equal 'FOO', Hpricot.make("FOO").first.content
+  end
+
   def test_get_element_by_id
     assert_equal 'link1', @basic.get_element_by_id('link1').get_attribute('id').to_s
     assert_equal 'link1', @basic.get_element_by_id('body1').get_element_by_id('link1').get_attribute('id').to_s
@@ -91,9 +95,9 @@ class TestParser < Test::Unit::TestCase
   def test_alt_predicates
     assert_equal 2, @boingboing.search('//table/tr:last').length
     assert_equal "<p>The third paragraph</p>",
-        @basic.search('p:eq(2)').html
+        @basic.search('p:eq(2)').to_html
     assert_equal '<p class="last final"><b>THE FINAL PARAGRAPH</b></p>',
-        @basic.search('p:last').html
+        @basic.search('p:last').to_html
     assert_equal 'last final', @basic.search('//p:last-of-type').first.get_attribute('class').to_s
   end
 

@@ -12,6 +12,11 @@ module Hpricot
     def comment?() Comment::Trav === self end
     def bogusetag?() BogusETag::Trav === self end
 
+    def to_html
+      output("")
+    end
+    alias_method :to_s, :to_html
+
     def get_subnode(*indexes)
       n = self
       indexes.each {|index|
@@ -25,8 +30,38 @@ module Hpricot
     def containers
       children.grep(Container::Trav)
     end
+    def replace_child(old, new)
+      children[children.index(old), 1] = [*new]
+    end
+    def insert_before(nodes, ele)
+      case nodes
+      when Array
+        nodes.each { |n| insert_before(n, ele) }
+      else
+        children[children.index(ele) || 0, 0] = nodes
+      end
+    end
+    def insert_after(nodes, ele)
+      case nodes
+      when Array
+        nodes.each { |n| insert_after(n, ele) }
+      else
+        idx = children.index(ele)
+        children[idx ? idx + 1 : children.length, 0] = nodes
+      end
+    end
     def innerHTML
-      output("")
+      children.map { |x| x.output("") }.join
+    end
+    def innerHTML=(inner)
+      case inner
+      when String, IO
+        self.children = Hpricot.parse(inner).children
+      when Array
+        self.children = inner
+      when nil
+        self.children = []
+      end
     end
     def search(expr, &blk)
       last = nil
@@ -448,14 +483,14 @@ module Hpricot
 
   module Elem::Trav
     def has_attribute?(name)
-      attributes && attributes.has_key?(name)
+      self.attributes && self.attributes.has_key?(name.to_s)
     end
     def get_attribute(name)
-      attributes && attributes[name]
+      self.attributes && self.attributes[name.to_s]
     end
     def set_attribute(name, val)
-      attributes ||= {}
-      attributes[name] = val
+      self.attributes ||= {}
+      self.attributes[name.to_s] = val
     end
   end
 

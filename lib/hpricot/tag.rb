@@ -28,8 +28,8 @@ module Hpricot
       @children = children ? children.each { |c| c.parent = self }  : []
     end
     def empty?; @children.empty? end
-    [:name, :attributes, :parent, :parent=].each do |m|
-      define_method(m) { |*a| @stag.send(m, *a) }
+    [:name, :attributes, :parent].each do |m|
+      [m, "#{m}="].each { |m2| define_method(m2) { |*a| @stag.send(m2, *a) } }
     end
     def output(out)
       if empty?
@@ -48,7 +48,7 @@ module Hpricot
       @name = name
       @attributes = attributes
     end
-    attr_reader :name, :attributes
+    attr_accessor :name, :attributes
     def attributes_as_html
       if @attributes
         @attributes.map do |aname, aval|

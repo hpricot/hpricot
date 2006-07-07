@@ -1,15 +1,19 @@
 require 'hpricot/htmlinfo'
 
+def Hpricot(input)
+  Hpricot.parse(input)
+end
+
 module Hpricot
   # Hpricot.parse parses <i>input</i> and return a document tree.
   # represented by Hpricot::Doc.
   def Hpricot.parse(input)
-    parse_as(input)
+    Doc.new(make(input))
   end
 
   # :stopdoc:
 
-  def Hpricot.parse_as(input)
+  def Hpricot.make(input)
     stack = [[nil, nil, []]]
     Hpricot.scan(input) do |token|
       case token[0]
@@ -52,8 +56,7 @@ module Hpricot
 
     structure_list = stack[0][2]
     # structure_list = fix_structure_list(stack[0][2])
-    nodes = structure_list.map {|s| build_node(s) }
-    Doc.new(nodes)
+    structure_list.map {|s| build_node(s) }
   end
 
   def Hpricot.fix_structure_list(structure_list)

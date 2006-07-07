@@ -5,9 +5,19 @@ module Hpricot
     end
     alias_method :/, :search
 
-    def html
-      map { |x| x.innerHTML }.join
+    def to_html
+      map { |x| x.output("") }.join
     end
+    alias_method :to_s, :to_html
+
+    def html(str = nil)
+      if str
+        self.html = str
+      else
+        map { |x| x.innerHTML }.join
+      end
+    end
+    alias_method :text, :html
 
     def html=(str)
       each { |x| x.innerHTML = str }
@@ -16,6 +26,43 @@ module Hpricot
     def filter(expr)
         nodes, = Elements.filter(self, expr)
         nodes
+    end
+
+    def remove
+      each { |x| x.parent.children.delete(x) }
+    end
+
+    def empty
+      each { |x| x.innerHTML = nil }
+    end
+
+    def append(str)
+      each { |x| x.innerHTML += str }
+    end
+
+    def prepend(str)
+      each { |x| x.innerHTML = str + x.innerHTML }
+    end
+
+    def before(str)
+      each { |x| x.parent.insert_before Hpricot.make(str), x }
+    end
+
+    def after(str)
+      each { |x| x.parent.insert_after Hpricot.make(str), x }
+    end
+
+    def wrap(str)
+      each do |x|
+        wrap = Hpricot.make(str)
+        nest = wrap.detect { |w| w.respond_to? :children }
+        unless nest
+          raise Exception, "No wrapping element found."
+        end
+        x.parent.replace_child(x, wrap)
+        nest = nest.children.first until nest.empty?
+        nest.children << x
+      end
     end
 
     def not(expr)
@@ -27,10 +74,17 @@ module Hpricot
         nodes
     end
 
-    def set(k, v)
+    def set(k, v = nil)
+      case k
+      when Hash
+        each do |node|
+          k.each { |a,b| node.set_attribute(a, b) }
+        end
+      else
         each do |node|
           node.set_attribute(k, v)
         end
+      end
     end
 
     ATTR_RE = %r!\[ *(@)([a-zA-Z0-9\(\)_-]+) *([~\!\|\*$\^=]*) *'?"?([^'"]*)'?"? *\]!i

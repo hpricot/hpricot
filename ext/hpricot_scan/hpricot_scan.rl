@@ -232,7 +232,18 @@ VALUE hpricot_scan(VALUE self, VALUE port)
       /* text nodes have no tokstart because each byte is parsed alone */
       if ( mark_tag != NULL && text == 1 )
       {
-        CAT(tag, p);
+        if (done)
+        {
+          if (mark_tag < p-1)
+          {
+            CAT(tag, p-1);
+            ELE(text);
+          }
+        }
+        else
+        {
+          CAT(tag, p);
+        }
       }
       mark_tag = buf;
     }
