@@ -7,7 +7,7 @@ require 'fileutils'
 include FileUtils
 
 NAME = "hpricot"
-VERS = "0.2"
+VERS = "0.3"
 CLEAN.include ['ext/hpricot_scan/*.{bundle,so,obj,pdb,lib,def,exp}', 'ext/hpricot_scan/Makefile', 
                '**/.*.sw?', '*.gem', '.config']
 
@@ -24,6 +24,7 @@ task :compile => [:hpricot_scan] do
     exit(1)
   end
 end
+task :hpricot_scan => [:ragel]
 
 desc "Packages up Hpricot."
 task :package => [:clean]
