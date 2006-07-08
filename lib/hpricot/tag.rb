@@ -52,7 +52,8 @@ module Hpricot
     def attributes_as_html
       if @attributes
         @attributes.map do |aname, aval|
-          " #{aname}=#{html_quote(aval)}"
+          " #{aname}" +
+            (aval ? "=#{html_quote(aval)}" : "")
         end.join
       end
     end
