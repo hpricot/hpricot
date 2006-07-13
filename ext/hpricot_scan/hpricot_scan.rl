@@ -90,10 +90,11 @@ static ID s_read, s_to_str;
   NameCharAttr = NameChar+ >_aval %aval ;
   Nmtoken = NameChar+ >_akey %akey ;
 
-  Attr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | NameCharAttr ) ;
-  AttrSet = (Attr >new_attr %save_attr | Nmtoken >new_attr %save_attr);
-  StartTag = "<" NameCap (space+ AttrSet)* space* ">" ;
-  EmptyTag = "<" NameCap (space+ AttrSet)* space* "/>" ;
+  Attr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | NameCharAttr space+ ) space* ;
+  AttrEnd = ( NameAttr space* "=" space* NameCharAttr | Nmtoken >new_attr %save_attr ) ;
+  AttrSet = ( Attr >new_attr %save_attr | Nmtoken >new_attr space+ %save_attr ) ;
+  StartTag = "<" NameCap space+ AttrSet* (AttrEnd >new_attr %save_attr)? ">" | "<" NameCap ">";
+  EmptyTag = "<" NameCap space+ AttrSet* (AttrEnd >new_attr %save_attr)? "/>" | "<" NameCap "/>" ;
 
   EndTag = "</" NameCap space* ">" ;
   XmlVersionNum = [a-zA-Z0-9_.:\-]+ >_aval %xmlver ;
