@@ -76,6 +76,7 @@ static ID s_read, s_to_str;
   # (a blatant rip from HTree)
   #
   newline = '\n' @{curline += 1;} ;
+  qtext = '"' [^\n"]* '"' | "'" [^\n']* "'" ;
   NameChar = [\-A-Za-z0-9._:] ;
   Name = [A-Za-z_:] NameChar* ;
   StartComment = "<!--" ;
@@ -129,7 +130,7 @@ static ID s_read, s_to_str;
     StartComment >newEle { fgoto html_comment; };
     StartCdata >newEle { fgoto html_cdata; };
 
-    any | newline {
+    any | qtext | newline {
       if (text == 0)
       {
         mark_tag = p;
