@@ -8,6 +8,7 @@ class TestParser < Test::Unit::TestCase
   def setup
     @basic = Hpricot.parse(TestFiles::BASIC)
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
+    @immob = Hpricot.parse(TestFiles::IMMOB)
   end
 
   # def test_set_attr
@@ -104,5 +105,14 @@ class TestParser < Test::Unit::TestCase
   def test_many_paths
     assert_equal 62, @boingboing.search('p.posted, link[@rel="alternate"]').length
     assert_equal 20, @boingboing.search('//div/p[a/img]|//link[@rel="alternate"]').length
+  end
+
+  def test_body_newlines
+    body = (@immob/:body).first
+    {'background' => '', 'bgcolor' => '#ffffff', 'text' => '#000000', 'marginheight' => '10',
+     'marginwidth' => '10', 'leftmargin' => '10', 'topmargin' => '10', 'link' => '#000066',
+     'alink' => '#ff6600', 'hlink' => "#ff6600", 'vlink' => "#000000"}.each do |k, v|
+        assert_equal v, body.attributes[k]
+    end
   end
 end
