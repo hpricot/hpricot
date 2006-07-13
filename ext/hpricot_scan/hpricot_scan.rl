@@ -14,6 +14,7 @@ static ID s_read, s_to_str;
 
 #define ELE(N) \
   if (tokend > tokstart) { \
+    ele_open = 0; \
     rb_yield_tokens(sym_##N, tag, attr, tokstart == 0 ? Qnil : rb_str_new(tokstart, tokend-tokstart), taint); \
   }
 
@@ -45,6 +46,7 @@ static ID s_read, s_to_str;
     attr = Qnil;
     tag = Qnil;
     mark_tag = NULL;
+    ele_open = 1;
   }
 
   action _tag { mark_tag = p; }
@@ -76,7 +78,7 @@ static ID s_read, s_to_str;
   # (a blatant rip from HTree)
   #
   newline = '\n' @{curline += 1;} ;
-  qtext = '"' [^\n"]* '"' | "'" [^\n']* "'" ;
+# qtext = '"' ( '\"' | [^\n"] )* '"' | "'" ( "\\'" | [^\n'] )* "'" ; 
   NameChar = [\-A-Za-z0-9._:] ;
   Name = [A-Za-z_:] NameChar* ;
   StartComment = "<!--" ;
@@ -130,10 +132,17 @@ static ID s_read, s_to_str;
     StartComment >newEle { fgoto html_comment; };
     StartCdata >newEle { fgoto html_cdata; };
 
-    any | qtext | newline {
+    any | newline {
       if (text == 0)
       {
-        mark_tag = p;
+        if (ele_open == 1) {
+          ele_open = 0;
+          if (tokstart > 0) {
+            mark_tag = tokstart;
+          }
+        } else {
+          mark_tag = p;
+        }
         attr = Qnil;
         tag = Qnil;
         text = 1;
@@ -170,7 +179,7 @@ VALUE hpricot_scan(VALUE self, VALUE port)
 
   VALUE attr = Qnil, tag = Qnil, akey = Qnil, aval = Qnil;
   char *mark_tag = 0, *mark_akey = 0, *mark_aval = 0;
-  int done = 0;
+  int done = 0, ele_open = 0;
 
   int taint = OBJ_TAINTED( port );
   if ( !rb_respond_to( port, s_read ) )
@@ -228,6 +237,16 @@ VALUE hpricot_scan(VALUE self, VALUE port)
       break;
     }
     
+    if ( done && ele_open )
+    {
+      ele_open = 0;
+      if (tokstart > 0) {
+        mark_tag = tokstart;
+        tokstart = 0;
+        text = 1;
+      }
+    }
+
     if ( tokstart == 0 )
     {
       have = 0;
