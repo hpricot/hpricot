@@ -90,11 +90,11 @@ static ID s_read, s_to_str;
   NameAttr = Name >_akey %akey ;
   Q1Attr = [^']* >_aval %aval ;
   Q2Attr = [^"]* >_aval %aval ;
-  NameCharAttr = NameChar+ >_aval %aval ;
+  UnqAttr = [^ \t\n<>"']+ >_aval %aval ;
   Nmtoken = NameChar+ >_akey %akey ;
 
-  Attr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | NameCharAttr space+ ) space* ;
-  AttrEnd = ( NameAttr space* "=" space* NameCharAttr | Nmtoken >new_attr %save_attr ) ;
+  Attr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | UnqAttr space+ ) space* ;
+  AttrEnd = ( NameAttr space* "=" space* UnqAttr | Nmtoken >new_attr %save_attr ) ;
   AttrSet = ( Attr >new_attr %save_attr | Nmtoken >new_attr space+ %save_attr ) ;
   StartTag = "<" NameCap space+ AttrSet* (AttrEnd >new_attr %save_attr)? ">" | "<" NameCap ">";
   EmptyTag = "<" NameCap space+ AttrSet* (AttrEnd >new_attr %save_attr)? "/>" | "<" NameCap "/>" ;
