@@ -44,6 +44,13 @@ module Hpricot
           ele = stack.pop
           stack.last[2] << ele
         end
+      when :text
+        l = stack.last[2].last
+        if l and l[0] == :text
+          l[1] += token[1]
+        else
+          stack.last[2] << token
+        end
       else
         stack.last[2] << token
       end

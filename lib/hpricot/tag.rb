@@ -45,8 +45,10 @@ module Hpricot
 
   class STag < BaseEle
     def initialize(name, attributes=nil)
-      @name = name
-      @attributes = attributes
+      @name = name.downcase
+      if attributes
+        @attributes = attributes.inject({}) { |hsh,(k,v)| hsh[k.downcase] = v; hsh }
+      end
     end
     attr_accessor :name, :attributes
     def attributes_as_html
