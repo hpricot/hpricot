@@ -8,6 +8,7 @@ include FileUtils
 
 NAME = "hpricot"
 VERS = "0.3"
+PKG_REVISION = ".0"
 CLEAN.include ['ext/hpricot_scan/*.{bundle,so,obj,pdb,lib,def,exp}', 'ext/hpricot_scan/Makefile', 
                '**/.*.sw?', '*.gem', '.config']
 
@@ -19,7 +20,7 @@ task :compile => [:hpricot_scan] do
   if Dir.glob(File.join("lib","hpricot_scan.*")).length == 0
     STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     STDERR.puts "Gem actually failed to build.  Your system is"
-    STDERR.puts "NOT configured properly to build Mongrel."
+    STDERR.puts "NOT configured properly to build hpricot."
     STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     exit(1)
   end
@@ -27,7 +28,7 @@ end
 task :hpricot_scan => [:ragel]
 
 desc "Packages up Hpricot."
-task :package => [:clean]
+task :package => [:clean, :ragel]
 
 desc "Run all the tests"
 Rake::TestTask.new do |t|
@@ -39,7 +40,7 @@ end
 spec =
     Gem::Specification.new do |s|
         s.name = NAME
-        s.version = VERS
+        s.version = VERS + PKG_REVISION
         s.platform = Gem::Platform::RUBY
         s.has_rdoc = false
         s.extra_rdoc_files = ["README", "CHANGELOG", "COPYING"]
@@ -49,12 +50,13 @@ spec =
         s.email = 'why@ruby-lang.org'
         s.homepage = 'http://code.whytheluckystiff.net/hpricot/'
 
-        s.files = %w(COPYING README Rakefile) +
+        s.files = %w(COPYING README Rakefile mingw-rbconfig.rb) +
           Dir.glob("{bin,doc,test,lib,extras}/**/*") + 
-          Dir.glob("ext/**/*.{h,c,rb}")
+          Dir.glob("ext/**/*.{h,c,rb,rl}") + 
+          %w[ext/hpricot_scan/hpricot_scan.c] # needed because it's generated later
         
         s.require_path = "lib"
-        s.autorequire = "hpricot"
+        #s.autorequire = "hpricot"  # no no no this is tHe 3v1l
         s.extensions = FileList["ext/**/extconf.rb"].to_a
         s.bindir = "bin"
     end
@@ -70,6 +72,7 @@ ext_so = "#{ext}/#{extension}.#{Config::CONFIG['DLEXT']}"
 ext_files = FileList[
   "#{ext}/*.c",
   "#{ext}/*.h",
+  "#{ext}/*.rl",
   "#{ext}/extconf.rb",
   "#{ext}/Makefile",
   "lib"
@@ -95,8 +98,60 @@ end
 
 desc "Generates the scanner code with Ragel."
 task :ragel do
-  sh %{/usr/local/bin/ragel ext/hpricot_scan/hpricot_scan.rl | /usr/local/bin/rlcodegen -G2 -o ext/hpricot_scan/hpricot_scan.c}
+  sh %{ragel ext/hpricot_scan/hpricot_scan.rl | rlcodegen -G2 -o ext/hpricot_scan/hpricot_scan.c}
 end
+
+PKG_FILES = FileList[
+  "test/**/*.{rb,html,xhtml}",
+  "lib/**/*.rb",
+  "ext/**/*.{c,rb,h,rl}",
+  "CHANGELOG", "README", "Rakefile", "COPYING",
+  "mingw-rbconfig.rb", "lib/hpricot_scan.so"]
+
+Win32Spec = Gem::Specification.new do |s|
+  s.name = NAME
+  s.version = VERS + PKG_REVISION
+  s.platform = Gem::Platform::WIN32
+  s.has_rdoc = false
+  s.extra_rdoc_files = ["README", "CHANGELOG", "COPYING"]
+  s.summary = "a swift, liberal HTML parser with a fantastic library"
+  s.description = s.summary
+  s.author = "why the lucky stiff"
+  s.email = 'why@ruby-lang.org'
+  s.homepage = 'http://code.whytheluckystiff.net/hpricot/'
+
+  s.files = PKG_FILES
+
+  s.require_path = "lib"
+  #s.autorequire = "hpricot"  # no no no this is tHe 3v1l
+  s.extensions = []
+  s.bindir = "bin"
+end
+  
+WIN32_PKG_DIR = "hpricot-" + VERS + PKG_REVISION
+
+file WIN32_PKG_DIR => [:package] do
+  sh "tar zxf pkg/#{WIN32_PKG_DIR}.tgz"
+end
+
+desc "Cross-compile the hpricot_scan extension for win32"
+file "hpricot_scan_win32" => [WIN32_PKG_DIR] do
+  cp "mingw-rbconfig.rb", "#{WIN32_PKG_DIR}/ext/hpricot_scan/rbconfig.rb"
+  sh "cd #{WIN32_PKG_DIR}/ext/hpricot_scan/ && ruby -I. extconf.rb && make"
+  mv "#{WIN32_PKG_DIR}/ext/hpricot_scan/hpricot_scan.so", "#{WIN32_PKG_DIR}/lib"
+end
+
+desc "Build the binary RubyGems package for win32"
+task :rubygems_win32 => ["hpricot_scan_win32"] do
+  Dir.chdir("#{WIN32_PKG_DIR}") do
+    Gem::Builder.new(Win32Spec).build
+    verbose(true) {
+      mv Dir["*.gem"].first, "../pkg/hpricot-#{VERS + PKG_REVISION}-mswin32.gem"
+    }
+  end
+end
+
+CLEAN.include WIN32_PKG_DIR
 
 task :install do
   sh %{rake package}
