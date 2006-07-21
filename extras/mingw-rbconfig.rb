@@ -10,7 +10,7 @@ module Config
   #RUBY_VERSION == "1.8.5" or
   #  raise "ruby lib version (1.8.5) doesn't match executable version (#{RUBY_VERSION})"
 
-  mingw32 = ENV['MINGW32'] || "#{ENV["HOME"]}/ruby-mingw32"
+  mingw32 = ENV['MINGW32_RUBY'] || "#{ENV["HOME"]}/ruby-mingw32"
   mingwpre = ENV['MINGW32_PREFIX']
   TOPDIR = File.dirname(__FILE__).chomp!("/lib/ruby/1.8/i386-mingw32")
   DESTDIR = '' unless defined? DESTDIR

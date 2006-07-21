@@ -50,7 +50,7 @@ spec =
         s.email = 'why@ruby-lang.org'
         s.homepage = 'http://code.whytheluckystiff.net/hpricot/'
 
-        s.files = %w(COPYING README Rakefile mingw-rbconfig.rb) +
+        s.files = %w(COPYING README Rakefile) +
           Dir.glob("{bin,doc,test,lib,extras}/**/*") + 
           Dir.glob("ext/**/*.{h,c,rb,rl}") + 
           %w[ext/hpricot_scan/hpricot_scan.c] # needed because it's generated later
@@ -106,7 +106,7 @@ PKG_FILES = FileList[
   "lib/**/*.rb",
   "ext/**/*.{c,rb,h,rl}",
   "CHANGELOG", "README", "Rakefile", "COPYING",
-  "mingw-rbconfig.rb", "lib/hpricot_scan.so"]
+  "extras/**/*", "lib/hpricot_scan.so"]
 
 Win32Spec = Gem::Specification.new do |s|
   s.name = NAME
@@ -136,7 +136,7 @@ end
 
 desc "Cross-compile the hpricot_scan extension for win32"
 file "hpricot_scan_win32" => [WIN32_PKG_DIR] do
-  cp "mingw-rbconfig.rb", "#{WIN32_PKG_DIR}/ext/hpricot_scan/rbconfig.rb"
+  cp "extras/mingw-rbconfig.rb", "#{WIN32_PKG_DIR}/ext/hpricot_scan/rbconfig.rb"
   sh "cd #{WIN32_PKG_DIR}/ext/hpricot_scan/ && ruby -I. extconf.rb && make"
   mv "#{WIN32_PKG_DIR}/ext/hpricot_scan/hpricot_scan.so", "#{WIN32_PKG_DIR}/lib"
 end

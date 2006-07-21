@@ -188,8 +188,8 @@ module Hpricot
 
     filter ':nth-child' do |arg,i|
       case arg 
-      when 'even': parent.containers.index(self) % 2 == 0
-      when 'odd':  parent.containers.index(self) % 2 == 1
+      when 'even'; parent.containers.index(self) % 2 == 0
+      when 'odd';  parent.containers.index(self) % 2 == 1
       else         self == parent.containers[arg.to_i]
       end
     end

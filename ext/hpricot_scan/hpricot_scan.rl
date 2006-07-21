@@ -8,7 +8,7 @@
  */
 #include <ruby.h>
 
-static VALUE sym_xmldecl, sym_doctype, sym_xmlprocins, sym_stag, sym_etag, sym_emptytag, sym_comment,
+static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_emptytag, sym_comment,
       sym_cdata, sym_text;
 static ID s_read, s_to_str;
 
@@ -120,7 +120,7 @@ static ID s_read, s_to_str;
 
   html_cdata := (any | newline )* >_tag :>> EndCdata >tagc @{ ELE(cdata); fgoto main; };
 
-  html_procins := (any | newline )* >_tag :>> EndXmlProcIns >tagc @{ ELE(xmlprocins); fgoto main; };
+  html_procins := (any | newline )* >_tag :>> EndXmlProcIns >tagc @{ ELE(procins); fgoto main; };
 
   main := |*
     XmlDecl >newEle { ELE(xmldecl); };
@@ -290,7 +290,7 @@ void Init_hpricot_scan()
   s_to_str = rb_intern("to_str");
   sym_xmldecl = ID2SYM(rb_intern("xmldecl"));
   sym_doctype = ID2SYM(rb_intern("doctype"));
-  sym_xmlprocins = ID2SYM(rb_intern("xmlprocins"));
+  sym_procins = ID2SYM(rb_intern("procins"));
   sym_stag = ID2SYM(rb_intern("stag"));
   sym_etag = ID2SYM(rb_intern("etag"));
   sym_emptytag = ID2SYM(rb_intern("emptytag"));
