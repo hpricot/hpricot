@@ -9,6 +9,7 @@ class TestParser < Test::Unit::TestCase
     @basic = Hpricot.parse(TestFiles::BASIC)
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     @immob = Hpricot.parse(TestFiles::IMMOB)
+    @utf8 = Hpricot.parse(TestFiles::UTF8)
   end
 
   # def test_set_attr
@@ -118,5 +119,8 @@ class TestParser < Test::Unit::TestCase
 
   def test_javascripts
     assert_equal 3, (@immob/:script)[0].innerHTML.scan(/<LINK/).length
+  end
+
+  def test_unicode
   end
 end

@@ -32,7 +32,7 @@ module Hpricot
       [m, "#{m}="].each { |m2| define_method(m2) { |*a| @stag.send(m2, *a) } }
     end
     def output(out)
-      if empty?
+      if empty? and ElementContent[@stag.name] != :CDATA
         @stag.output(out, :style => :empty)
       else
         @stag.output(out)

@@ -7,8 +7,8 @@ require 'fileutils'
 include FileUtils
 
 NAME = "hpricot"
-VERS = "0.3"
-PKG_REVISION = ".0"
+REV = File.read(".svn/entries")[/committed-rev="(\d+)"/, 1] rescue nil
+VERS = "0.3" + (REV ? ".#{REV}" : "")
 CLEAN.include ['ext/hpricot_scan/*.{bundle,so,obj,pdb,lib,def,exp}', 'ext/hpricot_scan/Makefile', 
                '**/.*.sw?', '*.gem', '.config']
 
@@ -40,7 +40,7 @@ end
 spec =
     Gem::Specification.new do |s|
         s.name = NAME
-        s.version = VERS + PKG_REVISION
+        s.version = VERS
         s.platform = Gem::Platform::RUBY
         s.has_rdoc = false
         s.extra_rdoc_files = ["README", "CHANGELOG", "COPYING"]
@@ -110,7 +110,7 @@ PKG_FILES = FileList[
 
 Win32Spec = Gem::Specification.new do |s|
   s.name = NAME
-  s.version = VERS + PKG_REVISION
+  s.version = VERS
   s.platform = Gem::Platform::WIN32
   s.has_rdoc = false
   s.extra_rdoc_files = ["README", "CHANGELOG", "COPYING"]
@@ -128,7 +128,7 @@ Win32Spec = Gem::Specification.new do |s|
   s.bindir = "bin"
 end
   
-WIN32_PKG_DIR = "hpricot-" + VERS + PKG_REVISION
+WIN32_PKG_DIR = "hpricot-" + VERS
 
 file WIN32_PKG_DIR => [:package] do
   sh "tar zxf pkg/#{WIN32_PKG_DIR}.tgz"
@@ -146,7 +146,7 @@ task :rubygems_win32 => ["hpricot_scan_win32"] do
   Dir.chdir("#{WIN32_PKG_DIR}") do
     Gem::Builder.new(Win32Spec).build
     verbose(true) {
-      mv Dir["*.gem"].first, "../pkg/hpricot-#{VERS + PKG_REVISION}-mswin32.gem"
+      mv Dir["*.gem"].first, "../pkg/hpricot-#{VERS}-mswin32.gem"
     }
   end
 end
