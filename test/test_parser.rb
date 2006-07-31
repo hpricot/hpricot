@@ -9,7 +9,7 @@ class TestParser < Test::Unit::TestCase
     @basic = Hpricot.parse(TestFiles::BASIC)
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     @immob = Hpricot.parse(TestFiles::IMMOB)
-    @utf8 = Hpricot.parse(TestFiles::UTF8)
+    # @utf8 = Hpricot.parse(TestFiles::UTF8)
   end
 
   # def test_set_attr
