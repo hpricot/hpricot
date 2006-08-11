@@ -10,18 +10,20 @@ module Hpricot
     end
     alias_method :to_s, :to_html
 
-    def html(str = nil)
-      if str
-        self.html = str
-      else
+    def contents(*str)
+      if str.empty?
         map { |x| x.innerHTML }.join
+      else
+        x = self.contents = str.pop || x
       end
     end
-    alias_method :text, :html
+    alias_method :text, :contents
+    alias_method :html, :contents
 
-    def html=(str)
+    def contents=(str)
       each { |x| x.innerHTML = str }
     end
+    alias_method :html=, :contents=
 
     def filter(expr)
         nodes, = Elements.filter(self, expr)

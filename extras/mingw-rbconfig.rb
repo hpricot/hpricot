@@ -17,7 +17,7 @@ module Config
   CONFIG = {}
   CONFIG["DESTDIR"] = DESTDIR
   CONFIG["INSTALL"] = "/usr/bin/install -c"
-  CONFIG["prefix"] = (TOPDIR || DESTDIR + ENV['MINGW32'])
+  CONFIG["prefix"] = (TOPDIR || DESTDIR + mingw32)
   CONFIG["EXEEXT"] = ".exe"
   CONFIG["ruby_install_name"] = "ruby"
   CONFIG["RUBY_INSTALL_NAME"] = "ruby"
