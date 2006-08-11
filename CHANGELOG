@@ -1,13 +1,13 @@
-= 0.1
-=== 3rd July, 2006
+= 0.4
+=== 11th August, 2006
 
-* For whatever reason, wrote this HTML parser in C.
-  I guess Ragel is addictive and I want to improve HTree.
-
-= 0.2
-=== 4th July, 2006
-
-* Rewrote the HTree parser to be simpler, more adequate for the common man.  Will add encoding back in later.
+* The :fixup_tags option will try to sort out the hierarchy so elements end up with the right parents.
+* Elements such as *script* and *style* (identified as having CDATA contents) receive a single text node as their children now.  Previously, Hpricot was parsing out tags found in scripts.
+* Better scanning of partially quoted attributes (found by Brent Beardsly on http://uswebgen.com/)
+* Better scanning of unquoted attributes -- thanks to Aaron Patterson for the test cases!
+* Some tags were being output in the empty tag style, although browsers hated that.  FIXED!
+* Added Elements#at for finding single elements.
+* Added Elem::Trav#[] and Elem::Trav#[]= for reading and writing attributes.
 
 = 0.3
 === 7th July, 2006
@@ -21,3 +21,14 @@
 * open up all properties to setters, let people do as they may. 
 * use to_html for the full html of a node or set of elements.
 * doctypes were messed.
+
+= 0.2
+=== 4th July, 2006
+
+* Rewrote the HTree parser to be simpler, more adequate for the common man.  Will add encoding back in later.
+
+= 0.1
+=== 3rd July, 2006
+
+* For whatever reason, wrote this HTML parser in C.
+  I guess Ragel is addictive and I want to improve HTree.
