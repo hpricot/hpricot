@@ -9,6 +9,7 @@ class TestParser < Test::Unit::TestCase
     @basic = Hpricot.parse(TestFiles::BASIC)
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     @immob = Hpricot.parse(TestFiles::IMMOB)
+    @uswebgen = Hpricot.parse(TestFiles::USWEBGEN)
     # @utf8 = Hpricot.parse(TestFiles::UTF8)
   end
 
@@ -119,6 +120,11 @@ class TestParser < Test::Unit::TestCase
 
   def test_javascripts
     assert_equal 3, (@immob/:script)[0].innerHTML.scan(/<LINK/).length
+  end
+
+  def test_uswebgen
+    # sent by brent beardsley, hpricot 0.3 had problems with all the links.
+    assert_equal 67, (@uswebgen/:a).length
   end
 
   def test_unicode

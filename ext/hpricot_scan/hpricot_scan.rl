@@ -90,7 +90,7 @@ static ID s_read, s_to_str;
   NameAttr = Name >_akey %akey ;
   Q1Attr = [^']* >_aval %aval ;
   Q2Attr = [^"]* >_aval %aval ;
-  UnqAttr = [^ \t\n<>"']+ >_aval %aval ;
+  UnqAttr = [^ \t\n<>"'] >_aval [^ \t\n<>]* %aval ;
   Nmtoken = NameChar+ >_akey %akey ;
 
   Attr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | UnqAttr space+ ) space* ;
