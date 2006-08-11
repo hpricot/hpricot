@@ -1,21 +1,27 @@
 require 'hpricot/htmlinfo'
 
-def Hpricot(input)
-  Hpricot.parse(input)
+def Hpricot(input, opts = {})
+  Hpricot.parse(input, opts)
 end
 
 module Hpricot
   # Hpricot.parse parses <i>input</i> and return a document tree.
   # represented by Hpricot::Doc.
-  def Hpricot.parse(input)
-    Doc.new(make(input))
+  def Hpricot.parse(input, opts = {})
+    Doc.new(make(input, opts))
   end
 
   # :stopdoc:
 
-  def Hpricot.make(input)
-    stack = [[nil, nil, []]]
+  def Hpricot.make(input, opts = {})
+    opts = {:fixup_tags => false}.merge(opts)
+    stack = [[nil, nil, [], [], [], []]]
     Hpricot.scan(input) do |token|
+      if stack.last[5] == :CDATA and !(token[0] == :etag and token[1].downcase == stack.last[0])
+        token[0] = :text
+        token[1] = token[3] if token[3]
+      end
+
       case token[0]
       when :stag
         stagname = token[0] = token[1].downcase
@@ -23,12 +29,47 @@ module Hpricot
           token[0] = :emptytag
           stack.last[2] << token
         else
-          stack << [stagname, token, []]
+          if opts[:fixup_tags]
+            # obey the tag rules set up by the current element
+            if ElementContent.has_key? stagname
+              trans = nil
+              (stack.length-1).downto(0) do |i|
+                untags = stack[i][5]
+                break unless untags.include? stagname
+                # puts "** ILLEGAL #{stagname} IN #{stack[i][0]}"
+                trans = i
+              end
+              if trans.to_i > 1
+                eles = stack.slice!(trans..-1)
+                stack.last[2] += eles
+                # puts "** TRANSPLANTED #{stagname} TO #{stack.last[0]}"
+              end
+            end
+          end
+
+          # setup tag rules for inside this element
+          if ElementContent[stagname] == :CDATA
+            uncontainable_tags = :CDATA
+          elsif opts[:fixup_tags]
+            possible_tags = ElementContent[stagname]
+            excluded_tags, included_tags = stack.last[3..4]
+            if possible_tags
+              excluded_tags = excluded_tags | (ElementExclusions[stagname] || [])
+              included_tags = included_tags | (ElementInclusions[stagname] || [])
+              containable_tags = (possible_tags | included_tags) - excluded_tags
+              uncontainable_tags = ElementContent.keys - containable_tags
+            else
+              # If the tagname is unknown, it is assumed that any element
+              # except excluded can be contained.
+              uncontainable_tags = excluded_tags
+            end
+          end
+          stack << [stagname, token, [], excluded_tags, included_tags, uncontainable_tags]
         end
       when :etag
         etagname = token[0] = token[1].downcase
         matched_elem = nil
-        (stack.length-1).downto(0) {|i|
+        (stack.length-1).downto(0) do |i|
           stagname, = stack[i]
           if stagname == etagname
             matched_elem = stack[i]
@@ -37,7 +78,7 @@ module Hpricot
             stack.last[2] += eles
             break
           end
-        }
+        end
         unless matched_elem
           stack.last[2] << [:bogus_etag, token]
         else
@@ -62,24 +103,7 @@ module Hpricot
     end
 
     structure_list = stack[0][2]
-    # structure_list = fix_structure_list(stack[0][2])
     structure_list.map {|s| build_node(s) }
-  end
-
-  def Hpricot.fix_structure_list(structure_list)
-    result = []
-    rest = structure_list.dup
-    until rest.empty?
-      structure = rest.shift
-      if String === structure[0]
-        elem, rest2 = fix_element(structure, [], [])
-        result << elem
-        rest = rest2 + rest
-      else
-        result << structure
-      end
-    end
-    result
   end
 
   def Hpricot.fix_element(elem, excluded_tags, included_tags)

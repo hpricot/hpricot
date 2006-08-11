@@ -50,10 +50,11 @@ module Hpricot
         children[idx ? idx + 1 : children.length, 0] = nodes
       end
     end
-    def innerHTML
+    def inner_html
       children.map { |x| x.output("") }.join
     end
-    def innerHTML=(inner)
+    alias_method :innerHTML, :inner_html
+    def inner_html=(inner)
       case inner
       when String, IO
         self.children = Hpricot.parse(inner).children
@@ -63,6 +64,7 @@ module Hpricot
         self.children = []
       end
     end
+    alias_method :innerHTML=, :inner_html=
     def search(expr, &blk)
       last = nil
       nodes = [self]

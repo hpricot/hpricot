@@ -10,20 +10,22 @@ module Hpricot
     end
     alias_method :to_s, :to_html
 
-    def innerHTML(*str)
+    def inner_html(*str)
       if str.empty?
-        map { |x| x.innerHTML }.join
+        map { |x| x.inner_html }.join
       else
-        x = self.innerHTML = str.pop || x
+        x = self.inner_html = str.pop || x
       end
     end
-    alias_method :text, :innerHTML
-    alias_method :html, :innerHTML
+    alias_method :text, :inner_html
+    alias_method :html, :inner_html
+    alias_method :innerHTML, :inner_html
 
-    def innerHTML=(str)
-      each { |x| x.innerHTML = str }
+    def inner_html=(str)
+      each { |x| x.inner_html = str }
     end
-    alias_method :html=, :innerHTML=
+    alias_method :html=, :inner_html=
+    alias_method :innerHTML=, :inner_html=
 
     def filter(expr)
         nodes, = Elements.filter(self, expr)
@@ -35,15 +37,15 @@ module Hpricot
     end
 
     def empty
-      each { |x| x.innerHTML = nil }
+      each { |x| x.inner_html = nil }
     end
 
     def append(str)
-      each { |x| x.innerHTML += str }
+      each { |x| x.inner_html += str }
     end
 
     def prepend(str)
-      each { |x| x.innerHTML = str + x.innerHTML }
+      each { |x| x.inner_html = str + x.inner_html }
     end
 
     def before(str)

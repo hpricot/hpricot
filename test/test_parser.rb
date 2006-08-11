@@ -33,7 +33,7 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_output_basic
-    @basic2 = Hpricot.parse(@basic.innerHTML)
+    @basic2 = Hpricot.parse(@basic.inner_html)
     scan_basic @basic2
   end
 
@@ -79,7 +79,7 @@ class TestParser < Test::Unit::TestCase
     assert_equal 2,  divs.length
     assert_equal 1,  divs.search('a').length
     imgs = @boingboing.search('//div/p/a/img')
-    assert_equal 14, imgs.length
+    assert_equal 15, imgs.length
     assert_equal 17, @boingboing.search('//div').search('p/a/img').length
     assert imgs.all? { |x| x.name == 'img' }
   end
@@ -87,7 +87,7 @@ class TestParser < Test::Unit::TestCase
   def test_predicates
     assert_equal 2, @boingboing.search('//link[@rel="alternate"]').length
     p_imgs = @boingboing.search('//div/p[/a/img]')
-    assert_equal 14, p_imgs.length
+    assert_equal 15, p_imgs.length
     assert p_imgs.all? { |x| x.name == 'p' }
     p_imgs = @boingboing.search('//div/p[a/img]')
     assert_equal 18, p_imgs.length
@@ -119,7 +119,7 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_javascripts
-    assert_equal 3, (@immob/:script)[0].innerHTML.scan(/<LINK/).length
+    assert_equal 3, (@immob/:script)[0].inner_html.scan(/<LINK/).length
   end
 
   def test_uswebgen
