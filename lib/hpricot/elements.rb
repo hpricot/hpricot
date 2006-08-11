@@ -5,6 +5,11 @@ module Hpricot
     end
     alias_method :/, :search
 
+    def at(expr, &blk)
+      search(expr, &blk).first
+    end
+    alias_method :%, :at
+
     def to_html
       map { |x| x.output("") }.join
     end
