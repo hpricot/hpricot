@@ -23,13 +23,13 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_get_element_by_id
-    assert_equal 'link1', @basic.get_element_by_id('link1').get_attribute('id').to_s
-    assert_equal 'link1', @basic.get_element_by_id('body1').get_element_by_id('link1').get_attribute('id').to_s
+    assert_equal 'link1', @basic.get_element_by_id('link1')['id']
+    assert_equal 'link1', @basic.get_element_by_id('body1').get_element_by_id('link1').get_attribute('id')
   end
 
   def test_get_element_by_tag_name
-    assert_equal 'link1', @basic.get_elements_by_tag_name('a')[0].get_attribute('id').to_s
-    assert_equal 'link1', @basic.get_elements_by_tag_name('body')[0].get_element_by_id('link1').get_attribute('id').to_s
+    assert_equal 'link1', @basic.get_elements_by_tag_name('a')[0].get_attribute('id')
+    assert_equal 'link1', @basic.get_elements_by_tag_name('body')[0].get_element_by_id('link1').get_attribute('id')
   end
 
   def test_output_basic
@@ -42,22 +42,22 @@ class TestParser < Test::Unit::TestCase
   end
 
   def scan_basic doc
-    assert_equal 'link1', doc./('#link1').first.get_attribute('id').to_s
-    assert_equal 'link1', doc./('p a').first.get_attribute('id').to_s
-    assert_equal 'link1', (doc/:p/:a).first.get_attribute('id').to_s
-    assert_equal 'link1', doc.search('p').search('a').first.get_attribute('id').to_s
-    assert_equal 'link2', (doc/'p').filter('.ohmy').search('a').first.get_attribute('id').to_s
+    assert_equal 'link1', doc.at('#link1')['id']
+    assert_equal 'link1', doc.at("p a")['id']
+    assert_equal 'link1', (doc/:p/:a).first['id']
+    assert_equal 'link1', doc.search('p').search('a').first.get_attribute('id')
+    assert_equal 'link2', (doc/'p').filter('.ohmy').search('a').first.get_attribute('id')
     assert_equal (doc/'p')[2], (doc/'p').filter(':nth(2)')[0]
     assert_equal 4, (doc/'p').filter('*').length
     assert_equal 4, (doc/'p').filter('* *').length
     eles = (doc/'p').filter('.ohmy')
     assert_equal 1, eles.length
-    assert_equal 'ohmy', eles.first.get_attribute('class').to_s
+    assert_equal 'ohmy', eles.first.get_attribute('class')
     assert_equal 3, (doc/'p:not(.ohmy)').length
     assert_equal 3, (doc/'p').not('.ohmy').length
     assert_equal 3, (doc/'p').not(eles.first).length
     assert_equal 2, (doc/'p').filter('[@class]').length
-    assert_equal 'last final', (doc/'p[@class~="final"]').first.get_attribute('class').to_s
+    assert_equal 'last final', (doc/'p[@class~="final"]').first.get_attribute('class')
     assert_equal 1, (doc/'p').filter('[@class~="final"]').length
     assert_equal 2, (doc/'p > a').length
     assert_equal 1, (doc/'p.ohmy > a').length
@@ -101,7 +101,7 @@ class TestParser < Test::Unit::TestCase
         @basic.search('p:eq(2)').to_html
     assert_equal '<p class="last final"><b>THE FINAL PARAGRAPH</b></p>',
         @basic.search('p:last').to_html
-    assert_equal 'last final', @basic.search('//p:last-of-type').first.get_attribute('class').to_s
+    assert_equal 'last final', @basic.search('//p:last-of-type').first.get_attribute('class')
   end
 
   def test_many_paths
@@ -110,11 +110,11 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_body_newlines
-    body = (@immob/:body).first
+    body = @immob.at(:body)
     {'background' => '', 'bgcolor' => '#ffffff', 'text' => '#000000', 'marginheight' => '10',
      'marginwidth' => '10', 'leftmargin' => '10', 'topmargin' => '10', 'link' => '#000066',
      'alink' => '#ff6600', 'hlink' => "#ff6600", 'vlink' => "#000000"}.each do |k, v|
-        assert_equal v, body.attributes[k]
+        assert_equal v, body[k]
     end
   end
 

@@ -132,6 +132,11 @@ module Hpricot
     end
     alias_method :/, :search
 
+    def at(expr, &blk)
+      search(expr, &blk).first
+    end
+    alias_method :%, :at
+
     def clean_path(path)
       path.gsub(/^\s+|\s+$/, '')
     end
@@ -490,10 +495,12 @@ module Hpricot
     def get_attribute(name)
       self.attributes && self.attributes[name.to_s]
     end
+    alias_method :[], :get_attribute
     def set_attribute(name, val)
       self.attributes ||= {}
       self.attributes[name.to_s] = val
     end
+    alias_method :[]=, :set_attribute
   end
 
 end
