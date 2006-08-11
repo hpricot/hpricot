@@ -501,6 +501,11 @@ module Hpricot
       self.attributes[name.to_s] = val
     end
     alias_method :[]=, :set_attribute
+    def remove_attribute(name)
+      if has_attribute? name
+        self.attributes.delete(name)
+      end
+    end
   end
 
 end

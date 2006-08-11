@@ -71,6 +71,11 @@ class TestParser < Test::Unit::TestCase
     assert_equal 1, @boingboing.search("//a[@name='027906']").length
   end
 
+  def test_remove_attribute
+    (@basic/:p).each { |ele| ele.remove_attribute('class') }
+    assert_equal 0, (@basic/'p[@class]').length
+  end
+
   def test_abs_xpath
     assert_equal 60, @boingboing.search("/html/body//p[@class='posted']").length
     assert_equal 60, @boingboing.search("/*/body//p[@class='posted']").length
