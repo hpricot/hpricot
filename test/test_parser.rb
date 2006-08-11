@@ -71,6 +71,10 @@ class TestParser < Test::Unit::TestCase
     assert_equal 1, @boingboing.search("//a[@name='027906']").length
   end
 
+  def test_css_negation
+    assert_equal 3, (@basic/'p:not(.final)').length
+  end
+
   def test_remove_attribute
     (@basic/:p).each { |ele| ele.remove_attribute('class') }
     assert_equal 0, (@basic/'p[@class]').length
