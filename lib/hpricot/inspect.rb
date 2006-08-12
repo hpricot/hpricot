@@ -2,6 +2,13 @@ require 'pp'
 
 module Hpricot
   # :stopdoc:
+  class Elements
+    def pretty_print(q)
+      q.object_group(self) { super }
+    end
+    alias inspect pretty_print_inspect
+  end
+
   class Doc
     def pretty_print(q)
       q.object_group(self) { @children.each {|elt| q.breakable; q.pp elt } }

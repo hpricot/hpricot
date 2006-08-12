@@ -8,7 +8,7 @@ include FileUtils
 
 NAME = "hpricot"
 REV = File.read(".svn/entries")[/committed-rev="(\d+)"/, 1] rescue nil
-VERS = "0.3" + (REV ? ".#{REV}" : "")
+VERS = ENV['VERSION'] || "0.3" + (REV ? ".#{REV}" : "")
 CLEAN.include ['ext/hpricot_scan/*.{bundle,so,obj,pdb,lib,def,exp}', 'ext/hpricot_scan/Makefile', 
                '**/.*.sw?', '*.gem', '.config']
 
@@ -29,6 +29,9 @@ task :hpricot_scan => [:ragel]
 
 desc "Packages up Hpricot."
 task :package => [:clean, :ragel]
+
+desc "Releases packages for all Hpricot packages and platforms."
+task :release => [:package, :rubygems_win32]
 
 desc "Run all the tests"
 Rake::TestTask.new do |t|

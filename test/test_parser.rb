@@ -118,6 +118,10 @@ class TestParser < Test::Unit::TestCase
     assert_equal 20, @boingboing.search('//div/p[a/img]|//link[@rel="alternate"]').length
   end
 
+  def test_stacked_search
+    assert_kind_of Hpricot::Elements, @boingboing.search('//div/p').search('a img')
+  end
+
   def test_body_newlines
     body = @immob.at(:body)
     {'background' => '', 'bgcolor' => '#ffffff', 'text' => '#000000', 'marginheight' => '10',

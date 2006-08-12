@@ -1,7 +1,7 @@
 module Hpricot
   class Elements < Array
     def search(*expr,&blk)
-      map { |x| x.search(*expr,&blk) }.flatten.uniq
+      Elements[*map { |x| x.search(*expr,&blk) }.flatten.uniq]
     end
     alias_method :/, :search
 
@@ -133,8 +133,6 @@ module Hpricot
         end
         [nodes, expr]
     end
-
-    def inspect; "#<#{self.class}#{super}>" end
 
     private
     def copy_node(node, l)
