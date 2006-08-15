@@ -103,7 +103,7 @@ module Hpricot
     end
 
     structure_list = stack[0][2]
-    structure_list.map {|s| build_node(s) }
+    structure_list.map {|s| build_node(s, opts) }
   end
 
   def Hpricot.fix_element(elem, excluded_tags, included_tags)
@@ -159,7 +159,7 @@ module Hpricot
     end
   end
 
-  def Hpricot.build_node(structure)
+  def Hpricot.build_node(structure, opts = {})
     case structure[0]
     when String
       tagname, _, attrs, sraw, _, _, _, eraw = structure[1]
@@ -168,7 +168,7 @@ module Hpricot
       stag = STag.parse(tagname, attrs, sraw, true)
       if !children.empty? || etag
         Elem.new(stag,
-                  children.map {|c| build_node(c) },
+                  children.map {|c| build_node(c, opts) },
                   etag)
       else
         Elem.new(stag)
@@ -182,6 +182,10 @@ module Hpricot
     when :xmldecl
       XMLDecl.parse(structure[2], structure[3])
     when :doctype
+      if opts[:xhtml_strict]
+        structure[2]['system_id'] = "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
+        structure[2]['public_id'] = "-//W3C//DTD XHTML 1.0 Strict//EN"
+      end
       DocType.parse(structure[1], structure[2], structure[3])
     when :procins
       ProcIns.parse(structure[1], structure[2], structure[3])

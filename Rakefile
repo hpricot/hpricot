@@ -8,7 +8,7 @@ include FileUtils
 
 NAME = "hpricot"
 REV = File.read(".svn/entries")[/committed-rev="(\d+)"/, 1] rescue nil
-VERS = ENV['VERSION'] || "0.3" + (REV ? ".#{REV}" : "")
+VERS = ENV['VERSION'] || "0.4" + (REV ? ".#{REV}" : "")
 CLEAN.include ['ext/hpricot_scan/*.{bundle,so,obj,pdb,lib,def,exp}', 'ext/hpricot_scan/Makefile', 
                '**/.*.sw?', '*.gem', '.config']
 

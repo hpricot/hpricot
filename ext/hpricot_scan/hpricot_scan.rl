@@ -55,6 +55,10 @@ static ID s_read, s_to_str;
   action tag { SET(tag, p); }
   action tagc { SET(tag, p-1); }
   action aval { SET(aval, p); }
+  action aunq { 
+    if (*(p-1) == '"' || *(p-1) == '\'') { SET(aval, p-1); }
+    else { SET(aval, p); }
+  }
   action akey { SET(akey, p); }
   action xmlver { SET(aval, p); ATTR(rb_str_new2("version"), aval); }
   action xmlenc { SET(aval, p); ATTR(rb_str_new2("encoding"), aval); }
@@ -90,7 +94,7 @@ static ID s_read, s_to_str;
   NameAttr = Name >_akey %akey ;
   Q1Attr = [^']* >_aval %aval ;
   Q2Attr = [^"]* >_aval %aval ;
-  UnqAttr = [^ \t\n<>"'] >_aval [^ \t\n<>]* %aval ;
+  UnqAttr = [^ \t\n<>"'] >_aval [^ \t\n<>]* %aunq ;
   Nmtoken = NameChar+ >_akey %akey ;
 
   Attr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | UnqAttr space+ ) space* ;

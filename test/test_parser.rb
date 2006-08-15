@@ -5,39 +5,37 @@ require 'hpricot'
 require 'load_files'
 
 class TestParser < Test::Unit::TestCase
-  def setup
+  def test_set_attr
     @basic = Hpricot.parse(TestFiles::BASIC)
-    @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
-    @immob = Hpricot.parse(TestFiles::IMMOB)
-    @uswebgen = Hpricot.parse(TestFiles::USWEBGEN)
-    # @utf8 = Hpricot.parse(TestFiles::UTF8)
+    @basic.search('//p').set('class', 'para')
+    assert_equal 4, @basic.search('//p').length
+    assert_equal 4, @basic.search('//p').find_all { |x| x['class'] == 'para' }.length
   end
-
-  # def test_set_attr
-  #   @basic.search('//p').set('class', 'para')
-  #   assert_equal '', @basic.search('//p').map { |x| x.attributes }
-  # end
 
   def test_scan_text
     assert_equal 'FOO', Hpricot.make("FOO").first.content
   end
 
   def test_get_element_by_id
+    @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 'link1', @basic.get_element_by_id('link1')['id']
     assert_equal 'link1', @basic.get_element_by_id('body1').get_element_by_id('link1').get_attribute('id')
   end
 
   def test_get_element_by_tag_name
+    @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 'link1', @basic.get_elements_by_tag_name('a')[0].get_attribute('id')
     assert_equal 'link1', @basic.get_elements_by_tag_name('body')[0].get_element_by_id('link1').get_attribute('id')
   end
 
   def test_output_basic
+    @basic = Hpricot.parse(TestFiles::BASIC)
     @basic2 = Hpricot.parse(@basic.inner_html)
     scan_basic @basic2
   end
 
   def test_scan_basic
+    @basic = Hpricot.parse(TestFiles::BASIC)
     scan_basic @basic
   end
 
@@ -67,20 +65,24 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_scan_boingboing
+    @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 60, (@boingboing/'p.posted').length
     assert_equal 1, @boingboing.search("//a[@name='027906']").length
   end
 
   def test_css_negation
+    @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 3, (@basic/'p:not(.final)').length
   end
 
   def test_remove_attribute
+    @basic = Hpricot.parse(TestFiles::BASIC)
     (@basic/:p).each { |ele| ele.remove_attribute('class') }
     assert_equal 0, (@basic/'p[@class]').length
   end
 
   def test_abs_xpath
+    @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 60, @boingboing.search("/html/body//p[@class='posted']").length
     assert_equal 60, @boingboing.search("/*/body//p[@class='posted']").length
     assert_equal 18, @boingboing.search("//script").length
@@ -94,6 +96,7 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_predicates
+    @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 2, @boingboing.search('//link[@rel="alternate"]').length
     p_imgs = @boingboing.search('//div/p[/a/img]')
     assert_equal 15, p_imgs.length
@@ -105,7 +108,10 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_alt_predicates
+    @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 2, @boingboing.search('//table/tr:last').length
+
+    @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal "<p>The third paragraph</p>",
         @basic.search('p:eq(2)').to_html
     assert_equal '<p class="last final"><b>THE FINAL PARAGRAPH</b></p>',
@@ -114,15 +120,18 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_many_paths
+    @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 62, @boingboing.search('p.posted, link[@rel="alternate"]').length
     assert_equal 20, @boingboing.search('//div/p[a/img]|//link[@rel="alternate"]').length
   end
 
   def test_stacked_search
+    @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_kind_of Hpricot::Elements, @boingboing.search('//div/p').search('a img')
   end
 
   def test_body_newlines
+    @immob = Hpricot.parse(TestFiles::IMMOB)
     body = @immob.at(:body)
     {'background' => '', 'bgcolor' => '#ffffff', 'text' => '#000000', 'marginheight' => '10',
      'marginwidth' => '10', 'leftmargin' => '10', 'topmargin' => '10', 'link' => '#000066',
@@ -132,10 +141,12 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_javascripts
+    @immob = Hpricot.parse(TestFiles::IMMOB)
     assert_equal 3, (@immob/:script)[0].inner_html.scan(/<LINK/).length
   end
 
   def test_uswebgen
+    @uswebgen = Hpricot.parse(TestFiles::USWEBGEN)
     # sent by brent beardsley, hpricot 0.3 had problems with all the links.
     assert_equal 67, (@uswebgen/:a).length
   end
