@@ -202,7 +202,7 @@ module Hpricot
     end
 
     filter ":last-child" do |i|
-      self == parent.containers.first
+      self == parent.containers.last
     end
     
     filter ":nth-last-child" do |arg,i|

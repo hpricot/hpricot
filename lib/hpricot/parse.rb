@@ -15,6 +15,9 @@ module Hpricot
 
   def Hpricot.make(input, opts = {})
     opts = {:fixup_tags => false}.merge(opts)
+    if opts[:xhtml_strict]
+      opts[:fixup_tags] = true
+    end
     stack = [[nil, nil, [], [], [], []]]
     Hpricot.scan(input) do |token|
       if stack.last[5] == :CDATA and !(token[0] == :etag and token[1].downcase == stack.last[0])
