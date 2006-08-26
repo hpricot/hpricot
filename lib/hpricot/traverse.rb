@@ -101,17 +101,18 @@ module Hpricot
               done += nodes
               nodes = [self]
           else
-              m = expr.match %r!^([#.]?)([a-z0-9\\*_-]*)!i
-              expr = $'
+              m = expr.match(%r!^([#.]?)([a-z0-9\\*_-]*)!i).to_a
               if m[1] == '#'
                   oid = get_element_by_id(m[2])
                   nodes = oid ? [oid] : []
+                  expr = $'
               else
                   m[2] = "*" if m[2] == "" || m[1] == "."
                   ret = []
                   nodes.each do |node|
                       case m[2]
                       when '*'
+                          node.traverse_element { |n| ret << n }
                       else
                           ret += [*node.get_elements_by_tag_name(m[2])]
                       end

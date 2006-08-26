@@ -130,6 +130,15 @@ class TestParser < Test::Unit::TestCase
     assert_kind_of Hpricot::Elements, @boingboing.search('//div/p').search('a img')
   end
 
+  def test_class_search
+    # test case sent by Chih-Chao Lam
+    doc = Hpricot("<div class=xyz'>abc</div>")
+    assert_equal 1, doc.search(".xyz").length
+    doc = Hpricot("<div class=xyz>abc</div><div class=abc>xyz</div>")
+    assert_equal 1, doc.search(".xyz").length
+    assert_equal 2, doc.search("*").length
+  end
+
   def test_body_newlines
     @immob = Hpricot.parse(TestFiles::IMMOB)
     body = @immob.at(:body)
