@@ -275,7 +275,8 @@ module Hpricot
     end
 
     filter '@*=' do |attr,val,i|
-      get_attribute(attr).to_s.index(val) >= 0
+      idx = get_attribute(attr).to_s.index(val)
+      idx >= 0 if idx
     end
 
     filter '@' do |attr,val,i|

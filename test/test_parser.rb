@@ -139,6 +139,15 @@ class TestParser < Test::Unit::TestCase
     assert_equal 2, doc.search("*").length
   end
 
+  def test_kleene_star
+    # bug noticed by raja bhatia
+    doc = Hpricot("<span class='small'>1</span><div class='large'>2</div><div class='small'>3</div><span class='blue large'>4</span>")
+    assert_equal 2, doc.search("*[@class*='small']").length
+    assert_equal 2, doc.search("*.small").length
+    assert_equal 2, doc.search(".small").length
+    assert_equal 2, doc.search(".large").length
+  end
+
   def test_body_newlines
     @immob = Hpricot.parse(TestFiles::IMMOB)
     body = @immob.at(:body)
