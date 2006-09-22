@@ -70,6 +70,14 @@ class TestParser < Test::Unit::TestCase
     assert_equal 1, @boingboing.search("//a[@name='027906']").length
   end
 
+  def test_siblings
+    @basic = Hpricot.parse(TestFiles::BASIC)
+    t = @basic.at(:title)
+    e = t.next_sibling.next_sibling
+    assert_equal 'test1.css', e['href']
+    assert_equal 'title', e.previous_sibling.previous_sibling.name
+  end
+
   def test_css_negation
     @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 3, (@basic/'p:not(.final)').length

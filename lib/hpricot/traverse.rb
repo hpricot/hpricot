@@ -17,6 +17,15 @@ module Hpricot
     end
     alias_method :to_s, :to_html
 
+    def next_sibling
+      sib = parent.children
+      sib[sib.index(self) + 1] if parent
+    end
+    def previous_sibling
+      sib = parent.children
+      x = sib.index(self) - 1
+      sib[x] if sib and x >= 0
+    end
     def get_subnode(*indexes)
       n = self
       indexes.each {|index|
