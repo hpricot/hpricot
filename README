@@ -1,6 +1,21 @@
+== Hpricot, Read Any HTML
+
 Hpricot is a fast, flexible HTML parser written in C.  It's designed to be very
 accomodating (like Tanaka Akira's HTree) and to have a very helpful library (like
 some JavaScript libs -- JQuery, Prototype -- give you.)
 
-Right now, there's not much here.  The scanner works, but I'm still writing all
-the support libraries.
+Also, Hpricot can be handy for reading broken XML files, since many of the same
+principles are used.  If a quote is missing, Hpricot tries to figure it out.  If
+tags overlap, Hpricot works on sorting them out.  You know, that sort of thing.
+
+== The Hpricot Kingdom
+
+First, here are all the links you need to know:
+
+* http://code.whytheluckystiff.net/hpricot/ is the Hpricot wiki and bug tracker.
+  Go there for news and recipes and patches.  It's the center of activity.
+* http://code.whytheluckystiff.net/svn/hpricot/trunk/ is the main Subversion
+  repository for Hpricot.
+* See COPYING for the terms of this software. (Spoiler: it's absolutely free.)
+
+Still need a link for Hpricot docs.  Well, remind me to come back to it.

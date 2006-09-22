@@ -5,6 +5,10 @@ def Hpricot(input, opts = {})
 end
 
 module Hpricot
+  # Exception class used for any errors related to deficiencies in the system when
+  # handling the character encodings of a document.
+  class EncodingError < StandardError; end
+
   # Hpricot.parse parses <i>input</i> and return a document tree.
   # represented by Hpricot::Doc.
   def Hpricot.parse(input, opts = {})
@@ -15,9 +19,21 @@ module Hpricot
 
   def Hpricot.make(input, opts = {})
     opts = {:fixup_tags => false}.merge(opts)
+
+    case opts[:encoding]
+    when nil
+    when 'utf-8'
+      unless defined? Encoding::Character::UTF8
+        raise EncodingError, "The ruby-character-encodings library could not be found for utf-8 mode."
+      end
+    else
+      raise EncodingError, "No encoding option `#{opts[:encoding]}' is available."
+    end
+
     if opts[:xhtml_strict]
       opts[:fixup_tags] = true
     end
+
     stack = [[nil, nil, [], [], [], []]]
     Hpricot.scan(input) do |token|
       if stack.last[5] == :CDATA and !(token[0] == :etag and token[1].downcase == stack.last[0])
@@ -27,6 +43,10 @@ module Hpricot
 
       case token[0]
       when :stag
+        case opts[:encoding] when 'utf-8'
+          token.map! { |str| u(str) if str.is_a? String }
+        end
+
         stagname = token[0] = token[1].downcase
         if ElementContent[stagname] == :EMPTY
           token[0] = :emptytag
