@@ -34,6 +34,24 @@ static ID s_read, s_to_str;
       rb_hash_aset(attr, K, V); \
     }
 
+#define TEXT_PASS() \
+    if (text == 0) \
+    { \
+      if (ele_open == 1) { \
+        ele_open = 0; \
+        if (tokstart > 0) { \
+          mark_tag = tokstart; \
+        } \
+      } else { \
+        mark_tag = p; \
+      } \
+      attr = Qnil; \
+      tag = Qnil; \
+      text = 1; \
+    }
+
+#define EBLK(N, T) CAT(tag, p - T + 1); ELE(N); text = 0;
+
 %%{
   machine hpricot_scan;
 
@@ -120,11 +138,20 @@ static ID s_read, s_to_str;
   StartXmlProcIns = "<?" Name space+ ;
   EndXmlProcIns = "?>" ;
 
-  html_comment := (any | newline )* >_tag :>> EndComment >tagc @{ ELE(comment); fgoto main; };
+  html_comment := |*
+    EndComment @{ EBLK(comment, 3); fgoto main; };
+    any | newline { TEXT_PASS(); };
+  *|;
 
-  html_cdata := (any | newline )* >_tag :>> EndCdata >tagc @{ ELE(cdata); fgoto main; };
+  html_cdata := |*
+    EndCdata @{ EBLK(cdata, 3); fgoto main; };
+    any | newline { TEXT_PASS(); };
+  *|;
 
-  html_procins := (any | newline )* >_tag :>> EndXmlProcIns >tagc @{ ELE(procins); fgoto main; };
+  html_procins := |*
+    EndXmlProcIns @{ EBLK(procins, 2); fgoto main; };
+    any | newline { TEXT_PASS(); };
+  *|;
 
   main := |*
     XmlDecl >newEle { ELE(xmldecl); };
@@ -135,23 +162,7 @@ static ID s_read, s_to_str;
     EmptyTag >newEle { ELE(emptytag); };
     StartComment >newEle { fgoto html_comment; };
     StartCdata >newEle { fgoto html_cdata; };
-
-    any | newline {
-      if (text == 0)
-      {
-        if (ele_open == 1) {
-          ele_open = 0;
-          if (tokstart > 0) {
-            mark_tag = tokstart;
-          }
-        } else {
-          mark_tag = p;
-        }
-        attr = Qnil;
-        tag = Qnil;
-        text = 1;
-      }
-    };
+    any | newline { TEXT_PASS(); };
   *|;
 }%%
 
