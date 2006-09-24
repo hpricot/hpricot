@@ -15,6 +15,12 @@ module Hpricot
     Doc.new(make(input, opts))
   end
 
+  # Hpricot::XML parses <i>input</i>, disregarding all the HTML rules
+  # and returning a document tree.
+  def Hpricot.XML(input, opts = {})
+    Doc.new(make(input, opts.merge(:xml => true)))
+  end
+
   # :stopdoc:
 
   def Hpricot.make(input, opts = {})
@@ -48,43 +54,45 @@ module Hpricot
         end
 
         stagname = token[0] = token[1].downcase
-        if ElementContent[stagname] == :EMPTY
+        if ElementContent[stagname] == :EMPTY and !opts[:xml]
           token[0] = :emptytag
           stack.last[2] << token
         else
-          if opts[:fixup_tags]
-            # obey the tag rules set up by the current element
-            if ElementContent.has_key? stagname
-              trans = nil
-              (stack.length-1).downto(0) do |i|
-                untags = stack[i][5]
-                break unless untags.include? stagname
-                # puts "** ILLEGAL #{stagname} IN #{stack[i][0]}"
-                trans = i
-              end
-              if trans.to_i > 1
-                eles = stack.slice!(trans..-1)
-                stack.last[2] += eles
-                # puts "** TRANSPLANTED #{stagname} TO #{stack.last[0]}"
+          unless opts[:xml]
+            if opts[:fixup_tags]
+              # obey the tag rules set up by the current element
+              if ElementContent.has_key? stagname
+                trans = nil
+                (stack.length-1).downto(0) do |i|
+                  untags = stack[i][5]
+                  break unless untags.include? stagname
+                  # puts "** ILLEGAL #{stagname} IN #{stack[i][0]}"
+                  trans = i
+                end
+                if trans.to_i > 1
+                  eles = stack.slice!(trans..-1)
+                  stack.last[2] += eles
+                  # puts "** TRANSPLANTED #{stagname} TO #{stack.last[0]}"
+                end
               end
             end
-          end
 
-          # setup tag rules for inside this element
-          if ElementContent[stagname] == :CDATA
-            uncontainable_tags = :CDATA
-          elsif opts[:fixup_tags]
-            possible_tags = ElementContent[stagname]
-            excluded_tags, included_tags = stack.last[3..4]
-            if possible_tags
-              excluded_tags = excluded_tags | (ElementExclusions[stagname] || [])
-              included_tags = included_tags | (ElementInclusions[stagname] || [])
-              containable_tags = (possible_tags | included_tags) - excluded_tags
-              uncontainable_tags = ElementContent.keys - containable_tags
-            else
-              # If the tagname is unknown, it is assumed that any element
-              # except excluded can be contained.
-              uncontainable_tags = excluded_tags
+            # setup tag rules for inside this element
+            if ElementContent[stagname] == :CDATA
+              uncontainable_tags = :CDATA
+            elsif opts[:fixup_tags]
+              possible_tags = ElementContent[stagname]
+              excluded_tags, included_tags = stack.last[3..4]
+              if possible_tags
+                excluded_tags = excluded_tags | (ElementExclusions[stagname] || [])
+                included_tags = included_tags | (ElementInclusions[stagname] || [])
+                containable_tags = (possible_tags | included_tags) - excluded_tags
+                uncontainable_tags = ElementContent.keys - containable_tags
+              else
+                # If the tagname is unknown, it is assumed that any element
+                # except excluded can be contained.
+                uncontainable_tags = excluded_tags
+              end
             end
           end
           stack << [stagname, token, [], excluded_tags, included_tags, uncontainable_tags]
