@@ -177,6 +177,12 @@ class TestParser < Test::Unit::TestCase
     assert_equal 67, (@uswebgen/:a).length
   end
 
+  def test_procins
+    doc = Hpricot("<?php print('hello') ?>\n<?xml blah='blah'?>")
+    assert_equal "php", doc.children[0].target
+    assert_equal "blah='blah'", doc.children[2].content
+  end
+
   def test_unicode
   end
 end

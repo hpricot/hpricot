@@ -219,7 +219,7 @@ module Hpricot
       end
       DocType.parse(structure[1], structure[2], structure[3])
     when :procins
-      ProcIns.parse(structure[1], structure[2], structure[3])
+      ProcIns.parse(structure[1])
     when :comment
       Comment.parse(structure[1])
     when :cdata_content
@@ -299,9 +299,10 @@ module Hpricot
     result
   end
 
-  def ProcIns.parse(target, content, raw_string)
+  def ProcIns.parse(raw_string)
+    _, target, content = *raw_string.match(/\A<\?(\S+)\s+(.+)/m)
     result = ProcIns.new(target, content)
-    result.raw_string = raw_string
+    result.raw_string = raw_string + "?>"
     result
   end
 

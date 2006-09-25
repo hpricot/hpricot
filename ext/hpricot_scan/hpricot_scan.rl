@@ -13,7 +13,7 @@ static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_empt
 static ID s_read, s_to_str;
 
 #define ELE(N) \
-  if (tokend > tokstart) { \
+  if (tokend > tokstart || text == 1) { \
     ele_open = 0; \
     rb_yield_tokens(sym_##N, tag, attr, tokstart == 0 ? Qnil : rb_str_new(tokstart, tokend-tokstart), taint); \
   }
@@ -135,7 +135,7 @@ static ID s_read, s_to_str;
     "'" [\t a-zA-Z0-9\-'()+,./:=?;!*\#@$_%]* >_aval %pubid "'" ;
   ExternalID = ( "SYSTEM" | "PUBLIC" space+ PubidLiteral ) (space+ SystemLiteral)? ;
   DocType = "<!DOCTYPE" space+ NameCap (space+ ExternalID)? space* ("[" [^\]]* "]" space*)? ">" ;
-  StartXmlProcIns = "<?" Name space+ ;
+  StartXmlProcIns = "<?" Name >{ TEXT_PASS(); } space+ ;
   EndXmlProcIns = "?>" ;
 
   html_comment := |*
