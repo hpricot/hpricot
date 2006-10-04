@@ -26,6 +26,9 @@ module Hpricot
       x = sib.index(self) - 1
       sib[x] if sib and x >= 0
     end
+    def swap(html)
+      parent.replace_child(self, Hpricot.make(html))
+    end
     def get_subnode(*indexes)
       n = self
       indexes.each {|index|
