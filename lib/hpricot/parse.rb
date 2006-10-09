@@ -137,59 +137,6 @@ module Hpricot
     structure_list.map {|s| build_node(s, opts) }
   end
 
-  def Hpricot.fix_element(elem, excluded_tags, included_tags)
-    tagname, _, attrs, sraw, _, _, _, eraw = elem[1]
-    children = elem[2]
-    if eraw
-      elem[2] = fix_structure_list(children)
-      return elem, []
-    else
-      if ElementContent[tagname] == :EMPTY
-        elem[2] = []
-        return elem, children
-      else
-        if ElementContent[tagname] == :CDATA
-          possible_tags = []
-        else
-          possible_tags = ElementContent[tagname]
-        end
-        if possible_tags
-          excluded_tags2 = ElementExclusions[tagname]
-          included_tags2 = ElementInclusions[tagname]
-          excluded_tags |= excluded_tags2 if excluded_tags2
-          included_tags |= included_tags2 if included_tags2
-          containable_tags = (possible_tags | included_tags) - excluded_tags
-          uncontainable_tags = ElementContent.keys - containable_tags
-        else
-          # If the tagname is unknown, it is assumed that any element
-          # except excluded can be contained.
-          uncontainable_tags = excluded_tags
-        end
-        fixed_children = []
-        rest = children
-        until rest.empty?
-          if String === rest[0][0]
-            elem = rest.shift
-            elem_tagname = elem[0]
-            elem_tagname = elem_tagname.downcase
-            if uncontainable_tags.include? elem_tagname
-              rest.unshift elem
-              break
-            else
-              fixed_elem, rest2 = fix_element(elem, excluded_tags, included_tags)
-              fixed_children << fixed_elem
-              rest = rest2 + rest
-            end
-          else
-            fixed_children << rest.shift
-          end
-        end
-        elem[2] = fixed_children
-        return elem, rest
-      end
-    end
-  end
-
   def Hpricot.build_node(structure, opts = {})
     case structure[0]
     when String
