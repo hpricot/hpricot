@@ -166,6 +166,12 @@ class TestParser < Test::Unit::TestCase
     end
   end
 
+  def test_wildcard
+    @basic = Hpricot.parse(TestFiles::BASIC)
+    assert_equal 3, (@basic/"*[@id]").length
+    assert_equal 3, (@basic/"//*[@id]").length
+  end
+
   def test_javascripts
     @immob = Hpricot.parse(TestFiles::IMMOB)
     assert_equal 3, (@immob/:script)[0].inner_html.scan(/<LINK/).length
@@ -175,6 +181,18 @@ class TestParser < Test::Unit::TestCase
     @uswebgen = Hpricot.parse(TestFiles::USWEBGEN)
     # sent by brent beardsley, hpricot 0.3 had problems with all the links.
     assert_equal 67, (@uswebgen/:a).length
+  end
+
+  def test_mangled_tags
+    [%{<html><form name='loginForm' method='post' action='/units/a/login/1,13088,779-1,00.html'?URL=></form></html>},
+     %{<html><form name='loginForm' ?URL= method='post' action='/units/a/login/1,13088,779-1,00.html'></form></html>},
+     %{<html><form name='loginForm'?URL= ?URL= method='post' action='/units/a/login/1,13088,779-1,00.html'?URL=></form></html>},
+     %{<html><form name='loginForm' method='post' action='/units/a/login/1,13088,779-1,00.html' ?URL=></form></html>}].
+    each do |str|
+      doc = Hpricot(str)
+      assert_equal 1, (doc/:form).length
+      assert_equal '/units/a/login/1,13088,779-1,00.html', doc.at("form")['action']
+    end
   end
 
   def test_procins
