@@ -108,13 +108,13 @@ module Hpricot
   end
 
   class DocType < BaseEle
-    def initialize(name, pubid, sysid)
-      @name, @public_id, @system_id = name, pubid, sysid
+    def initialize(target, pubid, sysid)
+      @target, @public_id, @system_id = target, pubid, sysid
     end
-    attr_reader :name, :public_id, :system_id
+    attr_reader :target, :public_id, :system_id
     def output(out)
       out <<
-        "<!DOCTYPE #{@name} " +
+        "<!DOCTYPE #{@target} " +
           (@public_id ? "PUBLIC \"#{@public_id}\"" : "SYSTEM") +
           (@system_id ? " #{html_quote(@system_id)}" : "") + ">"
     end

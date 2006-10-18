@@ -154,6 +154,41 @@ module Hpricot
       path.gsub(/^\s+|\s+$/, '')
     end
 
+    def xpath
+      if has_attribute? 'id'
+        "//#{self.name}[@id='#{get_attribute('id')}']"
+      else
+        sim, i, id = 0, 0, 0
+        parent.each_child do |e|
+          next unless e.respond_to? :name
+          sim += 1 if e.name == self.name
+          id = i if e == self
+          i += 1
+        end
+        p = File.join(parent.xpath, self.name)
+        p += ":eq(#{id})" if sim >= 2
+        p
+      end
+    end
+
+    def css_path
+      if has_attribute? 'id'
+        "##{get_attribute('id')}"
+      else
+        sim, i, id = 0, 0, 0
+        parent.each_child do |e|
+          next unless e.respond_to? :name
+          sim += 1 if e.name == self.name
+          id = i if e == self
+          i += 1
+        end
+        p = parent.css_path
+        p = p ? "#{p} > #{self.name}" : self.name
+        p += ":nth(#{id})" if sim >= 2
+        p
+      end
+    end
+
     # +each_child+ iterates over each child.
     def each_child(&block) # :yields: child_node
       children.each(&block)
@@ -331,6 +366,12 @@ module Hpricot
   module Doc::Trav
     def traverse_all_element(&block)
       children.each {|c| c.traverse_all_element(&block) }
+    end
+    def xpath
+      "/"
+    end
+    def css_path
+      nil
     end
   end
 
