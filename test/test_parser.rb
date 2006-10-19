@@ -70,6 +70,17 @@ class TestParser < Test::Unit::TestCase
     assert_equal 1, @boingboing.search("//a[@name='027906']").length
   end
 
+  def test_reparent
+    doc = Hpricot(%{<div id="blurb_1"></div>})
+    div1 = doc.search('#blurb_1')
+    div1.before('<div id="blurb_0"></div>')
+
+    div0 = doc.search('#blurb_0')
+    div0.before('<div id="blurb_a"></div>')
+
+    assert_equal 'div', doc.at('#blurb_1').name
+  end
+
   def test_siblings
     @basic = Hpricot.parse(TestFiles::BASIC)
     t = @basic.at(:title)

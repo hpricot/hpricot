@@ -43,6 +43,7 @@ module Hpricot
       children.grep(Container::Trav)
     end
     def replace_child(old, new)
+      reparent new
       children[children.index(old), 1] = [*new]
     end
     def insert_before(nodes, ele)
@@ -50,6 +51,7 @@ module Hpricot
       when Array
         nodes.each { |n| insert_before(n, ele) }
       else
+        reparent nodes
         children[children.index(ele) || 0, 0] = nodes
       end
     end
@@ -58,6 +60,7 @@ module Hpricot
       when Array
         nodes.each { |n| insert_after(n, ele) }
       else
+        reparent nodes
         idx = children.index(ele)
         children[idx ? idx + 1 : children.length, 0] = nodes
       end
@@ -75,8 +78,13 @@ module Hpricot
       when nil
         self.children = []
       end
+      reparent self.children
     end
     alias_method :innerHTML=, :inner_html=
+    def reparent(nodes)
+      [*nodes].each { |e| e.parent = self }
+    end
+    private :reparent
     def search(expr, &blk)
       last = nil
       nodes = [self]
