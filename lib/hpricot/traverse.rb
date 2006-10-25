@@ -101,27 +101,27 @@ module Hpricot
 
           case expr
           when %r!^/?\.\.!
-              expr = $'
+              last = expr = $'
               nodes.map! { |node| node.parent }
           when %r!^[>/]!
-              expr = $'
+              last = expr = $'
               nodes = Elements[*nodes.map { |node| node.containers }.flatten]
           when %r!^\+!
-              expr = $'
+              last = expr = $'
               nodes.map! do |node|
                   siblings = node.parent.containers
                   siblings[siblings.index(node)+1]
               end
               nodes.compact!
           when %r!^~!
-              expr = $'
+              last = expr = $'
               nodes.map! do |node|
                   siblings = node.parent.containers
                   siblings[(siblings.index(node)+1)..-1]
               end
               nodes.flatten!
           when %r!^[|,]!
-              expr = " #$'"
+              last = expr = " #$'"
               nodes.shift if nodes.first == self
               done += nodes
               nodes = [self]
@@ -139,11 +139,12 @@ module Hpricot
                       when '*'
                           node.traverse_element { |n| ret << n }
                       else
-                          ret += [*node.get_elements_by_tag_name(m[2])]
+                          ret += [*node.get_elements_by_tag_name(m[2])] - [*(node unless last)]
                       end
                   end
                   nodes = ret
               end
+              last = nil
           end
 
           nodes, expr = Elements.filter(nodes, expr)

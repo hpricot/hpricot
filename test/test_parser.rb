@@ -177,6 +177,11 @@ class TestParser < Test::Unit::TestCase
     end
   end
 
+  def test_nested_twins
+    @doc = Hpricot("<div>Hi<div>there</div></div>")
+    assert_equal 1, (@doc/"div div").length
+  end
+
   def test_wildcard
     @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 3, (@basic/"*[@id]").length
