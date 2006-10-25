@@ -161,32 +161,33 @@ module Hpricot
     end
 
     filter :lt do |num,i|
-      parent.containers.index(self) < num.to_i
+      self.position < num.to_i
     end
 
     filter :gt do |num,i|
-      parent.containers.index(self) > num.to_i
+      self.position > num.to_i
     end
 
-    nth = proc { |num,i| parent.containers.index(self) == num.to_i }
+    nth = proc { |num,i| self.position == num.to_i }
+    nth_first = proc { |num,i| self.position == 0 }
+    nth_last = proc { |num| self == parent.containers_of_type(self.name).last }
 
     filter :nth, &nth
     filter :eq, &nth
+    filter ":nth-of-type", &nth
 
-    filter :first do |num,i|
-      parent.containers.index(self) == 0
-    end
+    filter :first, &nth_first
+    filter ":first-of-type", &nth_first
 
-    filter :last do |i|
-      self == parent.containers.last
-    end
+    filter :last, &nth_last
+    filter ":last-of-type", &nth_last
 
     filter :even do |num,i|
-      parent.containers.index(self) % 2 == 0
+      self.position % 2 == 0
     end
 
     filter :odd do |num,i|
-      parent.containers.index(self) % 2 == 1
+      self.position % 2 == 1
     end
 
     filter ':first-child' do |i|
@@ -209,25 +210,12 @@ module Hpricot
       self == parent.containers[-1-arg.to_i]
     end
 
-    filter ":first-of-type" do |i|
-      self == parent.containers.detect { |x| x.name == arg }
-    end
-
-    filter ":nth-of-type" do |arg,i|
-      self == parent.containers.find_all { |x| x.name == arg }[arg.to_i]
-    end
-
-    filter ":last-of-type" do |i|
-      self == parent.containers.find_all { |x| x.name == self.name }.last
-    end
-
     filter :"nth-last-of-type" do |arg,i|
-      self == parent.containers.find_all { |x| x.name == arg }[-1-arg.to_i]
+      self == parent.containers_of_type(self.name)[-1-arg.to_i]
     end
 
     filter ":only-of-type" do |arg,i|
-      of_type = parent.containers.find_all { |x| x.name == arg }
-      of_type.length == 1
+      parent.containers_of_type(self.name).length == 1
     end
 
     filter ":only-child" do |arg,i|

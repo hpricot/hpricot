@@ -42,6 +42,11 @@ module Hpricot
     def containers
       children.grep(Container::Trav)
     end
+    def containers_of_type(tag_name)
+      children.find_all do |x|
+        x.is_a?(Container::Trav) && x.name == tag_name
+      end
+    end
     def replace_child(old, new)
       reparent new
       children[children.index(old), 1] = [*new]
@@ -166,12 +171,10 @@ module Hpricot
       if has_attribute? 'id'
         "//#{self.name}[@id='#{get_attribute('id')}']"
       else
-        sim, i, id = 0, 0, 0
-        parent.each_child do |e|
-          next unless e.respond_to? :name
+        sim, id = 0, 0, 0
+        parent.containers.each do |e|
+          id = sim if e == self
           sim += 1 if e.name == self.name
-          id = i if e == self
-          i += 1
         end
         p = File.join(parent.xpath, self.name)
         p += ":eq(#{id})" if sim >= 2
@@ -184,17 +187,19 @@ module Hpricot
         "##{get_attribute('id')}"
       else
         sim, i, id = 0, 0, 0
-        parent.each_child do |e|
-          next unless e.respond_to? :name
+        parent.containers.each do |e|
+          id = sim if e == self
           sim += 1 if e.name == self.name
-          id = i if e == self
-          i += 1
         end
         p = parent.css_path
         p = p ? "#{p} > #{self.name}" : self.name
         p += ":nth(#{id})" if sim >= 2
         p
       end
+    end
+
+    def position
+      parent.containers_of_type(self.name).index(self)
     end
 
     # +each_child+ iterates over each child.
