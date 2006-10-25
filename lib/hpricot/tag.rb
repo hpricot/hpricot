@@ -46,6 +46,7 @@ module Hpricot
   class STag < BaseEle
     def initialize(name, attributes=nil)
       @name = name.downcase
+      @attributes = {}
       if attributes
         @attributes = attributes.inject({}) { |hsh,(k,v)| hsh[k.downcase] = v; hsh }
       end
