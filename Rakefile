@@ -40,12 +40,21 @@ Rake::TestTask.new do |t|
     t.verbose = true
 end
 
+Rake::RDocTask.new do |rdoc|
+    rdoc.rdoc_dir = 'doc/rdoc'
+    # rdoc.options += RDOC_OPTS
+    # rdoc.template = "extras/flipbook_rdoc.rb"
+    rdoc.main = "README"
+    rdoc.title = "Hpricot Documentation"
+    rdoc.rdoc_files.add ['README', 'CHANGELOG', 'COPYING', 'lib/**/*.rb']
+end
+
 spec =
     Gem::Specification.new do |s|
         s.name = NAME
         s.version = VERS
         s.platform = Gem::Platform::RUBY
-        s.has_rdoc = false
+        s.has_rdoc = true
         s.extra_rdoc_files = ["README", "CHANGELOG", "COPYING"]
         s.summary = "a swift, liberal HTML parser with a fantastic library"
         s.description = s.summary

@@ -210,7 +210,7 @@ module Hpricot
       self == parent.containers[-1-arg.to_i]
     end
 
-    filter :"nth-last-of-type" do |arg,i|
+    filter ":nth-last-of-type" do |arg,i|
       self == parent.containers_of_type(self.name)[-1-arg.to_i]
     end
 
