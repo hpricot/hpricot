@@ -1,7 +1,7 @@
 = Hpricot, Read Any HTML
 
 Hpricot is a fast, flexible HTML parser written in C.  It's designed to be very
-accomodating (like Tanaka Akira's HTree) and to have a very helpful library (like
+accommodating (like Tanaka Akira's HTree) and to have a very helpful library (like
 some JavaScript libs -- JQuery, Prototype -- give you.)  The XPath and CSS parser,
 in fact, is based on John Resig's JQuery. 
 
@@ -228,7 +228,7 @@ What measures does <tt>:xhtml_strict</tt> take?
 
 == Hpricot.XML()
 
-The last option is the <tt>:xml</tt> option, which makes some slight varitions on the standard mode.  The main difference is
+The last option is the <tt>:xml</tt> option, which makes some slight variations on the standard mode.  The main difference is
 that :xml mode won't try to output tags which are friendlier for browsers.  For example, if an opening and closing <tt>br</tt>
 tag is found, XML mode won't try to turn that into an empty element.
 
@@ -238,7 +238,7 @@ The primary way to use Hpricot's XML mode is to call the Hpricot.XML method:
    Hpricot.XML(f)
  end
 
-*Also, :fixup_tags is cancelled out by the :xml option.*  This is because :fixup_tags makes assumptions based how HTML is
+*Also, :fixup_tags is canceled out by the :xml option.*  This is because :fixup_tags makes assumptions based how HTML is
 structured.  Specifically, how tags are defined in the XHTML 1.0 DTD.
 
 == Digging Around for More Handy Methods
