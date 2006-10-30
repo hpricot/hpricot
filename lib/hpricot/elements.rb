@@ -1,33 +1,97 @@
 module Hpricot
+# Once you've matched a list of elements, you will often need to handle them as a group.  Or you
+# may want to perform the same action on each of them.  Hpricot::Elements is an extension of Ruby's
+# array class, with some methods added for altering elements contained in the array.
+#
+# If you need to create an element array from regular elements:
+#
+#   Hpricot::Elements[ele1, ele2, ele3]
+#
+# Assuming that ele1, ele2 and ele3 contain element objects (Hpricot::Elem, Hpricot::Doc, etc.)
+#
+# == Continuing Searches
+#
+# Usually the Hpricot::Elements you're working on comes from a search you've
+# done.  Well, you can continue searching the list by using the same <tt>at</tt>
+# and <tt>search</tt> methods you can use on plain elements.
+#
+#   elements = doc.search("/div/p")
+#   elements = elements.search("/a[@href='http://hoodwink.d/']")
+#   elements = elements.at("img")
+#
+# == Altering Elements
+#
+# When you're altering elements in the list, your changes will be reflected in
+# the document you started searching from.
+#
+#   doc = Hpricot("That's my <b>spoon</b>, Tyler.")
+#   doc.at("b").swap("<i>fork</i>")
+#   doc.to_html
+#     #=> "That's my <i>fork</i>, Tyler." 
+#
+# == Getting More Detailed
+#
+# If you can't find a method here that does what you need, you may need to
+# loop through the elements and find a method in Hpricot::Container::Trav
+# which can do what you need.
+#
+# For example, you may want to search for all the H3 header tags in a document
+# and grab all the tags underneath the header, but not inside the header.
+# A good method for this is <tt>next_sibling</tt>:
+#
+#   doc.search("h3").each do |h3|
+#     while ele = h3.next_sibling
+#       ary << ele   # stuff away all the elements under the h3
+#     end
+#   end
+#
+# Most of the useful element methods are in the mixins Hpricot::Traverse
+# and Hpricot::Container::Trav.
   class Elements < Array
+    # Searches this list for any elements (or children of these elements) matching
+    # the CSS or XPath expression +expr+.  Root is assumed to be the element scanned.
+    #
+    # See Hpricot::Container::Trav.search for more.
     def search(*expr,&blk)
       Elements[*map { |x| x.search(*expr,&blk) }.flatten.uniq]
     end
     alias_method :/, :search
 
+    # Searches this list for the first element (or child of these elements) matching
+    # the CSS or XPath expression +expr+.  Root is assumed to be the element scanned.
+    #
+    # See Hpricot::Container::Trav.at for more.
     def at(expr, &blk)
       search(expr, &blk).first
     end
     alias_method :%, :at
 
+    # Convert this group of elements into a complete HTML fragment, returned as a
+    # string.
     def to_html
       map { |x| x.output("") }.join
     end
     alias_method :to_s, :to_html
 
-    def inner_html(*str)
-      if str.empty?
+    # Returns an HTML fragment built of the contents of each element in this list.
+    #
+    # If a HTML +string+ is supplied, this method acts like inner_html=.
+    def inner_html(*string)
+      if string.empty?
         map { |x| x.inner_html }.join
       else
-        x = self.inner_html = str.pop || x
+        x = self.inner_html = string.pop || x
       end
     end
     alias_method :text, :inner_html
     alias_method :html, :inner_html
     alias_method :innerHTML, :inner_html
 
-    def inner_html=(str)
-      each { |x| x.inner_html = str }
+    # Replaces the contents of each element in this list.  Supply an HTML +string+,
+    # which is loaded into Hpricot objects and inserted into every element in this
+    # list.
+    def inner_html=(string)
+      each { |x| x.inner_html = string }
     end
     alias_method :html=, :inner_html=
     alias_method :innerHTML=, :inner_html=
@@ -37,30 +101,60 @@ module Hpricot
         nodes
     end
 
+    # Remove all elements in this list from the document which contains them.
+    #
+    #   doc = Hpricot("<html>Remove this: <b>here</b></html>")
+    #   doc.search("b").remove
+    #   doc.to_html
+    #     => "<html>Remove this: </html>"
+    #
     def remove
       each { |x| x.parent.children.delete(x) }
     end
 
+    # Empty the elements in this list, by removing their insides.
+    #
+    #   doc = Hpricot("<p> We have <i>so much</i> to say.</p>")
+    #   doc.search("i").empty
+    #   doc.to_html
+    #     => "<p> We have <i></i> to say.</p>"
+    #
     def empty
       each { |x| x.inner_html = nil }
     end
 
+    # Add to the end of the contents inside each element in this list.
+    # Pass in an HTML +str+, which is turned into Hpricot elements.
     def append(str)
       each { |x| x.inner_html += str }
     end
 
+    # Add to the start of the contents inside each element in this list.
+    # Pass in an HTML +str+, which is turned into Hpricot elements.
     def prepend(str)
       each { |x| x.inner_html = str + x.inner_html }
     end
-
+ 
+    # Add some HTML just previous to each element in this list.
+    # Pass in an HTML +str+, which is turned into Hpricot elements.
     def before(str)
       each { |x| x.parent.insert_before Hpricot.make(str), x }
     end
 
+    # Just after each element in this list, add some HTML.
+    # Pass in an HTML +str+, which is turned into Hpricot elements.
     def after(str)
       each { |x| x.parent.insert_after Hpricot.make(str), x }
     end
 
+    # Wraps each element in the list inside the element created by HTML +str+. 
+    # If more than one element is found in the string, Hpricot locates the
+    # deepest spot inside the first element.
+    #
+    #  doc.search("a[@href]").
+    #      wrap(%{<div class="link"><div class="link_inner"></div></div>})
+    #
+    # This code wraps every link on the page inside a +div.link+ and a +div.link_inner+ nest.
     def wrap(str)
       each do |x|
         wrap = Hpricot.make(str)
@@ -83,6 +177,15 @@ module Hpricot
         nodes
     end
 
+    # Sets an attribute for all elements in this list.  You may use
+    # a simple pair (<em>attribute name</em>, <em>attribute value</em>):
+    #
+    #   doc.search('p').set(:class, 'outline')
+    #
+    # Or, use a hash of pairs:
+    #
+    #   doc.search('div#sidebar').set(:class => 'outline', :id => 'topbar')
+    #
     def set(k, v = nil)
       case k
       when Hash

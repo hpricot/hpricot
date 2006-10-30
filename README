@@ -76,6 +76,10 @@ To load from a web URL, use <tt>open-uri</tt>, which comes with Ruby:
  require 'open-uri'
  doc = open("http://qwantz.com/") { |f| Hpricot(f) }
 
+Hpricot uses an internal buffer to parse the file, so the IO will stream properly and large documents won't be
+loaded into memory all at once.  However, the parsed document object will be present in memory, in its
+entirety.
+
 === Search for Elements
 
 Use <tt>Doc.search</tt>:
@@ -187,6 +191,55 @@ Or, the <tt>xpath</tt> method:
    #=> "/div/div:eq(1)" 
  doc.at("#header").xpath
    #=> "//div[@id='header']" 
+
+== Hpricot Fixups
+
+When loading HTML documents, you have a few settings that can make Hpricot more or less intense about how it gets
+involved.
+
+== :fixup_tags
+
+Really, there are so many ways to clean up HTML and your intentions may be to keep the HTML as-is.  So Hpricot's 
+default behavior is to keep things flexible.  Making sure to open and close all the tags, but ignore any validation problems.
+
+As of Hpricot 0.4, there's a new <tt>:fixup_tags</tt> option which will attempt to shift the document's tags to meet XHTML 1.0 Strict.
+
+ doc = open("index.html") { |f| Hpricot f, :fixup_tags => true }
+
+This doesn't quite meet the XHTML 1.0 Strict standard, it just tries to follow the rules a bit better.  Like: say Hpricot finds 
+a paragraph in a link, it's going to move the paragraph below the link.  Or up and out of other elements where paragraphs don't below.
+
+If an unknown element is found, it is ignored.  Again, <tt>:fixup_tags</tt>.
+
+== :xhtml_strict
+
+So, let's go beyond just trying to fix the hierarchy.  The <tt>:xhtml_strict</tt> option really tries to force the document to be an 
+XHTML 1.0 Strict document.  Even at the cost of removing elements that get in the way.
+
+ doc = open("index.html") { |f| Hpricot f, :xhtml_strict => true }
+
+What measures does <tt>:xhtml_strict</tt> take?
+
+ 1. Shift elements into their proper containers just like <tt>:fixup_tags</tt>.
+ 2. Remove unknown elements.
+ 3. Remove unknown attributes.
+ 4. Remove illegal content.
+ 5. Alter the doctype to XHTML 1.0 Strict.
+
+== Hpricot.XML()
+
+The last option is the <tt>:xml</tt> option, which makes some slight varitions on the standard mode.  The main difference is
+that :xml mode won't try to output tags which are friendlier for browsers.  For example, if an opening and closing <tt>br</tt>
+tag is found, XML mode won't try to turn that into an empty element.
+
+The primary way to use Hpricot's XML mode is to call the Hpricot.XML method:
+
+ doc = open("http://redhanded.hobix.com/index.xml") do |f|
+   Hpricot.XML(f)
+ end
+
+*Also, :fixup_tags is cancelled out by the :xml option.*  This is because :fixup_tags makes assumptions based how HTML is
+structured.  Specifically, how tags are defined in the XHTML 1.0 DTD.
 
 == Digging Around for More Handy Methods
 
