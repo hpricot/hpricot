@@ -96,11 +96,6 @@ module Hpricot
     alias_method :html=, :inner_html=
     alias_method :innerHTML=, :inner_html=
 
-    def filter(expr)
-        nodes, = Elements.filter(self, expr)
-        nodes
-    end
-
     # Remove all elements in this list from the document which contains them.
     #
     #   doc = Hpricot("<html>Remove this: <b>here</b></html>")
@@ -168,15 +163,6 @@ module Hpricot
       end
     end
 
-    def not(expr)
-        if expr.is_a? Container::Trav
-            nodes = self - [expr]
-        else
-            nodes, = Elements.filter(self, expr, false)
-        end
-        nodes
-    end
-
     # Sets an attribute for all elements in this list.  You may use
     # a simple pair (<em>attribute name</em>, <em>attribute value</em>):
     #
@@ -235,6 +221,20 @@ module Hpricot
             end
         end
         [nodes, expr]
+    end
+
+    def filter(expr)
+        nodes, = Elements.filter(self, expr)
+        nodes
+    end
+
+    def not(expr)
+        if expr.is_a? Container::Trav
+            nodes = self - [expr]
+        else
+            nodes, = Elements.filter(self, expr, false)
+        end
+        nodes
     end
 
     private

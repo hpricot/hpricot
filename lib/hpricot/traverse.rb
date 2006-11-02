@@ -3,32 +3,50 @@ require 'uri'
 
 module Hpricot
   module Traverse
+    # Is this object the enclosing HTML or XML document?
     def doc?() Doc::Trav === self end
+    # Is this object an HTML or XML element?
     def elem?() Elem::Trav === self end
+    # Is this object an HTML text node?
     def text?() Text::Trav === self end
+    # Is this object an XML declaration?
     def xmldecl?() XMLDecl::Trav === self end
+    # Is this object a doctype tag?
     def doctype?() DocType::Trav === self end
+    # Is this object an XML processing instruction?
     def procins?() ProcIns::Trav === self end
+    # Is this object a comment?
     def comment?() Comment::Trav === self end
+    # Is this object a stranded end tag?
     def bogusetag?() BogusETag::Trav === self end
 
+    # Builds an HTML string from this node and its contents.
+    # If you need to write to a stream, try calling <tt>output(io)</tt>
+    # as a method on this object.
     def to_html
       output("")
     end
     alias_method :to_s, :to_html
 
+    # Returns the node neighboring this node to the south: just below it.
     def next_sibling
       sib = parent.children
       sib[sib.index(self) + 1] if parent
     end
+
+    # Returns to node neighboring this node to the north: just above it.
     def previous_sibling
       sib = parent.children
       x = sib.index(self) - 1
       sib[x] if sib and x >= 0
     end
+
+    # Replace this element and its contents with the nodes contained
+    # in the +html+ string.
     def swap(html)
       parent.replace_child(self, Hpricot.make(html))
     end
+
     def get_subnode(*indexes)
       n = self
       indexes.each {|index|
@@ -39,18 +57,32 @@ module Hpricot
   end
 
   module Container::Trav
+    # Return all children of this node which can contain other
+    # nodes.  This is a good way to get all HTML elements which
+    # aren't text, comment, doctype or processing instruction nodes.
     def containers
       children.grep(Container::Trav)
     end
+
+    # Find containers of a given +tag_name+.
+    #
+    #   ele.containers_of_type('p')
+    #     #=> [...array of paragraphs...]
+    #
     def containers_of_type(tag_name)
       children.find_all do |x|
         x.is_a?(Container::Trav) && x.name == tag_name
       end
     end
+
+    # Replace +old+, a child of the current node, with +new+ node.
     def replace_child(old, new)
       reparent new
       children[children.index(old), 1] = [*new]
     end
+
+    # Insert +nodes+, an array of HTML elements or a single element,
+    # before the node +ele+, a child of the current node.
     def insert_before(nodes, ele)
       case nodes
       when Array
@@ -60,6 +92,9 @@ module Hpricot
         children[children.index(ele) || 0, 0] = nodes
       end
     end
+
+    # Insert +nodes+, an array of HTML elements or a single element,
+    # after the node +ele+, a child of the current node.
     def insert_after(nodes, ele)
       case nodes
       when Array
@@ -70,10 +105,15 @@ module Hpricot
         children[idx ? idx + 1 : children.length, 0] = nodes
       end
     end
+
+    # Builds an HTML string from the contents of this node.
     def inner_html
       children.map { |x| x.output("") }.join
     end
     alias_method :innerHTML, :inner_html
+
+    # Inserts new contents into the current node, based on
+    # the HTML contained in string +inner+.
     def inner_html=(inner)
       case inner
       when String, IO
@@ -86,10 +126,16 @@ module Hpricot
       reparent self.children
     end
     alias_method :innerHTML=, :inner_html=
+
     def reparent(nodes)
       [*nodes].each { |e| e.parent = self }
     end
     private :reparent
+
+    # Searches this node for all elements matching
+    # the CSS or XPath +expr+.  Returns an Elements array
+    # containing the matching nodes.  If +blk+ is given, it
+    # is used to iterate through the matching set.
     def search(expr, &blk)
       last = nil
       nodes = [self]
@@ -159,8 +205,10 @@ module Hpricot
     end
     alias_method :/, :search
 
-    def at(expr, &blk)
-      search(expr, &blk).first
+    # Find the first matching node for the CSS or XPath
+    # +expr+ string.
+    def at(expr)
+      search(expr).first
     end
     alias_method :%, :at
 
@@ -168,6 +216,8 @@ module Hpricot
       path.gsub(/^\s+|\s+$/, '')
     end
 
+    # Builds a unique XPath string for this node, from the
+    # root of the document containing it.
     def xpath
       if has_attribute? 'id'
         "//#{self.name}[@id='#{get_attribute('id')}']"
@@ -183,6 +233,8 @@ module Hpricot
       end
     end
 
+    # Builds a unique CSS string for this node, from the
+    # root of the document containing it.
     def css_path
       if has_attribute? 'id'
         "##{get_attribute('id')}"
@@ -262,6 +314,7 @@ module Hpricot
       nil
     end
 
+    # Returns a list of CSS classes to which this element belongs.
     def classes
       get_attribute('class').to_s.strip.split(/\s+/)
     end
