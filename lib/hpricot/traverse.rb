@@ -29,13 +29,15 @@ module Hpricot
     alias_method :to_s, :to_html
 
     # Returns the node neighboring this node to the south: just below it.
-    def next_sibling
+    # This method includes text nodes and comments and such.
+    def next_node
       sib = parent.children
       sib[sib.index(self) + 1] if parent
     end
 
     # Returns to node neighboring this node to the north: just above it.
-    def previous_sibling
+    # This method includes text nodes and comments and such.
+    def previous_node
       sib = parent.children
       x = sib.index(self) - 1
       sib[x] if sib and x >= 0
@@ -73,6 +75,23 @@ module Hpricot
       children.find_all do |x|
         x.is_a?(Container::Trav) && x.name == tag_name
       end
+    end
+
+    # Returns the node neighboring this node to the south: just below it.
+    # This method does not find text nodes or comments or cdata or any of that.
+    # See Hpricot::Traverse#next_node if you need to hunt out all kinds of nodes.
+    def next_sibling
+      sib = parent.containers
+      sib[sib.index(self) + 1] if parent
+    end
+
+    # Returns to node neighboring this node to the north: just above it.
+    # This method does not find text nodes or comments or cdata or any of that.
+    # See Hpricot::Traverse#previous_node if you need to hunt out all kinds of nodes.
+    def previous_sibling
+      sib = parent.containers
+      x = sib.index(self) - 1
+      sib[x] if sib and x >= 0
     end
 
     # Replace +old+, a child of the current node, with +new+ node.
