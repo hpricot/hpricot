@@ -230,6 +230,14 @@ class TestParser < Test::Unit::TestCase
     end
   end
 
+  def test_filters
+    @basic = Hpricot.parse(TestFiles::BASIC)
+    assert_equal 0, (@basic/"title:parent").size
+    assert_equal 3, (@basic/"p:parent").size
+    assert_equal 1, (@basic/"title:empty").size
+    assert_equal 1, (@basic/"p:empty").size
+  end
+
   def test_unicode
   end
 end

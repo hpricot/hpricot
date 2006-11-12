@@ -326,11 +326,11 @@ module Hpricot
     end
 
     filter :parent do
-      childNodes.length > 0
+      containers.length > 0
     end
 
     filter :empty do
-      childNodes.length == 0
+      containers.length == 0
     end
 
     filter :root do
