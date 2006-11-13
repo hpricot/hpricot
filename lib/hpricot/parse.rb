@@ -74,6 +74,9 @@ module Hpricot
                   stack.last[2] += eles
                   # puts "** TRANSPLANTED #{stagname} TO #{stack.last[0]}"
                 end
+              elsif opts[:xhtml_strict]
+                token[2] = {'class' => stagname}
+                stagname = token[0] = "div"
               end
             end
 
@@ -99,6 +102,9 @@ module Hpricot
         end
       when :etag
         etagname = token[0] = token[1].downcase
+        if opts[:xhtml_strict] and not ElementContent.has_key? etagname
+          etagname = token[0] = "div"
+        end
         matched_elem = nil
         (stack.length-1).downto(0) do |i|
           stagname, = stack[i]
