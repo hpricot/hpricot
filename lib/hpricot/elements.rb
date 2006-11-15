@@ -201,6 +201,10 @@ module Hpricot
                 m[0] = "@#{m.slice!(2,1)}"
             end
 
+            if m[0] == '[' && m[1] =~ /^\d+$/
+                m = [":", "nth", m[1]]
+            end
+
             if m[0] == ":" && m[1] == "not"
                 nodes, = Elements.filter(nodes, m[2], false)
             else

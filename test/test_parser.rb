@@ -53,6 +53,7 @@ class TestParser < Test::Unit::TestCase
     assert_equal 'link1', doc.search('p').at('a').get_attribute('id')
     assert_equal 'link2', (doc/'p').filter('.ohmy').search('a').first.get_attribute('id')
     assert_equal (doc/'p')[2], (doc/'p').filter(':nth(2)')[0]
+    assert_equal (doc/'p')[2], (doc/'p').filter('[2]')[0]
     assert_equal 4, (doc/'p').filter('*').length
     assert_equal 4, (doc/'p').filter('* *').length
     eles = (doc/'p').filter('.ohmy')
@@ -91,9 +92,9 @@ class TestParser < Test::Unit::TestCase
   def test_siblings
     @basic = Hpricot.parse(TestFiles::BASIC)
     t = @basic.at(:title)
-    e = t.next_sibling.next_sibling
+    e = t.next_sibling
     assert_equal 'test1.css', e['href']
-    assert_equal 'title', e.previous_sibling.previous_sibling.name
+    assert_equal 'title', e.previous_sibling.name
   end
 
   def test_css_negation

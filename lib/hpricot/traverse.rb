@@ -247,7 +247,7 @@ module Hpricot
           sim += 1 if e.name == self.name
         end
         p = File.join(parent.xpath, self.name)
-        p += ":eq(#{id})" if sim >= 2
+        p += "[#{id}]" if sim >= 2
         p
       end
     end
