@@ -83,7 +83,6 @@ module Hpricot
         x = self.inner_html = string.pop || x
       end
     end
-    alias_method :text, :inner_html
     alias_method :html, :inner_html
     alias_method :innerHTML, :inner_html
 
@@ -95,6 +94,13 @@ module Hpricot
     end
     alias_method :html=, :inner_html=
     alias_method :innerHTML=, :inner_html=
+
+    # Returns an string containing the text contents of each element in this list.
+    # All HTML tags are removed.
+    def inner_text
+      map { |x| x.inner_text }.join
+    end
+    alias_method :text, :inner_text
 
     # Remove all elements in this list from the document which contains them.
     #
