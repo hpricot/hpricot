@@ -52,6 +52,7 @@ module Hpricot
     # Replace this element and its contents with the nodes contained
     # in the +html+ string.
     def swap(html)
+      parent.altered!
       parent.replace_child(self, Hpricot.make(html))
     end
 
@@ -147,6 +148,7 @@ module Hpricot
     # Inserts new contents into the current node, based on
     # the HTML contained in string +inner+.
     def inner_html=(inner)
+      altered!
       case inner
       when String, IO
         self.children = Hpricot.parse(inner).children
@@ -160,6 +162,7 @@ module Hpricot
     alias_method :innerHTML=, :inner_html=
 
     def reparent(nodes)
+      altered!
       [*nodes].each { |e| e.parent = self }
     end
     private :reparent

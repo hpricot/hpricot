@@ -107,7 +107,7 @@ module Hpricot
   end
 
   class BogusETag < ETag
-    def output(out, opts = {}); out << if_output(opts) {}; end
+    def output(out, opts = {}); out << if_output(opts) { '' }; end
   end
 
   class Text < BaseEle
