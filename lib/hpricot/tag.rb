@@ -20,7 +20,7 @@ module Hpricot
       "\"" + str.gsub('"', '\\"') + "\""
     end
     def if_output(opts)
-      if opts[:preserved] and not @raw_string.nil?
+      if opts[:preserve] and not @raw_string.nil?
         @raw_string
       else
         yield opts
@@ -55,11 +55,11 @@ module Hpricot
         @stag.output(out, opts.merge(:style => :empty))
       else
         @stag.output(out, opts)
-        @children.each { |n| n.output(out) }
+        @children.each { |n| n.output(out, opts) }
         if @etag
           @etag.output(out, opts)
-        elsif !opts[:preserved]
-          ETag.new(@name).output(out, opts)
+        elsif !opts[:preserve]
+          ETag.new(@stag.name).output(out, opts)
         end
       end
       out

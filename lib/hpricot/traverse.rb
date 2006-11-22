@@ -31,7 +31,7 @@ module Hpricot
     # Attempts to preserve the original HTML of the document, only
     # outputing new tags for elements which have changed.
     def to_original_html
-      output("", :preserved => true)
+      output("", :preserve => true)
     end
 
     # Returns the node neighboring this node to the south: just below it.
