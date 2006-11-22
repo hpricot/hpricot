@@ -6,9 +6,9 @@ module Hpricot
     def initialize(children)
       @children = children ? children.each { |c| c.parent = self }  : []
     end
-    def output(out)
+    def output(out, opts = {})
       @children.each do |n|
-        n.output(out)
+        n.output(out, opts)
       end
       out
     end
@@ -19,6 +19,25 @@ module Hpricot
     def html_quote(str)
       "\"" + str.gsub('"', '\\"') + "\""
     end
+    def if_output(opts)
+      if opts[:preserved] and not @raw_string.nil?
+        @raw_string
+      else
+        yield opts
+      end
+    end
+    def altered!
+      @raw_string = nil
+    end
+    def self.alterable *fields
+      attr_accessor *fields
+      fields.each do |f|
+        define_method("#{f}=") do |v|
+          altered!
+          instance_variable_set("@#{f}", v)
+        end
+      end
+    end
   end
 
   class Elem
@@ -28,16 +47,20 @@ module Hpricot
       @children = children ? children.each { |c| c.parent = self }  : []
     end
     def empty?; @children.empty? end
-    [:name, :attributes, :parent].each do |m|
-      [m, "#{m}="].each { |m2| define_method(m2) { |*a| @stag.send(m2, *a) } }
+    [:name, :attributes, :parent, :altered!].each do |m|
+      [m, "#{m}="].each { |m2| define_method(m2) { |*a| [@etag, @stag].inject { |_,t| t.send(m2, *a) if t and t.respond_to?(m2) } } }
     end
-    def output(out)
+    def output(out, opts = {})
       if empty? and ElementContent[@stag.name] == :EMPTY
-        @stag.output(out, :style => :empty)
+        @stag.output(out, opts.merge(:style => :empty))
       else
-        @stag.output(out)
+        @stag.output(out, opts)
         @children.each { |n| n.output(out) }
-        @stag.output(out, :style => :end)
+        if @etag
+          @etag.output(out, opts)
+        elsif !opts[:preserved]
+          ETag.new(@name).output(out, opts)
+        end
       end
       out
     end
@@ -51,7 +74,7 @@ module Hpricot
         @attributes = attributes.inject({}) { |hsh,(k,v)| hsh[k.downcase] = v; hsh }
       end
     end
-    attr_accessor :name, :attributes
+    alterable :name, :attributes
     def attributes_as_html
       if @attributes
         @attributes.map do |aname, aval|
@@ -62,10 +85,7 @@ module Hpricot
     end
     def output(out, opts = {})
       out <<
-        case opts[:style]
-        when :end
-          "</#{@name}>"
-        else
+        if_output(opts) do
           "<#{@name}#{attributes_as_html}" +
             (opts[:style] == :empty ? " /" : "") +
             ">"
@@ -77,20 +97,29 @@ module Hpricot
     def initialize(qualified_name)
       @name = qualified_name
     end
-    attr_reader :name
+    alterable :name
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "</#{@name}>"
+        end
+    end
   end
 
   class BogusETag < ETag
-    def output(out); end
+    def output(out, opts = {}); out << if_output(opts) {}; end
   end
 
   class Text < BaseEle
     def initialize(text)
       @content = text
     end
-    attr_reader :content
-    def output(out)
-      out << @content
+    alterable :content
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          @content
+        end
     end
   end
 
@@ -98,13 +127,15 @@ module Hpricot
     def initialize(version, encoding, standalone)
       @version, @encoding, @standalone = version, encoding, standalone
     end
-    attr_reader :version, :encoding, :standalone
-    def output(out)
+    alterable :version, :encoding, :standalone
+    def output(out, opts = {})
       out <<
-        "<?xml version=\"#{@version}\"" +
-          (@encoding ? " encoding=\"#{encoding}\"" : "") +
-          (@standalone != nil ? " standalone=\"#{standalone ? 'yes' : 'no'}\"" : "") +
-          "?>"
+        if_output(opts) do
+          "<?xml version=\"#{@version}\"" +
+            (@encoding ? " encoding=\"#{encoding}\"" : "") +
+            (@standalone != nil ? " standalone=\"#{standalone ? 'yes' : 'no'}\"" : "") +
+            "?>"
+        end
     end
   end
 
@@ -112,12 +143,14 @@ module Hpricot
     def initialize(target, pubid, sysid)
       @target, @public_id, @system_id = target, pubid, sysid
     end
-    attr_reader :target, :public_id, :system_id
-    def output(out)
+    alterable :target, :public_id, :system_id
+    def output(out, opts = {})
       out <<
-        "<!DOCTYPE #{@target} " +
-          (@public_id ? "PUBLIC \"#{@public_id}\"" : "SYSTEM") +
-          (@system_id ? " #{html_quote(@system_id)}" : "") + ">"
+        if_output(opts) do
+          "<!DOCTYPE #{@target} " +
+            (@public_id ? "PUBLIC \"#{@public_id}\"" : "SYSTEM") +
+            (@system_id ? " #{html_quote(@system_id)}" : "") + ">"
+        end
     end
   end
 
@@ -125,11 +158,14 @@ module Hpricot
     def initialize(target, content)
       @target, @content = target, content
     end
-    attr_reader :target, :content
-    def output(out)
-      out << "<?#{@target}" +
-        (@content ? " #{@content}" : "") +
-        "?>"
+    alterable :target, :content
+    def output(out, opts = {})
+      out << 
+        if_output(opts) do
+          "<?#{@target}" +
+           (@content ? " #{@content}" : "") +
+           "?>"
+        end
     end
   end
 
@@ -137,9 +173,12 @@ module Hpricot
     def initialize(content)
       @content = content
     end
-    attr_reader :content
-    def output(out)
-      out << "<!--#{@content}-->"
+    alterable :content
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "<!--#{@content}-->"
+        end
     end
   end
 

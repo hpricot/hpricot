@@ -28,6 +28,12 @@ module Hpricot
     end
     alias_method :to_s, :to_html
 
+    # Attempts to preserve the original HTML of the document, only
+    # outputing new tags for elements which have changed.
+    def to_original_html
+      output("", :preserved => true)
+    end
+
     # Returns the node neighboring this node to the south: just below it.
     # This method includes text nodes and comments and such.
     def next_node
@@ -644,12 +650,14 @@ module Hpricot
     end
     alias_method :[], :get_attribute
     def set_attribute(name, val)
+      altered!
       self.attributes ||= {}
       self.attributes[name.to_s] = val
     end
     alias_method :[]=, :set_attribute
     def remove_attribute(name)
       if has_attribute? name
+        altered!
         self.attributes.delete(name)
       end
     end
