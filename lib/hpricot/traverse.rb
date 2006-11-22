@@ -49,6 +49,17 @@ module Hpricot
       sib[x] if sib and x >= 0
     end
 
+    # Adds elements immediately after this element, contained in the +html+ string.
+    def after(html)
+      parent.insert_after(Hpricot.make(html), self)
+    end
+
+    # Adds elements immediately before this element, contained in the +html+ string.
+    def before(html)
+      parent.insert_after(Hpricot.make(html), self)
+    end
+
+
     # Replace this element and its contents with the nodes contained
     # in the +html+ string.
     def swap(html)

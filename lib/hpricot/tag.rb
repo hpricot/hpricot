@@ -12,6 +12,7 @@ module Hpricot
       end
       out
     end
+    def altered!; end
   end
 
   class BaseEle
