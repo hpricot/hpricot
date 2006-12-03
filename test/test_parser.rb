@@ -201,6 +201,11 @@ class TestParser < Test::Unit::TestCase
     assert_equal 3, (@immob/:script)[0].inner_html.scan(/<LINK/).length
   end
 
+  def test_nested_scripts
+    @week9 = Hpricot.parse(TestFiles::WEEK9)
+    assert_equal 14, (@week9/"a").find_all { |x| x.inner_html.include? "GameCenter" }.length
+  end
+
   def test_uswebgen
     @uswebgen = Hpricot.parse(TestFiles::USWEBGEN)
     # sent by brent beardsley, hpricot 0.3 had problems with all the links.

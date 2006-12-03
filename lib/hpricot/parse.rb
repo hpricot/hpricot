@@ -42,7 +42,8 @@ module Hpricot
 
     stack = [[nil, nil, [], [], [], []]]
     Hpricot.scan(input) do |token|
-      if stack.last[5] == :CDATA and ![:etag, :procins, :comment, :cdata].include?(token[0]) and token[1].downcase != stack.last[0]
+      if stack.last[5] == :CDATA and ![:procins, :comment, :cdata].include?(token[0]) and
+          !(token[0] == :etag and token[1].downcase == stack.last[0])
         token[0] = :text
         token[1] = token[3] if token[3]
       end
