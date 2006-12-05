@@ -262,7 +262,7 @@ module Hpricot
 
   def Comment.parse(content)
     result = Comment.new(content)
-    result.raw_string = "<!--" + content + "-->"
+    result.raw_string = "<!--" + content.to_s + "-->"
     result
   end
 

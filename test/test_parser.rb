@@ -175,6 +175,13 @@ class TestParser < Test::Unit::TestCase
     assert_equal 2, doc.search(".large").length
   end
 
+  def test_empty_comment
+    doc = Hpricot("<p><!----></p>")
+    assert doc.children[0].children[0].comment?
+    doc = Hpricot("<p><!-- --></p>")
+    assert doc.children[0].children[0].comment?
+  end
+
   def test_body_newlines
     @immob = Hpricot.parse(TestFiles::IMMOB)
     body = @immob.at(:body)
