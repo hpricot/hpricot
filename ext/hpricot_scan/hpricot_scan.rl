@@ -191,7 +191,7 @@ void rb_yield_tokens(VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
 
 VALUE hpricot_scan(VALUE self, VALUE port)
 {
-  static char buf[BUFSIZE];
+  char buf[BUFSIZE];
   int cs, act, have = 0, nread = 0, curline = 1, text = 0;
   char *tokstart = 0, *tokend = 0;
 
