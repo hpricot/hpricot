@@ -79,6 +79,7 @@ class TestParser < Test::Unit::TestCase
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 60, (@boingboing/'p.posted').length
     assert_equal 1, @boingboing.search("//a[@name='027906']").length
+    assert_equal 10, @boingboing.search("script comment()").length
   end
 
   def test_reparent
