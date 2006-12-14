@@ -210,15 +210,14 @@ module Hpricot
   end
 
   def Text.parse_cdata_content(raw_string)
-    result = Text.new(raw_string)
+    result = CData.new(raw_string)
     result.raw_string = raw_string
-    result.instance_variable_set( "@cdata", true )
     result
   end
 
   def Text.parse_cdata_section(content)
-    result = Text.new(content)
-    result.raw_string = "<![CDATA[" + content + "]]>"
+    result = CData.new(content)
+    result.raw_string = content
     result
   end
 

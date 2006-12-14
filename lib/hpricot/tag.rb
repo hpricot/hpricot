@@ -124,6 +124,15 @@ module Hpricot
     end
   end
 
+  class CData < Text
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "<![CDATA[#@content]]>"
+        end
+    end
+  end
+
   class XMLDecl < BaseEle
     def initialize(version, encoding, standalone)
       @version, @encoding, @standalone = version, encoding, standalone

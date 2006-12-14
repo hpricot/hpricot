@@ -251,6 +251,12 @@ class TestParser < Test::Unit::TestCase
     assert_equal 1, (@basic/"p:empty").size
   end
 
+  def test_keep_cdata
+    str = %{<script> /*<![CDATA[*/
+    /*]]>*/ </script>}
+    assert_equal str, Hpricot(str).to_html
+  end
+
   def test_unicode
   end
 end
