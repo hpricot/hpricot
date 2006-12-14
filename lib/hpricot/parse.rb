@@ -255,7 +255,7 @@ module Hpricot
   def ProcIns.parse(raw_string)
     _, target, content = *raw_string.match(/\A<\?(\S+)\s+(.+)/m)
     result = ProcIns.new(target, content)
-    result.raw_string = raw_string + "?>"
+    result.raw_string = "#{raw_string}?>"
     result
   end
 

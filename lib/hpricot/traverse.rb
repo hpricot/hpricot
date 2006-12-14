@@ -74,6 +74,222 @@ module Hpricot
       }
       n
     end
+
+    # Builds a string from the text contained in this node.  All
+    # HTML elements are removed.
+    def inner_text
+      children.map { |x| x.text? ? x.output("") : x.inner_text }.join
+    end
+    alias_method :innerText, :inner_text
+
+    # Builds an HTML string from the contents of this node.
+    def inner_html
+      children.map { |x| x.output("") }.join
+    end
+    alias_method :innerHTML, :inner_html
+
+    # Inserts new contents into the current node, based on
+    # the HTML contained in string +inner+.
+    def inner_html=(inner)
+      altered!
+      case inner
+      when String, IO
+        self.children = Hpricot.parse(inner).children
+      when Array
+        self.children = inner
+      when nil
+        self.children = []
+      end
+      reparent self.children
+    end
+    alias_method :innerHTML=, :inner_html=
+
+    def reparent(nodes)
+      altered!
+      [*nodes].each { |e| e.parent = self }
+    end
+    private :reparent
+
+    def clean_path(path)
+      path.gsub(/^\s+|\s+$/, '')
+    end
+
+    # Builds a unique XPath string for this node, from the
+    # root of the document containing it.
+    def xpath
+      if elem? and has_attribute? 'id'
+        "//#{self.name}[@id='#{get_attribute('id')}']"
+      else
+        sim, id = 0, 0, 0
+        parent.children.each do |e|
+          id = sim if e == self
+          sim += 1 if e.pathname == self.pathname
+        end
+        p = File.join(parent.xpath, self.pathname)
+        p += "[#{id}]" if sim >= 2
+        p
+      end
+    end
+
+    # Builds a unique CSS string for this node, from the
+    # root of the document containing it.
+    def css_path
+      if elem? and has_attribute? 'id'
+        "##{get_attribute('id')}"
+      else
+        sim, i, id = 0, 0, 0
+        parent.children.each do |e|
+          id = sim if e == self
+          sim += 1 if e.pathname == self.pathname
+        end
+        p = parent.css_path
+        p = p ? "#{p} > #{self.pathname}" : self.pathname
+        p += ":nth(#{id})" if sim >= 2
+        p
+      end
+    end
+
+    def position
+      parent.children_of_type(self.pathname).index(self)
+    end
+
+    # Searches this node for all elements matching
+    # the CSS or XPath +expr+.  Returns an Elements array
+    # containing the matching nodes.  If +blk+ is given, it
+    # is used to iterate through the matching set.
+    def search(expr, &blk)
+      last = nil
+      nodes = [self]
+      done = []
+      expr = expr.to_s
+      hist = []
+      until expr.empty?
+          expr = clean_path(expr)
+          expr.gsub!(%r!^//!, '')
+
+          case expr
+          when %r!^/?\.\.!
+              last = expr = $'
+              nodes.map! { |node| node.parent }
+          when %r!^[>/]!
+              last = expr = $'
+              nodes = Elements[*nodes.map { |node| node.children if node.respond_to? :children }.flatten.compact]
+          when %r!^\+!
+              last = expr = $'
+              nodes.map! do |node|
+                  siblings = node.parent.children
+                  siblings[siblings.index(node)+1]
+              end
+              nodes.compact!
+          when %r!^~!
+              last = expr = $'
+              nodes.map! do |node|
+                  siblings = node.parent.children
+                  siblings[(siblings.index(node)+1)..-1]
+              end
+              nodes.flatten!
+          when %r!^[|,]!
+              last = expr = " #$'"
+              nodes.shift if nodes.first == self
+              done += nodes
+              nodes = [self]
+          else
+              m = expr.match(%r!^([#.]?)([a-z0-9\\*_-]*)!i).to_a
+              if m[1] == '#'
+                  oid = get_element_by_id(m[2])
+                  nodes = oid ? [oid] : []
+                  expr = $'
+              else
+                  m[2] = "*" if $' =~ /^\(\)/ || m[2] == "" || m[1] == "."
+                  ret = []
+                  nodes.each do |node|
+                      case m[2]
+                      when '*'
+                          node.traverse_element { |n| ret << n }
+                      else
+                          if node.respond_to? :get_elements_by_tag_name
+                            ret += [*node.get_elements_by_tag_name(m[2])] - [*(node unless last)]
+                          end
+                      end
+                  end
+                  nodes = ret
+              end
+              last = nil
+          end
+
+          hist << expr
+          break if hist[-1] == hist[-2]
+          nodes, expr = Elements.filter(nodes, expr)
+      end
+      nodes = done + nodes.flatten.uniq
+      if blk
+          nodes.each(&blk)
+          self
+      else
+          Elements[*nodes]
+      end
+    end
+    alias_method :/, :search
+
+    # Find the first matching node for the CSS or XPath
+    # +expr+ string.
+    def at(expr)
+      search(expr).first
+    end
+    alias_method :%, :at
+
+    # +traverse_element+ traverses elements in the tree.
+    # It yields elements in depth first order.
+    #
+    # If _names_ are empty, it yields all elements.
+    # If non-empty _names_ are given, it should be list of universal names.
+    # 
+    # A nested element is yielded in depth first order as follows.
+    #
+    #   t = Hpricot('<a id=0><b><a id=1 /></b><c id=2 /></a>') 
+    #   t.traverse_element("a", "c") {|e| p e}
+    #   # =>
+    #   {elem <a id="0"> {elem <b> {emptyelem <a id="1">} </b>} {emptyelem <c id="2">} </a>}
+    #   {emptyelem <a id="1">}
+    #   {emptyelem <c id="2">}
+    #
+    # Universal names are specified as follows.
+    #
+    #   t = Hpricot(<<'End')
+    #   <html>
+    #   <meta name="robots" content="index,nofollow">
+    #   <meta name="author" content="Who am I?">    
+    #   </html>
+    #   End
+    #   t.traverse_element("{http://www.w3.org/1999/xhtml}meta") {|e| p e}
+    #   # =>
+    #   {emptyelem <{http://www.w3.org/1999/xhtml}meta name="robots" content="index,nofollow">}
+    #   {emptyelem <{http://www.w3.org/1999/xhtml}meta name="author" content="Who am I?">}
+    #
+    def traverse_element(*names, &block) # :yields: element
+      if names.empty?
+        traverse_all_element(&block)
+      else
+        name_set = {}
+        names.each {|n| name_set[n] = true }
+        traverse_some_element(name_set, &block)
+      end
+      nil
+    end
+
+    # Find children of a given +tag_name+.
+    #
+    #   ele.children_of_type('p')
+    #     #=> [...array of paragraphs...]
+    #
+    def children_of_type(tag_name)
+      if respond_to? :children
+        children.find_all do |x|
+          x.respond_to?(:pathname) && x.pathname == tag_name
+        end
+      end
+    end
+
   end
 
   module Container::Trav
@@ -82,17 +298,6 @@ module Hpricot
     # aren't text, comment, doctype or processing instruction nodes.
     def containers
       children.grep(Container::Trav)
-    end
-
-    # Find containers of a given +tag_name+.
-    #
-    #   ele.containers_of_type('p')
-    #     #=> [...array of paragraphs...]
-    #
-    def containers_of_type(tag_name)
-      children.find_all do |x|
-        x.is_a?(Container::Trav) && x.name == tag_name
-      end
     end
 
     # Returns the node neighboring this node to the south: just below it.
@@ -143,164 +348,6 @@ module Hpricot
       end
     end
 
-    # Builds a string from the text contained in this node.  All
-    # HTML elements are removed.
-    def inner_text
-      children.map { |x| x.text? ? x.output("") : x.inner_text }.join
-    end
-    alias_method :innerText, :inner_text
-
-    # Builds an HTML string from the contents of this node.
-    def inner_html
-      children.map { |x| x.output("") }.join
-    end
-    alias_method :innerHTML, :inner_html
-
-    # Inserts new contents into the current node, based on
-    # the HTML contained in string +inner+.
-    def inner_html=(inner)
-      altered!
-      case inner
-      when String, IO
-        self.children = Hpricot.parse(inner).children
-      when Array
-        self.children = inner
-      when nil
-        self.children = []
-      end
-      reparent self.children
-    end
-    alias_method :innerHTML=, :inner_html=
-
-    def reparent(nodes)
-      altered!
-      [*nodes].each { |e| e.parent = self }
-    end
-    private :reparent
-
-    # Searches this node for all elements matching
-    # the CSS or XPath +expr+.  Returns an Elements array
-    # containing the matching nodes.  If +blk+ is given, it
-    # is used to iterate through the matching set.
-    def search(expr, &blk)
-      last = nil
-      nodes = [self]
-      done = []
-      expr = expr.to_s
-      until expr.empty?
-          expr = clean_path(expr)
-          expr.gsub!(%r!^//!, '')
-
-          case expr
-          when %r!^/?\.\.!
-              last = expr = $'
-              nodes.map! { |node| node.parent }
-          when %r!^[>/]!
-              last = expr = $'
-              nodes = Elements[*nodes.map { |node| node.containers }.flatten]
-          when %r!^\+!
-              last = expr = $'
-              nodes.map! do |node|
-                  siblings = node.parent.containers
-                  siblings[siblings.index(node)+1]
-              end
-              nodes.compact!
-          when %r!^~!
-              last = expr = $'
-              nodes.map! do |node|
-                  siblings = node.parent.containers
-                  siblings[(siblings.index(node)+1)..-1]
-              end
-              nodes.flatten!
-          when %r!^[|,]!
-              last = expr = " #$'"
-              nodes.shift if nodes.first == self
-              done += nodes
-              nodes = [self]
-          else
-              m = expr.match(%r!^([#.]?)([a-z0-9\\*_-]*)!i).to_a
-              if m[1] == '#'
-                  oid = get_element_by_id(m[2])
-                  nodes = oid ? [oid] : []
-                  expr = $'
-              else
-                  m[2] = "*" if m[2] == "" || m[1] == "."
-                  ret = []
-                  nodes.each do |node|
-                      case m[2]
-                      when '*'
-                          node.traverse_element { |n| ret << n }
-                      else
-                          ret += [*node.get_elements_by_tag_name(m[2])] - [*(node unless last)]
-                      end
-                  end
-                  nodes = ret
-              end
-              last = nil
-          end
-
-          nodes, expr = Elements.filter(nodes, expr)
-      end
-      nodes = done + nodes.flatten.uniq
-      if blk
-          nodes.each(&blk)
-          self
-      else
-          Elements[*nodes]
-      end
-    end
-    alias_method :/, :search
-
-    # Find the first matching node for the CSS or XPath
-    # +expr+ string.
-    def at(expr)
-      search(expr).first
-    end
-    alias_method :%, :at
-
-    def clean_path(path)
-      path.gsub(/^\s+|\s+$/, '')
-    end
-
-    # Builds a unique XPath string for this node, from the
-    # root of the document containing it.
-    def xpath
-      if has_attribute? 'id'
-        "//#{self.name}[@id='#{get_attribute('id')}']"
-      else
-        sim, id = 0, 0, 0
-        parent.containers.each do |e|
-          id = sim if e == self
-          sim += 1 if e.name == self.name
-        end
-        p = File.join(parent.xpath, self.name)
-        p += "[#{id}]" if sim >= 2
-        p
-      end
-    end
-
-    # Builds a unique CSS string for this node, from the
-    # root of the document containing it.
-    def css_path
-      if has_attribute? 'id'
-        "##{get_attribute('id')}"
-      else
-        sim, i, id = 0, 0, 0
-        parent.containers.each do |e|
-          id = sim if e == self
-          sim += 1 if e.name == self.name
-        end
-        p = parent.css_path
-        p = p ? "#{p} > #{self.name}" : self.name
-        p += ":nth(#{id})" if sim >= 2
-        p
-      end
-    end
-
-    def position
-      parent.containers_of_type(self.name).index(self)
-    end
-
     # +each_child+ iterates over each child.
     def each_child(&block) # :yields: child_node
       children.each(&block)
@@ -321,45 +368,6 @@ module Hpricot
       nil
     end
 
-    # +traverse_element+ traverses elements in the tree.
-    # It yields elements in depth first order.
-    #
-    # If _names_ are empty, it yields all elements.
-    # If non-empty _names_ are given, it should be list of universal names.
-    # 
-    # A nested element is yielded in depth first order as follows.
-    #
-    #   t = Hpricot('<a id=0><b><a id=1 /></b><c id=2 /></a>') 
-    #   t.traverse_element("a", "c") {|e| p e}
-    #   # =>
-    #   {elem <a id="0"> {elem <b> {emptyelem <a id="1">} </b>} {emptyelem <c id="2">} </a>}
-    #   {emptyelem <a id="1">}
-    #   {emptyelem <c id="2">}
-    #
-    # Universal names are specified as follows.
-    #
-    #   t = Hpricot(<<'End')
-    #   <html>
-    #   <meta name="robots" content="index,nofollow">
-    #   <meta name="author" content="Who am I?">    
-    #   </html>
-    #   End
-    #   t.traverse_element("{http://www.w3.org/1999/xhtml}meta") {|e| p e}
-    #   # =>
-    #   {emptyelem <{http://www.w3.org/1999/xhtml}meta name="robots" content="index,nofollow">}
-    #   {emptyelem <{http://www.w3.org/1999/xhtml}meta name="author" content="Who am I?">}
-    #
-    def traverse_element(*names, &block) # :yields: element
-      if names.empty?
-        traverse_all_element(&block)
-      else
-        name_set = {}
-        names.each {|n| name_set[n] = true }
-        traverse_some_element(name_set, &block)
-      end
-      nil
-    end
-
     # Returns a list of CSS classes to which this element belongs.
     def classes
       get_attribute('class').to_s.strip.split(/\s+/)
@@ -367,7 +375,7 @@ module Hpricot
 
     def get_element_by_id(id)
       traverse_all_element do |ele|
-          if eid = ele.get_attribute('id')
+          if ele.elem? and eid = ele.get_attribute('id')
               return ele if eid.to_s == id
           end
       end
@@ -497,6 +505,7 @@ module Hpricot
 
   module Leaf::Trav
     def traverse_all_element
+      yield self
     end
   end
 

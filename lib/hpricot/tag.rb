@@ -27,6 +27,7 @@ module Hpricot
         yield opts
       end
     end
+    def pathname; self.name end
     def altered!
       @raw_string = nil
     end
@@ -51,6 +52,7 @@ module Hpricot
     [:name, :attributes, :parent, :altered!].each do |m|
       [m, "#{m}="].each { |m2| define_method(m2) { |*a| [@etag, @stag].inject { |_,t| t.send(m2, *a) if t and t.respond_to?(m2) } } }
     end
+    def pathname; self.name end
     def output(out, opts = {})
       if empty? and ElementContent[@stag.name] == :EMPTY
         @stag.output(out, opts.merge(:style => :empty))
@@ -116,6 +118,7 @@ module Hpricot
       @content = text
     end
     alterable :content
+    def pathname; "text()" end
     def output(out, opts = {})
       out <<
         if_output(opts) do
@@ -138,6 +141,7 @@ module Hpricot
       @version, @encoding, @standalone = version, encoding, standalone
     end
     alterable :version, :encoding, :standalone
+    def pathname; "xmldecl()" end
     def output(out, opts = {})
       out <<
         if_output(opts) do
@@ -154,6 +158,7 @@ module Hpricot
       @target, @public_id, @system_id = target, pubid, sysid
     end
     alterable :target, :public_id, :system_id
+    def pathname; "doctype()" end
     def output(out, opts = {})
       out <<
         if_output(opts) do
@@ -168,6 +173,7 @@ module Hpricot
     def initialize(target, content)
       @target, @content = target, content
     end
+    def pathname; "procins()" end
     alterable :target, :content
     def output(out, opts = {})
       out << 
@@ -183,6 +189,7 @@ module Hpricot
     def initialize(content)
       @content = content
     end
+    def pathname; "comment()" end
     alterable :content
     def output(out, opts = {})
       out <<

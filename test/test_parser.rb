@@ -70,6 +70,9 @@ class TestParser < Test::Unit::TestCase
     assert_equal 2, (doc/'p / a').length
     assert_equal 2, (doc/'link ~ link').length
     assert_equal 3, (doc/'title ~ link').length
+    assert_equal 5, (doc/"//p/text()").length
+    assert_equal 6, (doc/"//p[a]//text()").length
+    assert_equal 2, (doc/"//p/a/text()").length
   end
 
   def test_scan_boingboing
@@ -163,7 +166,7 @@ class TestParser < Test::Unit::TestCase
     assert_equal 1, doc.search(".xyz").length
     doc = Hpricot("<div class=xyz>abc</div><div class=abc>xyz</div>")
     assert_equal 1, doc.search(".xyz").length
-    assert_equal 2, doc.search("*").length
+    assert_equal 4, doc.search("*").length
   end
 
   def test_kleene_star

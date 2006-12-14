@@ -193,7 +193,7 @@ module Hpricot
 
     ATTR_RE = %r!\[ *(@)([a-zA-Z0-9\(\)_-]+) *([~\!\|\*$\^=]*) *'?"?([^'"]*)'?"? *\]!i
     BRACK_RE = %r!(\[) *([^\]]*) *\]!i
-    FUNC_RE = %r!(:)([a-zA-Z0-9\*_-]*)\( *[\"']?([^ \)'\"]*)['\"]? *\)!
+    FUNC_RE = %r!(:)?([a-zA-Z0-9\*_-]*)\( *[\"']?([^ \)'\"]*)['\"]? *\)!
     CATCH_RE = %r!([:\.#]*)([a-zA-Z0-9\*_-]+)!
 
     def self.filter(nodes, expr, truth = true)
@@ -215,11 +215,11 @@ module Hpricot
                 nodes, = Elements.filter(nodes, m[2], false)
             else
                 meth = "filter[#{m[0]}]"
-                if Container::Trav.method_defined? meth
+                if Traverse.method_defined? meth
                     args = m[1..-1]
                 else
                     meth = "filter[#{m[0]}#{m[1]}]"
-                    if Container::Trav.method_defined? meth
+                    if Traverse.method_defined? meth
                         args = m[2..-1]
                     end
                 end
@@ -239,7 +239,7 @@ module Hpricot
     end
 
     def not(expr)
-        if expr.is_a? Container::Trav
+        if expr.is_a? Traverse
             nodes = self - [expr]
         else
             nodes, = Elements.filter(self, expr, false)
@@ -256,21 +256,21 @@ module Hpricot
 
   end
 
-  module Container::Trav
+  module Traverse
     def self.filter(tok, &blk)
       define_method("filter[#{tok.is_a?(String) ? tok : tok.inspect}]", &blk)
     end
 
     filter '' do |name,i|
-      name == '*' || self.name.downcase == name.downcase
+      name == '*' || (self.respond_to?(:name) && self.name.downcase == name.downcase)
     end
 
     filter '#' do |id,i|
-      get_attribute('id').to_s == id
+      self.elem? and get_attribute('id').to_s == id
     end
 
     filter '.' do |name,i|
-      classes.include? name
+      self.elem? and classes.include? name
     end
 
     filter :lt do |num,i|
@@ -283,7 +283,7 @@ module Hpricot
 
     nth = proc { |num,i| self.position == num.to_i }
     nth_first = proc { |num,i| self.position == 0 }
-    nth_last = proc { |num| self == parent.containers_of_type(self.name).last }
+    nth_last = proc { |num| self == parent.children_of_type(self.name).last }
 
     filter :nth, &nth
     filter :eq, &nth
@@ -324,11 +324,11 @@ module Hpricot
     end
 
     filter ":nth-last-of-type" do |arg,i|
-      self == parent.containers_of_type(self.name)[-1-arg.to_i]
+      self == parent.children_of_type(self.name)[-1-arg.to_i]
     end
 
     filter ":only-of-type" do |arg,i|
-      parent.containers_of_type(self.name).length == 1
+      parent.children_of_type(self.name).length == 1
     end
 
     filter ":only-child" do |arg,i|
@@ -347,45 +347,55 @@ module Hpricot
       self.is_a? Hpricot::Doc
     end
     
+    filter 'text' do
+      self.text?
+    end
+
+    filter 'comment' do
+      self.comment?
+    end
+
     filter :contains do |arg,|
       html.include? arg
     end
 
     filter '@=' do |attr,val,i|
-      get_attribute(attr).to_s == val
+      self.elem? and get_attribute(attr).to_s == val
     end
 
     filter '@!=' do |attr,val,i|
-      get_attribute(attr).to_s != val
+      self.elem? and get_attribute(attr).to_s != val
     end
 
     filter '@~=' do |attr,val,i|
-      get_attribute(attr).to_s.split(/\s+/).include? val
+      self.elem? and get_attribute(attr).to_s.split(/\s+/).include? val
     end
 
     filter '@|=' do |attr,val,i|
-      get_attribute(attr).to_s =~ /^#{Regexp::quote val}(-|$)/
+      self.elem? and get_attribute(attr).to_s =~ /^#{Regexp::quote val}(-|$)/
     end
 
     filter '@^=' do |attr,val,i|
-      get_attribute(attr).to_s.index(val) == 0
+      self.elem? and get_attribute(attr).to_s.index(val) == 0
     end
 
     filter '@$=' do |attr,val,i|
-      get_attribute(attr).to_s =~ /#{Regexp::quote val}$/
+      self.elem? and get_attribute(attr).to_s =~ /#{Regexp::quote val}$/
     end
 
     filter '@*=' do |attr,val,i|
-      idx = get_attribute(attr).to_s.index(val)
-      idx >= 0 if idx
+      if self.elem?
+        idx = get_attribute(attr).to_s.index(val)
+        idx >= 0 if idx
+      end
     end
 
     filter '@' do |attr,val,i|
-      has_attribute? attr
+      self.elem? and has_attribute? attr
     end
 
     filter '[' do |val,i|
-      search(val).length > 0
+      self.elem? and search(val).length > 0
     end
 
   end
