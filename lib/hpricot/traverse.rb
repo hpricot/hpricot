@@ -34,6 +34,29 @@ module Hpricot
       output("", :preserve => true)
     end
 
+    # Puts together an array of neighboring nodes based on their proximity
+    # to this node.  So, for example, to get the next node, you could use
+    # <tt>nodes_at(1).  Or, to get the previous node, use <tt>nodes_at(1)</tt>.
+    #
+    # This method also accepts ranges and sets of numbers.
+    #
+    #    ele.nodes_at(-3..-1, 1..3) # gets three nodes before and three after
+    #    ele.nodes_at(1, 5, 7) # gets three nodes at offsets below the current node
+    #    ele.nodes_at(0, 5..6) # the current node and two others
+    def nodes_at(*pos)
+      sib = parent.children
+      i, si = 0, sib.index(self)
+      Elements[*
+        sib.select do |x|
+          sel = case i - si when *pos
+                  true
+                end
+          i += 1
+          sel
+        end
+      ]
+    end
+
     # Returns the node neighboring this node to the south: just below it.
     # This method includes text nodes and comments and such.
     def next_node
@@ -300,21 +323,46 @@ module Hpricot
       children.grep(Container::Trav)
     end
 
-    # Returns the node neighboring this node to the south: just below it.
-    # This method does not find text nodes or comments or cdata or any of that.
+    # Returns the container node neighboring this node to the south: just below it.
+    # By "container" node, I mean: this method does not find text nodes or comments or cdata or any of that.
     # See Hpricot::Traverse#next_node if you need to hunt out all kinds of nodes.
     def next_sibling
       sib = parent.containers
       sib[sib.index(self) + 1] if parent
     end
 
-    # Returns to node neighboring this node to the north: just above it.
-    # This method does not find text nodes or comments or cdata or any of that.
+    # Returns the container node neighboring this node to the north: just above it.
+    # By "container" node, I mean: this method does not find text nodes or comments or cdata or any of that.
     # See Hpricot::Traverse#previous_node if you need to hunt out all kinds of nodes.
     def previous_sibling
       sib = parent.containers
       x = sib.index(self) - 1
       sib[x] if sib and x >= 0
+    end
+
+    # Puts together an array of neighboring sibling elements based on their proximity
+    # to this element.
+    #
+    # This method accepts ranges and sets of numbers.
+    #
+    #    ele.siblings_at(-3..-1, 1..3) # gets three elements before and three after
+    #    ele.siblings_at(1, 5, 7) # gets three elements at offsets below the current element
+    #    ele.siblings_at(0, 5..6) # the current element and two others
+    #
+    # Like the other "sibling" methods, this doesn't find text and comment nodes.
+    # Use nodes_at to include those nodes.
+    def siblings_at(*pos)
+      sib = parent.containers
+      i, si = 0, sib.index(self)
+      Elements[*
+        sib.select do |x|
+          sel = case i - si when *pos
+                  true
+                end
+          i += 1
+          sel
+        end
+      ]
     end
 
     # Replace +old+, a child of the current node, with +new+ node.
