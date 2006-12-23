@@ -100,14 +100,26 @@ module Hpricot
 
     # Builds a string from the text contained in this node.  All
     # HTML elements are removed.
+    def to_plain_text
+      if respond_to? :children
+        children.map { |x| x.to_plain_text }.join.strip
+      end
+    end
+
+    # Builds a string from the text contained in this node.  All
+    # HTML elements are removed.
     def inner_text
-      children.map { |x| x.text? ? x.output("") : x.inner_text }.join
+      if respond_to? :children
+        children.map { |x| x.inner_text }.join
+      end
     end
     alias_method :innerText, :inner_text
 
     # Builds an HTML string from the contents of this node.
     def inner_html
-      children.map { |x| x.output("") }.join
+      if respond_to? :children
+        children.map { |x| x.output("") }.join
+      end
     end
     alias_method :innerHTML, :inner_html
 

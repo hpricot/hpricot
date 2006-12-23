@@ -52,6 +52,17 @@ module Hpricot
     [:name, :attributes, :parent, :altered!].each do |m|
       [m, "#{m}="].each { |m2| define_method(m2) { |*a| [@etag, @stag].inject { |_,t| t.send(m2, *a) if t and t.respond_to?(m2) } } }
     end
+    def to_plain_text
+      if self.name == 'br'
+        "\n"
+      elsif self.name == 'p'
+        "\n\n" + super + "\n\n"
+      elsif self.name == 'a' and self.has_attribute?('href')
+        "#{super} [#{self['href']}]"
+      else
+        super
+      end
+    end
     def pathname; self.name end
     def output(out, opts = {})
       if empty? and ElementContent[@stag.name] == :EMPTY
@@ -119,6 +130,8 @@ module Hpricot
     end
     alterable :content
     def pathname; "text()" end
+    alias_method :inner_text, :content
+    alias_method :to_plain_text, :content
     def output(out, opts = {})
       out <<
         if_output(opts) do
@@ -128,6 +141,8 @@ module Hpricot
   end
 
   class CData < Text
+    alias_method :inner_text, :content
+    alias_method :to_plain_text, :content
     def output(out, opts = {})
       out <<
         if_output(opts) do
