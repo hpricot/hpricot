@@ -102,7 +102,7 @@ module Hpricot
     # HTML elements are removed.
     def to_plain_text
       if respond_to? :children
-        children.map { |x| x.to_plain_text }.join.strip
+        children.map { |x| x.to_plain_text }.join.strip.gsub(/\n{2,}/, "\n\n")
       end
     end
 
@@ -182,6 +182,10 @@ module Hpricot
         p += ":nth(#{id})" if sim >= 2
         p
       end
+    end
+
+    def node_position
+      parent.children.index(self)
     end
 
     def position

@@ -59,6 +59,8 @@ module Hpricot
         "\n\n" + super + "\n\n"
       elsif self.name == 'a' and self.has_attribute?('href')
         "#{super} [#{self['href']}]"
+      elsif self.name == 'img' and self.has_attribute?('src')
+        "[img:#{self['src']}]"
       else
         super
       end
