@@ -31,8 +31,8 @@ module Hpricot
     def altered!
       @raw_string = nil
     end
-    def self.alterable *fields
-      attr_accessor *fields
+    def self.alterable(*fields)
+      attr_accessor(*fields)
       fields.each do |f|
         define_method("#{f}=") do |v|
           altered!
