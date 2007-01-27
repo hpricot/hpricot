@@ -205,19 +205,16 @@ module Hpricot
 
   def Text.parse_pcdata(raw_string)
     result = Text.new(raw_string)
-    result.raw_string = raw_string
     result
   end
 
   def Text.parse_cdata_content(raw_string)
     result = CData.new(raw_string)
-    result.raw_string = raw_string
     result
   end
 
   def Text.parse_cdata_section(content)
     result = CData.new(content)
-    result.raw_string = content
     result
   end
 
@@ -255,13 +252,11 @@ module Hpricot
   def ProcIns.parse(raw_string)
     _, target, content = *raw_string.match(/\A<\?(\S+)\s+(.+)/m)
     result = ProcIns.new(target, content)
-    result.raw_string = "#{raw_string}?>"
     result
   end
 
   def Comment.parse(content)
     result = Comment.new(content)
-    result.raw_string = "<!--" + content.to_s + "-->"
     result
   end
 

@@ -2,8 +2,18 @@
 
 require 'test/unit'
 require 'hpricot'
+require 'load_files'
 
 class TestPreserved < Test::Unit::TestCase
+  def assert_roundtrip str
+    doc = Hpricot(str)
+    yield doc if block_given?
+    str2 = doc.to_original_html
+    [*str].zip([*str2]).each do |s1, s2|
+      assert_equal s1, s2
+    end
+  end
+
   def assert_html str1, str2
     doc = Hpricot(str2)
     yield doc if block_given?
@@ -28,4 +38,8 @@ class TestPreserved < Test::Unit::TestCase
     end
   end
 
+  def test_files
+    assert_roundtrip TestFiles::BASIC
+    assert_roundtrip TestFiles::BOINGBOING
+  end
 end

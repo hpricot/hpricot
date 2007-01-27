@@ -17,8 +17,12 @@ static ID s_read, s_to_str;
 
 #define ELE(N) \
   if (tokend > tokstart || text == 1) { \
-    ele_open = 0; \
-    rb_yield_tokens(sym_##N, tag, attr, tokstart == 0 ? Qnil : rb_str_new(tokstart, tokend-tokstart), taint); \
+    VALUE raw_string = Qnil; \
+    ele_open = 0; text = 0; \
+    if (tokstart != 0 && sym_##N != sym_cdata && sym_##N != sym_text && sym_##N != sym_procins && sym_##N != sym_comment) { \
+      raw_string = rb_str_new(tokstart, tokend-tokstart); \
+    } \
+    rb_yield_tokens(sym_##N, tag, attr, raw_string, taint); \
   }
 
 #define SET(N, E) \
@@ -53,7 +57,7 @@ static ID s_read, s_to_str;
       text = 1; \
     }
 
-#define EBLK(N, T) CAT(tag, p - T + 1); ELE(N); text = 0;
+#define EBLK(N, T) CAT(tag, p - T + 1); ELE(N);
 
 %%{
   machine hpricot_scan;
