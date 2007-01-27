@@ -41,5 +41,6 @@ class TestPreserved < Test::Unit::TestCase
   def test_files
     assert_roundtrip TestFiles::BASIC
     assert_roundtrip TestFiles::BOINGBOING
+    assert_roundtrip TestFiles::CY0
   end
 end
