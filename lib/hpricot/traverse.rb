@@ -161,7 +161,7 @@ module Hpricot
           sim += 1 if e.pathname == self.pathname
         end
         p = File.join(parent.xpath, self.pathname)
-        p += "[#{id}]" if sim >= 2
+        p += "[#{id+1}]" if sim >= 2
         p
       end
     end

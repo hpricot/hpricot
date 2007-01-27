@@ -53,7 +53,7 @@ class TestParser < Test::Unit::TestCase
     assert_equal 'link1', doc.search('p').at('a').get_attribute('id')
     assert_equal 'link2', (doc/'p').filter('.ohmy').search('a').first.get_attribute('id')
     assert_equal (doc/'p')[2], (doc/'p').filter(':nth(2)')[0]
-    assert_equal (doc/'p')[2], (doc/'p').filter('[2]')[0]
+    assert_equal (doc/'p')[2], (doc/'p').filter('[3]')[0]
     assert_equal 4, (doc/'p').filter('*').length
     assert_equal 4, (doc/'p').filter('* *').length
     eles = (doc/'p').filter('.ohmy')

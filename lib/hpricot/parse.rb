@@ -118,7 +118,7 @@ module Hpricot
           end
         end
         unless matched_elem
-          stack.last[2] << [:bogus_etag, token]
+          stack.last[2] << [:bogus_etag, token.first, token.last]
         else
           ele = stack.pop
           stack.last[2] << ele

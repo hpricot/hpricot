@@ -208,7 +208,7 @@ module Hpricot
             end
 
             if m[0] == '[' && m[1] =~ /^\d+$/
-                m = [":", "nth", m[1]]
+                m = [":", "nth", m[1].to_i-1]
             end
 
             if m[0] == ":" && m[1] == "not"
