@@ -77,6 +77,13 @@ class TestParser < Test::Unit::TestCase
     assert_equal 2, (doc/"//p/a/text()").length
   end
 
+  def test_positional
+    h = Hpricot( "<div><br/><p>one</p><p>two</p></div>" )
+    assert_equal "<p>one</p>", h.search("//div/p:eq(0)").to_s
+    assert_equal "<p>one</p>", h.search("//div/p:first").to_s
+    assert_equal "<p>one</p>", h.search("//div/p:first()").to_s
+  end
+
   def test_scan_boingboing
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 60, (@boingboing/'p.posted').length

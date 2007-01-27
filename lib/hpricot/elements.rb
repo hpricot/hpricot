@@ -282,8 +282,8 @@ module Hpricot
     end
 
     nth = proc { |num,i| self.position == num.to_i }
-    nth_first = proc { |num,i| self.position == 0 }
-    nth_last = proc { |num| self == parent.children_of_type(self.name).last }
+    nth_first = proc { |*a| self.position == 0 }
+    nth_last = proc { |*a| self == parent.children_of_type(self.name).last }
 
     filter :nth, &nth
     filter :eq, &nth
