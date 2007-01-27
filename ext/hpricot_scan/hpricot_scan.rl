@@ -195,13 +195,12 @@ void rb_yield_tokens(VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
 
 VALUE hpricot_scan(VALUE self, VALUE port)
 {
-  char buf[BUFSIZE];
   int cs, act, have = 0, nread = 0, curline = 1, text = 0;
-  char *tokstart = 0, *tokend = 0;
+  char *tokstart = 0, *tokend = 0, *buf = NULL;
 
-  VALUE attr = Qnil, tag = Qnil, akey = Qnil, aval = Qnil;
+  VALUE attr = Qnil, tag = Qnil, akey = Qnil, aval = Qnil, bufsize = Qnil;
   char *mark_tag = 0, *mark_akey = 0, *mark_aval = 0;
-  int done = 0, ele_open = 0;
+  int done = 0, ele_open = 0, buffer_size = 0;
 
   int taint = OBJ_TAINTED( port );
   if ( !rb_respond_to( port, s_read ) )
@@ -217,12 +216,19 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     }
   }
 
+  bufsize = rb_ivar_get(self, rb_intern("@buffer_size"));
+  buffer_size = BUFSIZE;
+  if (!NIL_P(bufsize)) {
+    buffer_size = NUM2INT(bufsize);
+  }
+  buf = ALLOC_N(char, buffer_size);
+
   %% write init;
   
   while ( !done ) {
     VALUE str;
     char *p = buf + have, *pe;
-    int len, space = BUFSIZE - have;
+    int len, space = buffer_size - have;
 
     if ( space == 0 ) {
       /* We've used up the entire buffer storing an already-parsed token
@@ -255,6 +261,7 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     %% write exec;
     
     if ( cs == hpricot_scan_error ) {
+      free(buf);
       if ( !NIL_P(tag) )
       {
         rb_raise(rb_eHpricotParseError, "parse error on element <%s>, starting on line %d.\n" NO_WAY_SERIOUSLY, RSTRING(tag)->ptr, curline);
@@ -307,11 +314,13 @@ VALUE hpricot_scan(VALUE self, VALUE port)
       tokstart = buf;
     }
   }
+  free(buf);
 }
 
 void Init_hpricot_scan()
 {
   VALUE mHpricot = rb_define_module("Hpricot");
+  rb_define_attr(rb_singleton_class(mHpricot), "buffer_size", 1, 1);
   rb_define_singleton_method(mHpricot, "scan", hpricot_scan, 1);
   rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eException);
 
