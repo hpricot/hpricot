@@ -234,12 +234,20 @@ module Hpricot
               nodes = [self]
           else
               m = expr.match(%r!^([#.]?)([a-z0-9\\*_-]*)!i).to_a
+              after = $'
+              mt = after[%r!:[a-z0-9\\*_-]+!i, 0]
+              oop = false
+              if mt and not (mt == ":not" or Traverse.method_defined? "filter[#{mt}]")
+                after = $' 
+                m[2] += mt
+                expr = after
+              end
               if m[1] == '#'
                   oid = get_element_by_id(m[2])
                   nodes = oid ? [oid] : []
-                  expr = $'
+                  expr = after
               else
-                  m[2] = "*" if $' =~ /^\(\)/ || m[2] == "" || m[1] == "."
+                  m[2] = "*" if after =~ /^\(\)/ || m[2] == "" || m[1] == "."
                   ret = []
                   nodes.each do |node|
                       case m[2]

@@ -270,6 +270,14 @@ class TestParser < Test::Unit::TestCase
     assert_equal str, Hpricot(str).to_html
   end
 
-  def test_unicode
+  def test_namespace
+    chunk = <<-END
+    <a xmlns:t="http://www.nexopia.com/dev/template">
+      <t:sam>hi </t:sam>
+    </a>
+    END
+    doc = Hpricot::XML(chunk)
+    assert (doc/"//t:sam").size > 0 # at least this should probably work
+    # assert (doc/"//sam").size > 0  # this would be nice 
   end
 end
