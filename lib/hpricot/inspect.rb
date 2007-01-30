@@ -80,6 +80,12 @@ module Hpricot
     alias inspect pretty_print_inspect
   end
 
+  class Text
+    def pretty_print(q)
+      q.text @content.dump
+    end
+  end
+
   class BogusETag
     def pretty_print(q)
       q.group(1, '{', '}') {
