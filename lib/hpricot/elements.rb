@@ -1,13 +1,15 @@
 module Hpricot
-# Once you've matched a list of elements, you will often need to handle them as a group.  Or you
-# may want to perform the same action on each of them.  Hpricot::Elements is an extension of Ruby's
-# array class, with some methods added for altering elements contained in the array.
+# Once you've matched a list of elements, you will often need to handle them as
+# a group.  Or you may want to perform the same action on each of them.
+# Hpricot::Elements is an extension of Ruby's array class, with some methods
+# added for altering elements contained in the array.
 #
 # If you need to create an element array from regular elements:
 #
 #   Hpricot::Elements[ele1, ele2, ele3]
 #
-# Assuming that ele1, ele2 and ele3 contain element objects (Hpricot::Elem, Hpricot::Doc, etc.)
+# Assuming that ele1, ele2 and ele3 contain element objects (Hpricot::Elem,
+# Hpricot::Doc, etc.)  
 #
 # == Continuing Searches
 #
