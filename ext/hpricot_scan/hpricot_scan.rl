@@ -216,10 +216,12 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     }
   }
 
-  bufsize = rb_ivar_get(self, rb_intern("@buffer_size"));
   buffer_size = BUFSIZE;
-  if (!NIL_P(bufsize)) {
-    buffer_size = NUM2INT(bufsize);
+  if (rb_ivar_defined(self, rb_intern("@buffer_size")) == Qtrue) {
+    bufsize = rb_ivar_get(self, rb_intern("@buffer_size"));
+    if (!NIL_P(bufsize)) {
+      buffer_size = NUM2INT(bufsize);
+    }
   }
   buf = ALLOC_N(char, buffer_size);
 
