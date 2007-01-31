@@ -12,6 +12,20 @@ tags overlap, Hpricot works on sorting them out.  You know, that sort of thing.
 *Please read this entire document* before making assumptions about how this software
 works.
 
+== An Overview
+
+Let's clear up what Hpricot is.
+
+# Hpricot is *a standalone library*.  It requires no other libraries.  Just Ruby!
+# While priding itself on speed, Hpricot *work hard to sort out bad HTML* and
+  pays a small penalty in order to get that right.  So that's slightly more important
+  to me than speed.
+# *If you can see it in Firefox, then Hpricot should parse it.*  That's
+  how it should be!  Let me know the minute it's otherwise.
+# Primarily, Hpricot is used for reading HTML and tries to sort out troubled
+  HTML by having some idea of what good HTML is.  Some people still like to use
+  Hpricot for XML reading, but *remember to use the Hpricot::XML() method* for that!
+
 == The Hpricot Kingdom
 
 First, here are all the links you need to know:
@@ -20,6 +34,8 @@ First, here are all the links you need to know:
   Go there for news and recipes and patches.  It's the center of activity.
 * http://code.whytheluckystiff.net/svn/hpricot/trunk is the main Subversion
   repository for Hpricot.  You can get the latest code there.
+* http://code.whytheluckystiff.net/doc/hpricot is the home for the latest copy of
+  this reference.
 * See COPYING for the terms of this software. (Spoiler: it's absolutely free.)
 
 If you have any trouble, don't hesitate to contact the author.  As always, I'm not
@@ -38,7 +54,7 @@ gems are available.
 As Hpricot is still under active development, you can also try the most recent 
 candidate build here:
 
-  $ gem install hpricot --source code.whytheluckystiff.net
+  $ gem install hpricot --source http://code.whytheluckystiff.net
 
 The development gem is usually in pretty good shape actually.  You can also
 get the bleeding edge code or plain Ruby tarballs on the wiki.
@@ -240,7 +256,3 @@ The primary way to use Hpricot's XML mode is to call the Hpricot.XML method:
 
 *Also, :fixup_tags is canceled out by the :xml option.*  This is because :fixup_tags makes assumptions based how HTML is
 structured.  Specifically, how tags are defined in the XHTML 1.0 DTD.
-
-== Digging Around for More Handy Methods
-
-If you're looking around for more helpful methods to 

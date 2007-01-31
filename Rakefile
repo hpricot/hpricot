@@ -7,10 +7,11 @@ require 'fileutils'
 include FileUtils
 
 NAME = "hpricot"
-REV = File.read(".svn/entries")[/committed-rev="(\d+)"/, 1] rescue nil
+REV = `svn info`[/Revision: (\d+)/, 1] rescue nil
 VERS = ENV['VERSION'] || "0.4" + (REV ? ".#{REV}" : "")
 CLEAN.include ['ext/hpricot_scan/*.{bundle,so,obj,pdb,lib,def,exp}', 'ext/hpricot_scan/Makefile', 
                '**/.*.sw?', '*.gem', '.config']
+RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README', '--inline-source']
 
 desc "Does a full compile, test run"
 task :default => [:compile, :test]
@@ -42,10 +43,8 @@ end
 
 Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_dir = 'doc/rdoc'
-    # rdoc.options += RDOC_OPTS
-    # rdoc.template = "extras/flipbook_rdoc.rb"
+    rdoc.options += RDOC_OPTS
     rdoc.main = "README"
-    rdoc.title = "Hpricot Documentation"
     rdoc.rdoc_files.add ['README', 'CHANGELOG', 'COPYING', 'lib/**/*.rb']
 end
 
@@ -55,6 +54,7 @@ spec =
         s.version = VERS
         s.platform = Gem::Platform::RUBY
         s.has_rdoc = true
+        s.rdoc_options += RDOC_OPTS
         s.extra_rdoc_files = ["README", "CHANGELOG", "COPYING"]
         s.summary = "a swift, liberal HTML parser with a fantastic library"
         s.description = s.summary
