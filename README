@@ -17,7 +17,7 @@ works.
 Let's clear up what Hpricot is.
 
 # Hpricot is *a standalone library*.  It requires no other libraries.  Just Ruby!
-# While priding itself on speed, Hpricot *work hard to sort out bad HTML* and
+# While priding itself on speed, Hpricot *works hard to sort out bad HTML* and
   pays a small penalty in order to get that right.  So that's slightly more important
   to me than speed.
 # *If you can see it in Firefox, then Hpricot should parse it.*  That's
@@ -223,7 +223,7 @@ As of Hpricot 0.4, there's a new <tt>:fixup_tags</tt> option which will attempt 
  doc = open("index.html") { |f| Hpricot f, :fixup_tags => true }
 
 This doesn't quite meet the XHTML 1.0 Strict standard, it just tries to follow the rules a bit better.  Like: say Hpricot finds 
-a paragraph in a link, it's going to move the paragraph below the link.  Or up and out of other elements where paragraphs don't below.
+a paragraph in a link, it's going to move the paragraph below the link.  Or up and out of other elements where paragraphs don't belong.
 
 If an unknown element is found, it is ignored.  Again, <tt>:fixup_tags</tt>.
 
