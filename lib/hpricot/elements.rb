@@ -193,7 +193,7 @@ module Hpricot
       end
     end
 
-    ATTR_RE = %r!\[ *(@)([a-zA-Z0-9\(\)_-]+) *([~\!\|\*$\^=]*) *'?"?([^'"]*)'?"? *\]!i
+    ATTR_RE = %r!\[ *(?:(@)([\w\(\)-]+)|([\w\(\)-]+\(\))) *([~\!\|\*$\^=]*) *'?"?([^'"]*)'?"? *\]!i
     BRACK_RE = %r!(\[) *([^\]]*) *\]!i
     FUNC_RE = %r!(:)?([a-zA-Z0-9\*_-]*)\( *[\"']?([^ \)]*?)['\"]? *\)!
     CATCH_RE = %r!([:\.#]*)([a-zA-Z0-9\*_-]+)!
@@ -216,13 +216,13 @@ module Hpricot
             if m[0] == ":" && m[1] == "not"
                 nodes, = Elements.filter(nodes, m[2], false)
             else
-                meth = "filter[#{m[0]}]"
+                meth = "filter[#{m[0]}#{m[1]}]"
                 if Traverse.method_defined? meth
-                    args = m[1..-1]
+                    args = m[2..-1]
                 else
-                    meth = "filter[#{m[0]}#{m[1]}]"
+                    meth = "filter[#{m[0]}]"
                     if Traverse.method_defined? meth
-                        args = m[2..-1]
+                        args = m[1..-1]
                     end
                 end
                 i = -1
@@ -361,35 +361,30 @@ module Hpricot
       html.include? arg
     end
 
-    filter '@=' do |attr,val,i|
-      self.elem? and get_attribute(attr).to_s == val
-    end
+    pred_procs =
+      {'text()' => proc { |ele, *_| ele.inner_text.strip },
+       '@'      => proc { |ele, attr, *_| ele.get_attribute(attr).to_s if ele.elem? }}
+    
+    oper_procs =
+      {'='      => proc { |a,b| a == b },
+       '!='     => proc { |a,b| a != b },
+       '~='     => proc { |a,b| a.split(/\s+/).include?(b) },
+       '|='     => proc { |a,b| a =~ /^#{Regexp::quote b}(-|$)/ },
+       '^='     => proc { |a,b| a.index(b) == 0 },
+       '$='     => proc { |a,b| a =~ /#{Regexp::quote b}$/ },
+       '*='     => proc { |a,b| idx = a.index(b) }}
 
-    filter '@!=' do |attr,val,i|
-      self.elem? and get_attribute(attr).to_s != val
-    end
-
-    filter '@~=' do |attr,val,i|
-      self.elem? and get_attribute(attr).to_s.split(/\s+/).include? val
-    end
-
-    filter '@|=' do |attr,val,i|
-      self.elem? and get_attribute(attr).to_s =~ /^#{Regexp::quote val}(-|$)/
-    end
-
-    filter '@^=' do |attr,val,i|
-      self.elem? and get_attribute(attr).to_s.index(val) == 0
-    end
-
-    filter '@$=' do |attr,val,i|
-      self.elem? and get_attribute(attr).to_s =~ /#{Regexp::quote val}$/
-    end
-
-    filter '@*=' do |attr,val,i|
-      if self.elem?
-        idx = get_attribute(attr).to_s.index(val)
-        idx >= 0 if idx
+    pred_procs.each do |pred_n, pred_f|
+      oper_procs.each do |oper_n, oper_f|
+        filter "#{pred_n}#{oper_n}" do |*a|
+          qual = pred_f[self, *a]
+          oper_f[qual, a[-2]] if qual
+        end
       end
+    end
+
+    filter 'text()' do |val,i|
+      !self.inner_text.strip.empty?
     end
 
     filter '@' do |attr,val,i|

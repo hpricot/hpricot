@@ -89,6 +89,14 @@ class TestParser < Test::Unit::TestCase
     assert_equal 60, (@boingboing/'p.posted').length
     assert_equal 1, @boingboing.search("//a[@name='027906']").length
     assert_equal 10, @boingboing.search("script comment()").length
+    assert_equal 3, @boingboing.search("a[text()*='Boing']").length
+    assert_equal 1, @boingboing.search("h3[text()='College kids reportedly taking more smart drugs']").length
+    assert_equal 0, @boingboing.search("h3[text()='College']").length
+    assert_equal 60, @boingboing.search("h3").length
+    assert_equal 59, @boingboing.search("h3[text()!='College kids reportedly taking more smart drugs']").length
+    assert_equal 17, @boingboing.search("h3[text()$='s']").length
+    assert_equal 128, @boingboing.search("p[text()]").length
+    assert_equal 211, @boingboing.search("p").length
   end
 
   def test_reparent
