@@ -1,3 +1,19 @@
+= 0.5
+=== 31rd January, 2006
+
+* support for a[text()="Click Me!"] and h3[text()*="space"] and the like.
+* Hpricot.buffer_size accessor for increasing Hpricot's buffer if you're encountering huge ASP.NET viewstate attribs.
+* some support for colons in tag names (not full namespace support yet.)
+* Element.to_original_html will attempt to preserve the original HTML while merging your changes.
+* Element.to_plain_text converts an element's contents to a simple text format.
+* Element.inner_text removes all tags and returns text nodes concatenated into a single string.
+* no @raw_string variable kept for comments, text, and cdata -- as it's redundant.
+* xpath-style indices (//p/a[1]) but keep in mind that they aren't zero-based.
+* node_position is the index among all sibling nodes, while position is the position among children of identical type.
+* comment() and text() search criteria, like: //p/text(), which selects all text inside paragraph tags.
+* every element has css_path and xpath methods which return respective absolute paths.
+* more flexibility all around: in parsing attributes, tags, comments and cdata.
+
 = 0.4
 === 11th August, 2006
 
