@@ -8,7 +8,7 @@ include FileUtils
 
 NAME = "hpricot"
 REV = `svn info`[/Revision: (\d+)/, 1] rescue nil
-VERS = ENV['VERSION'] || "0.4" + (REV ? ".#{REV}" : "")
+VERS = ENV['VERSION'] || "0.5" + (REV ? ".#{REV}" : "")
 PKG = "#{NAME}-#{VERS}"
 BIN = "*.{bundle,jar,so,obj,pdb,lib,def,exp}"
 CLEAN.include ["ext/hpricot_scan/#{BIN}", "lib/#{BIN}", 'ext/hpricot_scan/Makefile', 
@@ -164,7 +164,7 @@ task :hpricot_scan_java => [:ragel_java] do
 end
 
 JRubySpec = SPEC.dup
-JRubySpec.platform = Gem::Platform::RUBY
+JRubySpec.platform = 'jruby'
 JRubySpec.files = PKG_FILES + ['lib/hpricot_scan.jar']
 JRubySpec.extensions = []
 
