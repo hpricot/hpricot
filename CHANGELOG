@@ -1,5 +1,5 @@
 = 0.5
-=== 31rd January, 2006
+=== 31rd January, 2007
 
 * support for a[text()="Click Me!"] and h3[text()*="space"] and the like.
 * Hpricot.buffer_size accessor for increasing Hpricot's buffer if you're encountering huge ASP.NET viewstate attribs.

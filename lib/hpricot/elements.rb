@@ -118,11 +118,11 @@ module Hpricot
     # Empty the elements in this list, by removing their insides.
     #
     #   doc = Hpricot("<p> We have <i>so much</i> to say.</p>")
-    #   doc.search("i").empty
+    #   doc.search("i").empty!
     #   doc.to_html
     #     => "<p> We have <i></i> to say.</p>"
     #
-    def empty
+    def empty!
       each { |x| x.inner_html = nil }
     end
 

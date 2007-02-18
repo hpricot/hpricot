@@ -79,7 +79,7 @@ module Hpricot
 
     # Adds elements immediately before this element, contained in the +html+ string.
     def before(html)
-      parent.insert_after(Hpricot.make(html), self)
+      parent.insert_before(Hpricot.make(html), self)
     end
 
 
