@@ -12,4 +12,11 @@ class TestParser < Test::Unit::TestCase
     assert_equal "this is title", (doc/:rss/:channel/:title).text
     assert_equal "http://fake.com", (doc/:rss/:channel/:link).text
   end
+
+  def test_tag_case
+    doc = Hpricot::XML(TestFiles::WHY)
+    # Hpricot currently downcase-s everything, so this test would fail:
+
+    # assert_equal "hourly", (doc.at "sy:updatePeriod").inner_html
+  end
 end
