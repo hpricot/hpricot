@@ -1,7 +1,7 @@
 
 import java.io.IOException;
 
-import org.jruby.IRuby;
+import org.jruby.Ruby;
 import org.jruby.RubyClass;
 import org.jruby.RubyHash;
 import org.jruby.RubyModule;
@@ -208,7 +208,7 @@ int cs, act, have = 0, nread = 0, curline = 1, p=-1;
 boolean text = false;
 int tokstart=-1, tokend;
 char[] buf;
-IRuby runtime;
+Ruby runtime;
 IRubyObject attr, bufsize;
 IRubyObject[] tag, akey, aval;
 int mark_tag, mark_akey, mark_aval;
@@ -331,7 +331,7 @@ IRubyObject hpricot_scan(IRubyObject recv, IRubyObject port) {
 }
 
 public static IRubyObject __hpricot_scan(IRubyObject recv, IRubyObject port, Block block) {
-  IRuby runtime = recv.getRuntime();
+  Ruby runtime = recv.getRuntime();
   HpricotScanService service = new HpricotScanService();
   service.runtime = runtime;
   service.xmldecl = runtime.newSymbol("xmldecl");
@@ -348,12 +348,12 @@ public static IRubyObject __hpricot_scan(IRubyObject recv, IRubyObject port, Blo
 }
 
 
-public boolean basicLoad(final IRuby runtime) throws IOException {
+public boolean basicLoad(final Ruby runtime) throws IOException {
        Init_hpricot_scan(runtime);
        return true;
 }
 
-public static void Init_hpricot_scan(IRuby runtime) {
+public static void Init_hpricot_scan(Ruby runtime) {
   RubyModule mHpricot = runtime.defineModule("Hpricot");
   mHpricot.getMetaClass().attr_accessor(new IRubyObject[]{runtime.newSymbol("buffer_size")});
   CallbackFactory fact = runtime.callbackFactory(HpricotScanService.class);
