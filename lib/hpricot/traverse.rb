@@ -412,7 +412,7 @@ module Hpricot
     def insert_after(nodes, ele)
       case nodes
       when Array
-        nodes.each { |n| insert_after(n, ele) }
+        nodes.reverse_each { |n| insert_after(n, ele) }
       else
         reparent nodes
         idx = children.index(ele)

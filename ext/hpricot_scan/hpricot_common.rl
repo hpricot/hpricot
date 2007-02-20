@@ -7,7 +7,6 @@
   # (a blatant rip from HTree)
   #
   newline = '\n' @{curline += 1;} ;
-# qtext = '"' ( '\"' | [^\n"] )* '"' | "'" ( "\\'" | [^\n'] )* "'" ; 
   NameChar = [\-A-Za-z0-9._:?] ;
   Name = [A-Za-z_:] NameChar* ;
   StartComment = "<!--" ;
@@ -19,7 +18,7 @@
   NameAttr = NameChar+ >_akey %akey ;
   Q1Attr = [^']* >_aval %aval ;
   Q2Attr = [^"]* >_aval %aval ;
-  UnqAttr = ( space >_aval | [^ \t\n<>"'] >_aval [^ \t\n<>]* %aunq ) ;
+  UnqAttr = ( space >_aval | [^ \t\r\n<>"'] >_aval [^ \t\r\n<>]* %aunq ) ; 
   Nmtoken = NameChar+ >_akey %akey ;
 
   Attr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | UnqAttr space+ ) space* ;

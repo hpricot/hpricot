@@ -84,6 +84,12 @@ class TestParser < Test::Unit::TestCase
     assert_equal "<p>one</p>", h.search("//div/p:first()").to_s
   end
 
+  def test_pace
+    doc = Hpricot(TestFiles::PACE_APPLICATION)
+    assert_equal 'get', doc.at('form[@name=frmSect11]')['method']
+    # assert_equal '2', doc.at('#hdnSpouse')['value']
+  end
+
   def test_scan_boingboing
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 60, (@boingboing/'p.posted').length
@@ -165,6 +171,22 @@ class TestParser < Test::Unit::TestCase
     assert_equal '<p class="last final"><b>THE FINAL PARAGRAPH</b></p>',
         @basic.search('p:last').to_html
     assert_equal 'last final', @basic.search('//p:last-of-type').first.get_attribute('class')
+  end
+
+  def test_insert_after # ticket #63
+    doc = Hpricot('<html><body><div id="a-div"></div></body></html>')
+    (doc/'div').each do |element|
+      element.after('<p>Paragraph 1</p><p>Paragraph 2</p>')
+    end
+    assert_equal doc.to_html, '<html><body><div id="a-div"></div><p>Paragraph 1</p><p>Paragraph 2</p></body></html>'
+  end
+
+  def test_insert_before # ticket #61
+    doc = Hpricot('<html><body><div id="a-div"></div></body></html>')
+    (doc/'div').each do |element|
+      element.before('<p>Paragraph 1</p><p>Paragraph 2</p>')
+    end
+    assert_equal doc.to_html, '<html><body><p>Paragraph 1</p><p>Paragraph 2</p><div id="a-div"></div></body></html>'
   end
 
   def test_many_paths
