@@ -234,7 +234,7 @@ IRubyObject hpricot_scan(IRubyObject recv, IRubyObject port) {
     if ( port.respondsTo("to_str")) {
       port = port.callMethod(runtime.getCurrentContext(),"to_str");
     } else {
-      throw runtime.newArgumentError("bad argument, String or IO only please.");
+      throw runtime.newArgumentError("bad Hpricot argument, String or IO only please.");
     }
   }
 

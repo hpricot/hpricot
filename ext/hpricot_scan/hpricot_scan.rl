@@ -145,7 +145,7 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     }
     else
     {
-      rb_raise( rb_eArgError, "bad argument, String or IO only please." );
+      rb_raise( rb_eArgError, "bad Hpricot argument, String or IO only please." );
     }
   }
 
