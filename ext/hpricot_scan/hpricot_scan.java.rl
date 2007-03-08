@@ -62,7 +62,7 @@ public class HpricotScanService implements BasicLibraryService {
            } else if(N == aval) {
              mark = mark_aval;
            }
-           ((RubyString)(N[0])).cat(new String(buf, mark, E-mark));
+           ((RubyString)(N[0])).append(runtime.newString(new String(buf, mark, E-mark)));
          }
        }
 
