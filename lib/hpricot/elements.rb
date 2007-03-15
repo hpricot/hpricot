@@ -171,6 +171,12 @@ module Hpricot
       end
     end
 
+    # Access a property on the first matched element.
+    def attr(k)
+      node = first
+      node.get_attribute(k) if node
+    end
+
     # Sets an attribute for all elements in this list.  You may use
     # a simple pair (<em>attribute name</em>, <em>attribute value</em>):
     #
