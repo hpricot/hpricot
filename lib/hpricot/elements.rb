@@ -128,26 +128,26 @@ module Hpricot
 
     # Add to the end of the contents inside each element in this list.
     # Pass in an HTML +str+, which is turned into Hpricot elements.
-    def append(str)
-      each { |x| x.inner_html += str }
+    def append(str = nil, &blk)
+      each { |x| x.html(x.children + Hpricot.make(str, &blk)) }
     end
 
     # Add to the start of the contents inside each element in this list.
     # Pass in an HTML +str+, which is turned into Hpricot elements.
-    def prepend(str)
-      each { |x| x.inner_html = str + x.inner_html }
+    def prepend(str = nil, &blk)
+      each { |x| x.html(Hpricot.make(str, &blk) + x.children) }
     end
  
     # Add some HTML just previous to each element in this list.
     # Pass in an HTML +str+, which is turned into Hpricot elements.
-    def before(str)
-      each { |x| x.parent.insert_before Hpricot.make(str), x }
+    def before(str = nil, &blk)
+      each { |x| x.parent.insert_before Hpricot.make(str, &blk), x }
     end
 
     # Just after each element in this list, add some HTML.
     # Pass in an HTML +str+, which is turned into Hpricot elements.
-    def after(str)
-      each { |x| x.parent.insert_after Hpricot.make(str), x }
+    def after(str = nil, &blk)
+      each { |x| x.parent.insert_after Hpricot.make(str, &blk), x }
     end
 
     # Wraps each element in the list inside the element created by HTML +str+. 
@@ -158,9 +158,9 @@ module Hpricot
     #      wrap(%{<div class="link"><div class="link_inner"></div></div>})
     #
     # This code wraps every link on the page inside a +div.link+ and a +div.link_inner+ nest.
-    def wrap(str)
+    def wrap(str = nil, &blk)
       each do |x|
-        wrap = Hpricot.make(str)
+        wrap = Hpricot.make(str, &blk)
         nest = wrap.detect { |w| w.respond_to? :children }
         unless nest
           raise Exception, "No wrapping element found."

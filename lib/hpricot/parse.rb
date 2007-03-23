@@ -1,7 +1,7 @@
 require 'hpricot/htmlinfo'
 
-def Hpricot(input, opts = {})
-  Hpricot.parse(input, opts)
+def Hpricot(input = nil, opts = {}, &blk)
+  Hpricot.parse(input, opts, &blk)
 end
 
 module Hpricot
@@ -11,8 +11,8 @@ module Hpricot
 
   # Hpricot.parse parses <i>input</i> and return a document tree.
   # represented by Hpricot::Doc.
-  def Hpricot.parse(input, opts = {})
-    Doc.new(make(input, opts))
+  def Hpricot.parse(input = nil, opts = {}, &blk)
+    Doc.new(make(input, opts, &blk))
   end
 
   # Hpricot::XML parses <i>input</i>, disregarding all the HTML rules
@@ -23,125 +23,133 @@ module Hpricot
 
   # :stopdoc:
 
-  def Hpricot.make(input, opts = {})
+  def Hpricot.make(input = nil, opts = {}, &blk)
     opts = {:fixup_tags => false}.merge(opts)
-
-    case opts[:encoding]
-    when nil
-    when 'utf-8'
-      unless defined? Encoding::Character::UTF8
-        raise EncodingError, "The ruby-character-encodings library could not be found for utf-8 mode."
-      end
-    else
-      raise EncodingError, "No encoding option `#{opts[:encoding]}' is available."
+    unless input or blk
+      raise ArgumentError, "An Hpricot document must be built from an input source (a String) or a block."
     end
 
-    if opts[:xhtml_strict]
-      opts[:fixup_tags] = true
-    end
-
-    stack = [[nil, nil, [], [], [], []]]
-    Hpricot.scan(input) do |token|
-      if stack.last[5] == :CDATA and ![:procins, :comment, :cdata].include?(token[0]) and
-          !(token[0] == :etag and token[1].downcase == stack.last[0])
-        token[0] = :text
-        token[1] = token[3] if token[3]
-      end
-
-      case token[0]
-      when :stag
-        case opts[:encoding] when 'utf-8'
-          token.map! { |str| u(str) if str.is_a? String }
-        end
-
-        stagname = token[0] = token[1].downcase
-        if ElementContent[stagname] == :EMPTY and !opts[:xml]
-          token[0] = :emptytag
-          stack.last[2] << token
-        else
-          unless opts[:xml]
-            if opts[:fixup_tags]
-              # obey the tag rules set up by the current element
-              if ElementContent.has_key? stagname
-                trans = nil
-                (stack.length-1).downto(0) do |i|
-                  untags = stack[i][5]
-                  break unless untags.include? stagname
-                  # puts "** ILLEGAL #{stagname} IN #{stack[i][0]}"
-                  trans = i
-                end
-                if trans.to_i > 1
-                  eles = stack.slice!(trans..-1)
-                  stack.last[2] += eles
-                  # puts "** TRANSPLANTED #{stagname} TO #{stack.last[0]}"
-                end
-              elsif opts[:xhtml_strict]
-                token[2] = {'class' => stagname}
-                stagname = token[0] = "div"
-              end
-            end
-
-            # setup tag rules for inside this element
-            if ElementContent[stagname] == :CDATA
-              uncontainable_tags = :CDATA
-            elsif opts[:fixup_tags]
-              possible_tags = ElementContent[stagname]
-              excluded_tags, included_tags = stack.last[3..4]
-              if possible_tags
-                excluded_tags = excluded_tags | (ElementExclusions[stagname] || [])
-                included_tags = included_tags | (ElementInclusions[stagname] || [])
-                containable_tags = (possible_tags | included_tags) - excluded_tags
-                uncontainable_tags = ElementContent.keys - containable_tags
-              else
-                # If the tagname is unknown, it is assumed that any element
-                # except excluded can be contained.
-                uncontainable_tags = excluded_tags
-              end
-            end
-          end
-          stack << [stagname, token, [], excluded_tags, included_tags, uncontainable_tags]
-        end
-      when :etag
-        etagname = token[0] = token[1].downcase
-        if opts[:xhtml_strict] and not ElementContent.has_key? etagname
-          etagname = token[0] = "div"
-        end
-        matched_elem = nil
-        (stack.length-1).downto(0) do |i|
-          stagname, = stack[i]
-          if stagname == etagname
-            matched_elem = stack[i]
-            stack[i][1] += token
-            eles = stack.slice!((i+1)..-1)
-            stack.last[2] += eles
-            break
-          end
-        end
-        unless matched_elem
-          stack.last[2] << [:bogus_etag, token.first, token.last]
-        else
-          ele = stack.pop
-          stack.last[2] << ele
-        end
-      when :text
-        l = stack.last[2].last
-        if l and l[0] == :text
-          l[1] += token[1]
-        else
-          stack.last[2] << token
+    fragment =
+    if input
+      case opts[:encoding]
+      when nil
+      when 'utf-8'
+        unless defined? Encoding::Character::UTF8
+          raise EncodingError, "The ruby-character-encodings library could not be found for utf-8 mode."
         end
       else
-        stack.last[2] << token
+        raise EncodingError, "No encoding option `#{opts[:encoding]}' is available."
       end
-    end
 
-    while 1 < stack.length
-      ele = stack.pop
-      stack.last[2] << ele
-    end
+      if opts[:xhtml_strict]
+        opts[:fixup_tags] = true
+      end
 
-    structure_list = stack[0][2]
-    structure_list.map {|s| build_node(s, opts) }
+      stack = [[nil, nil, [], [], [], []]]
+      Hpricot.scan(input) do |token|
+        if stack.last[5] == :CDATA and ![:procins, :comment, :cdata].include?(token[0]) and
+            !(token[0] == :etag and token[1].downcase == stack.last[0])
+          token[0] = :text
+          token[1] = token[3] if token[3]
+        end
+
+        case token[0]
+        when :stag
+          case opts[:encoding] when 'utf-8'
+            token.map! { |str| u(str) if str.is_a? String }
+          end
+
+          stagname = token[0] = token[1].downcase
+          if ElementContent[stagname] == :EMPTY and !opts[:xml]
+            token[0] = :emptytag
+            stack.last[2] << token
+          else
+            unless opts[:xml]
+              if opts[:fixup_tags]
+                # obey the tag rules set up by the current element
+                if ElementContent.has_key? stagname
+                  trans = nil
+                  (stack.length-1).downto(0) do |i|
+                    untags = stack[i][5]
+                    break unless untags.include? stagname
+                    # puts "** ILLEGAL #{stagname} IN #{stack[i][0]}"
+                    trans = i
+                  end
+                  if trans.to_i > 1
+                    eles = stack.slice!(trans..-1)
+                    stack.last[2] += eles
+                    # puts "** TRANSPLANTED #{stagname} TO #{stack.last[0]}"
+                  end
+                elsif opts[:xhtml_strict]
+                  token[2] = {'class' => stagname}
+                  stagname = token[0] = "div"
+                end
+              end
+
+              # setup tag rules for inside this element
+              if ElementContent[stagname] == :CDATA
+                uncontainable_tags = :CDATA
+              elsif opts[:fixup_tags]
+                possible_tags = ElementContent[stagname]
+                excluded_tags, included_tags = stack.last[3..4]
+                if possible_tags
+                  excluded_tags = excluded_tags | (ElementExclusions[stagname] || [])
+                  included_tags = included_tags | (ElementInclusions[stagname] || [])
+                  containable_tags = (possible_tags | included_tags) - excluded_tags
+                  uncontainable_tags = ElementContent.keys - containable_tags
+                else
+                  # If the tagname is unknown, it is assumed that any element
+                  # except excluded can be contained.
+                  uncontainable_tags = excluded_tags
+                end
+              end
+            end
+            stack << [stagname, token, [], excluded_tags, included_tags, uncontainable_tags]
+          end
+        when :etag
+          etagname = token[0] = token[1].downcase
+          if opts[:xhtml_strict] and not ElementContent.has_key? etagname
+            etagname = token[0] = "div"
+          end
+          matched_elem = nil
+          (stack.length-1).downto(0) do |i|
+            stagname, = stack[i]
+            if stagname == etagname
+              matched_elem = stack[i]
+              stack[i][1] += token
+              eles = stack.slice!((i+1)..-1)
+              stack.last[2] += eles
+              break
+            end
+          end
+          unless matched_elem
+            stack.last[2] << [:bogus_etag, token.first, token.last]
+          else
+            ele = stack.pop
+            stack.last[2] << ele
+          end
+        when :text
+          l = stack.last[2].last
+          if l and l[0] == :text
+            l[1] += token[1]
+          else
+            stack.last[2] << token
+          end
+        else
+          stack.last[2] << token
+        end
+      end
+
+      while 1 < stack.length
+        ele = stack.pop
+        stack.last[2] << ele
+      end
+
+      structure_list = stack[0][2]
+      structure_list.map {|s| build_node(s, opts) }
+    elsif blk
+      Hpricot.build(&blk).children
+    end
   end
 
   def Hpricot.build_node(structure, opts = {})

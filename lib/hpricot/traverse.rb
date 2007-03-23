@@ -89,21 +89,21 @@ module Hpricot
     end 
 
     # Adds elements immediately after this element, contained in the +html+ string.
-    def after(html)
-      parent.insert_after(Hpricot.make(html), self)
+    def after(html = nil, &blk)
+      parent.insert_after(Hpricot.make(html, &blk), self)
     end
 
     # Adds elements immediately before this element, contained in the +html+ string.
-    def before(html)
-      parent.insert_before(Hpricot.make(html), self)
+    def before(html = nil, &blk)
+      parent.insert_before(Hpricot.make(html, &blk), self)
     end
 
 
     # Replace this element and its contents with the nodes contained
     # in the +html+ string.
-    def swap(html)
+    def swap(html = nil, &blk)
       parent.altered!
-      parent.replace_child(self, Hpricot.make(html))
+      parent.replace_child(self, Hpricot.make(html, &blk))
     end
 
     def get_subnode(*indexes)
@@ -132,26 +132,29 @@ module Hpricot
     alias_method :innerText, :inner_text
 
     # Builds an HTML string from the contents of this node.
-    def inner_html
-      if respond_to? :children
-        children.map { |x| x.output("") }.join
+    def html(inner = nil, &blk)
+      if inner or blk
+        altered!
+        case inner
+        when Array
+          self.children = inner
+        else
+          self.children = Hpricot.make(inner, &blk)
+        end
+        reparent self.children
+      else
+        if respond_to? :children
+          children.map { |x| x.output("") }.join
+        end
       end
     end
+    alias_method :inner_html, :html
     alias_method :innerHTML, :inner_html
 
     # Inserts new contents into the current node, based on
     # the HTML contained in string +inner+.
     def inner_html=(inner)
-      altered!
-      case inner
-      when String, IO
-        self.children = Hpricot.parse(inner).children
-      when Array
-        self.children = inner
-      when nil
-        self.children = []
-      end
-      reparent self.children
+      html(inner || [])
     end
     alias_method :innerHTML=, :inner_html=
 

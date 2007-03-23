@@ -3,7 +3,7 @@ module Hpricot
 
   class Doc
     attr_accessor :children
-    def initialize(children)
+    def initialize(children = [])
       @children = children ? children.each { |c| c.parent = self }  : []
     end
     def output(out, opts = {})
@@ -84,10 +84,10 @@ module Hpricot
 
   class STag < BaseEle
     def initialize(name, attributes=nil)
-      @name = name.downcase
+      @name = name.to_s.downcase
       @attributes = {}
       if attributes
-        @attributes = attributes.inject({}) { |hsh,(k,v)| hsh[k.downcase] = v; hsh }
+        @attributes = attributes.inject({}) { |hsh,(k,v)| hsh[k.to_s.downcase] = v; hsh }
       end
     end
     alterable :name, :attributes
@@ -111,7 +111,7 @@ module Hpricot
 
   class ETag < BaseEle
     def initialize(qualified_name)
-      @name = qualified_name
+      @name = qualified_name.to_s
     end
     alterable :name
     def output(out, opts = {})
