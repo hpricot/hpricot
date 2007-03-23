@@ -59,18 +59,34 @@ module Hpricot
 
     # Returns the node neighboring this node to the south: just below it.
     # This method includes text nodes and comments and such.
-    def next_node
+    def next
       sib = parent.children
       sib[sib.index(self) + 1] if parent
     end
+    alias_method :next_node, :next
 
     # Returns to node neighboring this node to the north: just above it.
     # This method includes text nodes and comments and such.
-    def previous_node
+    def previous
       sib = parent.children
       x = sib.index(self) - 1
       sib[x] if sib and x >= 0
     end
+    alias_method :previous_node, :previous
+
+    # Find all preceding nodes.
+    def preceding
+      sibs = parent.children
+      si = sibs.index(self) 
+      return Elements[*sibs[0...si]] 
+    end 
+ 
+    # Find all nodes which follow the current one.
+    def following
+      sibs = parent.children 
+      si = sibs.index(self) + 1 
+      return Elements[*sibs[si...sibs.length]] 
+    end 
 
     # Adds elements immediately after this element, contained in the +html+ string.
     def after(html)
@@ -363,6 +379,22 @@ module Hpricot
       x = sib.index(self) - 1
       sib[x] if sib and x >= 0
     end
+
+    # Find all preceding sibling elements.   Like the other "sibling" methods, this weeds
+    # out text and comment nodes.
+    def preceding_siblings() 
+      sibs = parent.containers 
+      si = sibs.index(self) 
+      return Elements[*sibs[0...si]] 
+    end 
+ 
+    # Find sibling elements which follow the current one.   Like the other "sibling" methods, this weeds
+    # out text and comment nodes.
+    def following_siblings() 
+      sibs = parent.containers 
+      si = sibs.index(self) + 1 
+      return Elements[*sibs[si...sibs.length]] 
+    end 
 
     # Puts together an array of neighboring sibling elements based on their proximity
     # to this element.
