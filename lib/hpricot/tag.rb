@@ -133,7 +133,10 @@ module Hpricot
     alterable :content
     def pathname; "text()" end
     alias_method :inner_text, :content
-    alias_method :to_plain_text, :content
+    def to_s
+      Hpricot.uxs(@content)
+    end
+    alias_method :to_plain_text, :to_s
     def output(out, opts = {})
       out <<
         if_output(opts) do

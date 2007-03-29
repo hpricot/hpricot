@@ -1,4 +1,5 @@
 require 'hpricot/tags'
+require 'hpricot/xchar'
 require 'hpricot/blankslate'
 
 module Hpricot
@@ -24,6 +25,11 @@ module Hpricot
 
     def self.set(option, value)
       @@default[option] = value
+    end
+
+    # Write a +string+ to the HTML stream, making sure to escape it.
+    def text!(string)
+      @children << Text.new(Hpricot.xs(string))
     end
 
     # Write a +string+ to the HTML stream without escaping it.
@@ -66,7 +72,7 @@ module Hpricot
       # turn arguments into children or attributes
       childs = []
       attrs = args.grep(Hash)
-      childs.concat((args - attrs).map { |x| Text.new(x) })
+      childs.concat((args - attrs).map { |x| Text.new(Hpricot.xs(x)) })
       attrs = attrs.inject({}) { |hsh, hsh2| hsh.merge(hsh2) }
 
       # create the element itself
@@ -170,12 +176,9 @@ module Hpricot
         end
       end
       
-      args.push(@attrs)
-      
-      if block
+      if block or args.any?
+        args.push(@attrs)
         @builder.tag! @sym, *args, &block
-      else
-        @builder.tag! @sym, *args
       end
       
       return self
