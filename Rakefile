@@ -124,7 +124,7 @@ Win32Spec.platform = Gem::Platform::WIN32
 Win32Spec.files = PKG_FILES + ['lib/hpricot_scan.so']
 Win32Spec.extensions = []
   
-WIN32_PKG_DIR = "#{PKG}-win32"
+WIN32_PKG_DIR = "#{PKG}-mswin32"
 
 desc "Package up the Win32 distribution."
 file WIN32_PKG_DIR => [:package] do

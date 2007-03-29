@@ -36,12 +36,12 @@ end
 # hook in the Object and Kernel classes that will hide any defined
 module Kernel
   class << self
-    alias_method :blank_slate_method_added, :method_added
+    alias_method :hpricot_slate_method_added, :method_added
 
     # Detect method additions to Kernel and remove them in the
     # BlankSlate class.
     def method_added(name)
-      blank_slate_method_added(name)
+      hpricot_slate_method_added(name)
       return if self != Kernel
       Hpricot::BlankSlate.hide(name)
     end
@@ -50,12 +50,12 @@ end
 
 class Object
   class << self
-    alias_method :blank_slate_method_added, :method_added
+    alias_method :hpricot_slate_method_added, :method_added
 
     # Detect method additions to Object and remove them in the
     # BlankSlate class.
     def method_added(name)
-      blank_slate_method_added(name)
+      hpricot_slate_method_added(name)
       return if self != Object
       Hpricot::BlankSlate.hide(name)
     end
