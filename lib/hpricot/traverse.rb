@@ -776,7 +776,9 @@ module Hpricot
       self.attributes && self.attributes.has_key?(name.to_s)
     end
     def get_attribute(name)
-      self.attributes && self.attributes[name.to_s]
+      a = self.attributes && self.attributes[name.to_s]
+      a = Hpricot.uxs(a) if a
+      a
     end
     alias_method :[], :get_attribute
     def set_attribute(name, val)

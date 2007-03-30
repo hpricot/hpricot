@@ -146,7 +146,7 @@ module Hpricot
   end
 
   class CData < Text
-    alias_method :inner_text, :content
+    alias_method :to_s, :content
     alias_method :to_plain_text, :content
     def output(out, opts = {})
       out <<

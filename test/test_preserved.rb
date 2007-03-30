@@ -43,4 +43,12 @@ class TestPreserved < Test::Unit::TestCase
     assert_roundtrip TestFiles::BOINGBOING
     assert_roundtrip TestFiles::CY0
   end
+
+  def test_escaping_of_attrs
+    # ampersands in URLs
+    str = %{<a href="http://google.com/search?q=hpricot&amp;l=en">Google</a>}
+    doc = Hpricot(str)
+    assert_equal "http://google.com/search?q=hpricot&l=en", doc.at(:a)['href']
+    assert_equal str, doc.to_html
+  end
 end

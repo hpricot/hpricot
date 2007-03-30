@@ -73,7 +73,12 @@ module Hpricot
       childs = []
       attrs = args.grep(Hash)
       childs.concat((args - attrs).map { |x| Text.new(Hpricot.xs(x)) })
-      attrs = attrs.inject({}) { |hsh, hsh2| hsh.merge(hsh2) }
+      attrs = attrs.inject({}) do |hsh, ath|
+        ath.each do |k, v|
+          hsh[k] = Hpricot.xs(v)
+        end
+        hsh
+      end
 
       # create the element itself
       f = Elem.new(STag.new(tag, attrs), childs, ETag.new(tag))
