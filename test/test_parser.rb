@@ -23,6 +23,14 @@ class TestParser < Test::Unit::TestCase
     assert_equal 'FOO', Hpricot.make("FOO").first.content
   end
 
+  def test_filter_by_attr
+    @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
+
+    # this link is escaped in the doc
+    link = 'http://www.youtube.com/watch?v=TvSNXyNw26g&search=chris%20ware'
+    assert_equal link, @boingboing.at("a[@href='#{link}']")['href']
+  end
+
   def test_get_element_by_id
     @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 'link1', @basic.get_element_by_id('link1')['id']

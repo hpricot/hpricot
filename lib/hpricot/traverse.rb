@@ -773,24 +773,24 @@ module Hpricot
 
   module Elem::Trav
     def has_attribute?(name)
-      self.attributes && self.attributes.has_key?(name.to_s)
+      self.raw_attributes && self.raw_attributes.has_key?(name.to_s)
     end
     def get_attribute(name)
-      a = self.attributes && self.attributes[name.to_s]
+      a = self.raw_attributes && self.raw_attributes[name.to_s]
       a = Hpricot.uxs(a) if a
       a
     end
     alias_method :[], :get_attribute
     def set_attribute(name, val)
       altered!
-      self.attributes ||= {}
-      self.attributes[name.to_s] = val
+      self.raw_attributes ||= {}
+      self.raw_attributes[name.to_s] = Hpricot.xs(val)
     end
     alias_method :[]=, :set_attribute
     def remove_attribute(name)
       if has_attribute? name
         altered!
-        self.attributes.delete(name)
+        self.raw_attributes.delete(name)
       end
     end
   end

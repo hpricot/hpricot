@@ -38,6 +38,11 @@ class TestPreserved < Test::Unit::TestCase
     end
   end
 
+  def test_escaping_of_contents
+    doc = Hpricot(TestFiles::BOINGBOING)
+    assert_equal "Fukuda\342\200\231s Automatic Door opens around your body as you pass through it. The idea is to save energy and keep the room clean.", doc.at("img[@alt='200606131240']").next.to_s.strip
+  end
+
   def test_files
     assert_roundtrip TestFiles::BASIC
     assert_roundtrip TestFiles::BOINGBOING
@@ -47,8 +52,15 @@ class TestPreserved < Test::Unit::TestCase
   def test_escaping_of_attrs
     # ampersands in URLs
     str = %{<a href="http://google.com/search?q=hpricot&amp;l=en">Google</a>}
-    doc = Hpricot(str)
-    assert_equal "http://google.com/search?q=hpricot&l=en", doc.at(:a)['href']
+    link = (doc = Hpricot(str)).at(:a)
+    assert_equal "http://google.com/search?q=hpricot&l=en", link['href']
+    assert_equal "http://google.com/search?q=hpricot&l=en", link.attributes['href']
+    assert_equal "http://google.com/search?q=hpricot&l=en", link.get_attribute('href')
+    assert_equal "http://google.com/search?q=hpricot&amp;l=en", link.raw_attributes['href']
     assert_equal str, doc.to_html
+
+    # alter the url
+    link['href'] = "javascript:alert(\"AGGA-KA-BOO!\")"
+    assert_equal %{<a href="javascript:alert(&quot;AGGA-KA-BOO!&quot;)">Google</a>}, doc.to_html
   end
 end

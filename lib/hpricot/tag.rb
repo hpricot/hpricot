@@ -49,8 +49,16 @@ module Hpricot
       @children = children ? children.each { |c| c.parent = self }  : []
     end
     def empty?; @children.empty? end
-    [:name, :attributes, :parent, :altered!].each do |m|
+    [:name, :raw_attributes, :parent, :altered!].each do |m|
       [m, "#{m}="].each { |m2| define_method(m2) { |*a| [@etag, @stag].inject { |_,t| t.send(m2, *a) if t and t.respond_to?(m2) } } }
+    end
+    def attributes
+      if raw_attributes
+        raw_attributes.inject({}) do |hsh, (k, v)|
+          hsh[k] = Hpricot.uxs(v)
+          hsh
+        end
+      end
     end
     def to_plain_text
       if self.name == 'br'
@@ -85,17 +93,17 @@ module Hpricot
   class STag < BaseEle
     def initialize(name, attributes=nil)
       @name = name.to_s.downcase
-      @attributes = {}
+      @raw_attributes = {}
       if attributes
-        @attributes = attributes.inject({}) { |hsh,(k,v)| hsh[k.to_s.downcase] = v; hsh }
+        @raw_attributes = attributes.inject({}) { |hsh,(k,v)| hsh[k.to_s.downcase] = v; hsh }
       end
     end
-    alterable :name, :attributes
+    alterable :name, :raw_attributes
     def attributes_as_html
-      if @attributes
-        @attributes.map do |aname, aval|
+      if @raw_attributes
+        @raw_attributes.map do |aname, aval|
           " #{aname}" +
-            (aval ? "=#{html_quote(aval)}" : "")
+            (aval ? "=\"#{aval}\"" : "")
         end.join
       end
     end
