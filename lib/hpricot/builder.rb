@@ -3,8 +3,11 @@ require 'hpricot/xchar'
 require 'hpricot/blankslate'
 
 module Hpricot
-  def self.build(ele = Doc.new, &blk)
+  def self.build(ele = Doc.new, assigns = {}, &blk)
     ele.extend Builder
+    assigns.each do |k, v|
+      ele.instance_variable_set("@#{k}", v)
+    end
     ele.instance_eval &blk
     ele
   end
