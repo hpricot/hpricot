@@ -154,7 +154,7 @@ CLEAN.include WIN32_PKG_DIR
 ### JRuby Packages ###
 
 compile_java = proc do
-  sh %{javac -classpath $JRUBY_HOME/lib/jruby.jar HpricotScanService.java}
+  sh %{javac -source 1.4 -target 1.4 -classpath $JRUBY_HOME/lib/jruby.jar HpricotScanService.java}
   sh %{jar cf hpricot_scan.jar HpricotScanService.class}
 end
 
