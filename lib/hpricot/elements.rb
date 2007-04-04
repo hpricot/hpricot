@@ -167,7 +167,7 @@ module Hpricot
         end
         x.parent.replace_child(x, wrap)
         nest = nest.children.first until nest.empty?
-        nest.children << x
+        nest.html(nest.children + [x])
       end
     end
 
