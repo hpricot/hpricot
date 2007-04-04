@@ -294,6 +294,32 @@ class TestParser < Test::Unit::TestCase
     end
   end
 
+  def test_youtube_attr
+    str = <<-edoc
+    <html><body>
+    Lorem ipsum. Jolly roger, ding-dong sing-a-long 
+    <object width="425" height="350">
+      <param name="movie" value="http://www.youtube.com/v/NbDQ4M_cuwA"></param>
+      <param name="wmode" value="transparent"></param>
+        <embed src="http://www.youtube.com/v/NbDQ4M_cuwA" 
+          type="application/x-shockwave-flash" wmode="transparent" width="425" height="350">
+        </embed>
+    </object>
+    Check out my posting, I have bright mice in large clown cars.
+    <object width="425" height="350">
+      <param name="movie" value="http://www.youtube.com/v/foobar"></param>
+      <param name="wmode" value="transparent"></param>
+        <embed src="http://www.youtube.com/v/foobar" 
+          type="application/x-shockwave-flash" wmode="transparent" width="425" height="350">
+        </embed>
+    </object>
+    </body></html?
+    edoc
+    doc = Hpricot(str)
+    assert_equal "http://www.youtube.com/v/NbDQ4M_cuwA",
+      doc.at("//object/param[@value='http://www.youtube.com/v/NbDQ4M_cuwA']")['value']
+  end
+  
   def test_filters
     @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 0, (@basic/"title:parent").size

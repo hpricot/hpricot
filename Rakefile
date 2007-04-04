@@ -107,14 +107,19 @@ file ext_so => ext_files do
   cp ext_so, "lib"
 end
 
+desc "returns the ragel version"
+task :ragel_version do
+  @ragel_v = `ragel -v`[/(version )(\S*)/,2].to_f
+end
+
 desc "Generates the C scanner code with Ragel."
-task :ragel do
-  sh %{ragel ext/hpricot_scan/hpricot_scan.rl | rlcodegen -G2 -o ext/hpricot_scan/hpricot_scan.c}
+task :ragel => [:ragel_version] do
+  sh %{ragel ext/hpricot_scan/hpricot_scan.rl | #{@ragel_v >= 5.18 ? 'rlgen-cd' : 'rlcodegen'} -G2 -o ext/hpricot_scan/hpricot_scan.c}
 end
 
 desc "Generates the Java scanner code with Ragel."
-task :ragel_java do
-  sh %{ragel -J ext/hpricot_scan/hpricot_scan.java.rl | rlcodegen -o  ext/hpricot_scan/HpricotScanService.java}
+task :ragel_java => [:ragel_version] do
+  sh %{ragel -J ext/hpricot_scan/hpricot_scan.java.rl | #{@ragel_v >= 5.18 ? 'rlgen-java' : 'rlcodegen'} -o  ext/hpricot_scan/HpricotScanService.java}
 end
 
 ### Win32 Packages ###
