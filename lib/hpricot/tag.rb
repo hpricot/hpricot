@@ -92,11 +92,8 @@ module Hpricot
 
   class STag < BaseEle
     def initialize(name, attributes=nil)
-      @name = name.to_s.downcase
-      @raw_attributes = {}
-      if attributes
-        @raw_attributes = attributes.inject({}) { |hsh,(k,v)| hsh[k.to_s.downcase] = v; hsh }
-      end
+      @name = name.to_s
+      @raw_attributes = attributes || {}
     end
     alterable :name, :raw_attributes
     def attributes_as_html

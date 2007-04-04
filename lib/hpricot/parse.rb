@@ -29,6 +29,8 @@ module Hpricot
       raise ArgumentError, "An Hpricot document must be built from an input source (a String) or a block."
     end
 
+    trans = opts[:xml] ? :to_s : :downcase
+
     fragment =
     if input
       case opts[:encoding]
@@ -48,7 +50,7 @@ module Hpricot
       stack = [[nil, nil, [], [], [], []]]
       Hpricot.scan(input) do |token|
         if stack.last[5] == :CDATA and ![:procins, :comment, :cdata].include?(token[0]) and
-            !(token[0] == :etag and token[1].downcase == stack.last[0])
+            !(token[0] == :etag and token[1].send(trans) == stack.last[0])
           token[0] = :text
           token[1] = token[3] if token[3]
         end
@@ -59,7 +61,7 @@ module Hpricot
             token.map! { |str| u(str) if str.is_a? String }
           end
 
-          stagname = token[0] = token[1].downcase
+          stagname = token[0] = token[1].send(trans)
           if ElementContent[stagname] == :EMPTY and !opts[:xml]
             token[0] = :emptytag
             stack.last[2] << token
@@ -104,10 +106,15 @@ module Hpricot
                 end
               end
             end
+            unless opts[:xml]
+              case token[2] when Hash
+                token[2] = token[2].inject({}) { |hsh,(k,v)| hsh[k.downcase] = v; hsh }
+              end
+            end
             stack << [stagname, token, [], excluded_tags, included_tags, uncontainable_tags]
           end
         when :etag
-          etagname = token[0] = token[1].downcase
+          etagname = token[0] = token[1].send(trans)
           if opts[:xhtml_strict] and not ElementContent.has_key? etagname
             etagname = token[0] = "div"
           end

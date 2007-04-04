@@ -13,10 +13,16 @@ class TestParser < Test::Unit::TestCase
     assert_equal "http://fake.com", (doc/:rss/:channel/:link).text
   end
 
-  def test_tag_case
+  # make sure XML doesn't get downcased
+  def test_casing
     doc = Hpricot::XML(TestFiles::WHY)
-    # Hpricot currently downcase-s everything, so this test would fail:
+    assert_equal "hourly", (doc.at "sy:updatePeriod").inner_html
+    assert_equal 1, (doc/"guid[@isPermaLink]").length
+  end
 
-    # assert_equal "hourly", (doc.at "sy:updatePeriod").inner_html
+  # be sure tags named "text" are ok
+  def test_text_tags
+    doc = Hpricot::XML("<feed><title>City Poisoned</title><text>Rita Lee has poisoned Brazil.</text></feed>")
+    assert_equal "City Poisoned", (doc/"title").text
   end
 end

@@ -222,8 +222,8 @@ module Hpricot
             if m[0] == ":" && m[1] == "not"
                 nodes, = Elements.filter(nodes, m[2], false)
             else
-                meth = "filter[#{m[0]}#{m[1]}]"
-                if Traverse.method_defined? meth
+                meth = "filter[#{m[0]}#{m[1]}]" unless m[0].empty?
+                if meth and Traverse.method_defined? meth
                     args = m[2..-1]
                 else
                     meth = "filter[#{m[0]}]"

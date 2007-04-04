@@ -60,10 +60,10 @@ module Hpricot
       q.group(1, '<', '>') {
         q.text @name
 
-        if @attributes
-          @attributes.each {|n, t|
+        if @raw_attributes
+          @raw_attributes.each {|n, t|
             q.breakable
-            q.text "#{n}=\"#{t}\""
+            q.text "#{n}=\"#{Hpricot.uxs(t)}\""
           }
         end
       }
