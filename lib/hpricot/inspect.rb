@@ -63,7 +63,11 @@ module Hpricot
         if @raw_attributes
           @raw_attributes.each {|n, t|
             q.breakable
-            q.text "#{n}=\"#{Hpricot.uxs(t)}\""
+            if t
+              q.text "#{n}=\"#{Hpricot.uxs(t)}\""
+            else
+              q.text n
+            end
           }
         end
       }
