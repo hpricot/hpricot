@@ -229,7 +229,7 @@ module Hpricot
           when %r!^/?\.\.!
               last = expr = $'
               nodes.map! { |node| node.parent }
-          when %r!^[>/]!
+          when %r!^[>/]\s*!
               last = expr = $'
               nodes = Elements[*nodes.map { |node| node.children if node.respond_to? :children }.flatten.compact]
           when %r!^\+!
