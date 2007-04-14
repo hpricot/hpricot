@@ -236,7 +236,7 @@ module Hpricot
     # is used to iterate through the matching set.
     def search(expr, &blk)
       if Range === expr
-        return expand(at(expr.begin), at(expr.end))
+        return Elements.expand(at(expr.begin), at(expr.end))
       end
       last = nil
       nodes = [self]
