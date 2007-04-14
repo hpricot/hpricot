@@ -75,7 +75,7 @@ module Hpricot
       # turn arguments into children or attributes
       childs = []
       attrs = args.grep(Hash)
-      childs.concat((args - attrs).map { |x| Text.new(Hpricot.xs(x)) })
+      childs.concat((args - attrs).map { |x| Text.new(Hpricot.xs(x)) if x })
       attrs = attrs.inject({}) do |hsh, ath|
         ath.each do |k, v|
           hsh[k] = Hpricot.xs(v)
@@ -88,11 +88,15 @@ module Hpricot
 
       # build children from the block
       if block
-        Hpricot.build(f, &block)
+        build(f, &block)
       end
 
       @children << f
       f
+    end
+
+    def build(*a, &b)
+      Hpricot.build(*a, &b)
     end
 
     # Every HTML tag method goes through an html_tag call.  So, calling <tt>div</tt> is equivalent

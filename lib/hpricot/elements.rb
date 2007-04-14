@@ -241,6 +241,39 @@ module Hpricot
         [nodes, expr]
     end
 
+    # Given two elements, attempt to gather an Elements array of everything between
+    # (and including) those two elements.
+    def self.expand(ele1, ele2)
+      ary = []
+
+      if ele1 and ele2
+        # let's quickly take care of siblings
+        if ele1.parent == ele2.parent
+          ary = ele1.parent.children[ele1.node_position..ele2.node_position]
+        else
+          # find common parent
+          p, ele1_p = ele1, [ele1]
+          ele1_p.unshift p while p.respond_to?(:parent) and p = p.parent
+          p, ele2_p = ele2, [ele2]
+          ele2_p.unshift p while p.respond_to?(:parent) and p = p.parent
+          common_parent = ele1_p.zip(ele2_p).select { |p1, p2| p1 == p2 }.flatten.last
+
+          child = nil
+          if ele1 == common_parent
+            child = ele2
+          elsif ele2 == common_parent
+            child = ele1
+          end
+
+          if child
+            ary = common_parent.children[0..child.node_position]
+          end
+        end
+      end
+
+      return Elements[*ary]
+    end
+
     def filter(expr)
         nodes, = Elements.filter(self, expr)
         nodes

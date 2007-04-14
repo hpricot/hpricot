@@ -34,6 +34,17 @@ module Hpricot
       output("", :preserve => true)
     end
 
+    def index(name)
+      i = 0
+      return i if name == "*"
+      children.each do |x|
+        return i if (x.respond_to?(:name) and name == x.name) or
+          (x.text? and name == "text()")
+        i += 1
+      end
+      -1
+    end
+
     # Puts together an array of neighboring nodes based on their proximity
     # to this node.  So, for example, to get the next node, you could use
     # <tt>nodes_at(1).  Or, to get the previous node, use <tt>nodes_at(1)</tt>.
@@ -46,11 +57,19 @@ module Hpricot
     def nodes_at(*pos)
       sib = parent.children
       i, si = 0, sib.index(self)
+      pos.map! do |r|
+        if r.is_a?(Range) and r.begin.is_a?(String)
+          r = ((parent.index(r.begin)-si)..(parent.index(r.end)-si))
+        end
+        r
+      end
+      p pos
       Elements[*
         sib.select do |x|
-          sel = case i - si when *pos
-                  true
-                end
+          sel =
+            case i - si when *pos
+              true
+            end
           i += 1
           sel
         end
@@ -216,6 +235,9 @@ module Hpricot
     # containing the matching nodes.  If +blk+ is given, it
     # is used to iterate through the matching set.
     def search(expr, &blk)
+      if Range === expr
+        return expand(at(expr.begin), at(expr.end))
+      end
       last = nil
       nodes = [self]
       done = []
