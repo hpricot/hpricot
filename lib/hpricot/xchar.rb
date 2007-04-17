@@ -86,7 +86,7 @@ module Hpricot
 
     # XML unescape
     def uxs(str)
-      str.gsub(/\&\w+;/) { |x| XChar::PREDEFINED_U[x].chr }.
+      str.gsub(/\&\w+;/) { |x| (XChar::PREDEFINED_U[x] || ??).chr }.
           gsub(/\&\#(\d+);/) { [$1.to_i].pack("U*") }
     end
   end
