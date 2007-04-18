@@ -243,13 +243,14 @@ module Hpricot
 
     # Given two elements, attempt to gather an Elements array of everything between
     # (and including) those two elements.
-    def self.expand(ele1, ele2)
+    def self.expand(ele1, ele2, excl=false)
       ary = []
+      offset = excl ? -1 : 0
 
       if ele1 and ele2
         # let's quickly take care of siblings
         if ele1.parent == ele2.parent
-          ary = ele1.parent.children[ele1.node_position..ele2.node_position]
+          ary = ele1.parent.children[ele1.node_position..(ele2.node_position+offset)]
         else
           # find common parent
           p, ele1_p = ele1, [ele1]
@@ -266,7 +267,7 @@ module Hpricot
           end
 
           if child
-            ary = common_parent.children[0..child.node_position]
+            ary = common_parent.children[0..(child.node_position+offset)]
           end
         end
       end

@@ -59,7 +59,7 @@ module Hpricot
       i, si = 0, sib.index(self)
       pos.map! do |r|
         if r.is_a?(Range) and r.begin.is_a?(String)
-          r = ((parent.index(r.begin)-si)..(parent.index(r.end)-si))
+          r = Range.new(parent.index(r.begin)-si, parent.index(r.end)-si, r.exclude_end?)
         end
         r
       end
@@ -236,7 +236,7 @@ module Hpricot
     # is used to iterate through the matching set.
     def search(expr, &blk)
       if Range === expr
-        return Elements.expand(at(expr.begin), at(expr.end))
+        return Elements.expand(at(expr.begin), at(expr.end), expr.exclude_end?)
       end
       last = nil
       nodes = [self]
