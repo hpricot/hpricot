@@ -190,7 +190,7 @@ module Hpricot
       
       if block or args.any?
         args.push(@attrs)
-        return @builder.tag! @sym, *args, &block
+        return @builder.tag!(@sym, *args, &block)
       end
       
       return self
