@@ -200,7 +200,7 @@ private void rb_yield_tokens(IRubyObject sym, IRubyObject tag, IRubyObject attr,
     attr.setTaint(true);
     raw.setTaint(true);
   }
-  block.yield(runtime.getCurrentContext(), ary, null, null, true);
+  block.yield(runtime.getCurrentContext(), ary, null, null, false);
 }
 
 
