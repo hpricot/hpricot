@@ -30,6 +30,11 @@ class TestParser < Test::Unit::TestCase
     link = 'http://www.youtube.com/watch?v=TvSNXyNw26g&search=chris%20ware'
     assert_equal link, @boingboing.at("a[@href='#{link}']")['href']
   end
+  
+  def test_filter_contains
+    @basic = Hpricot.parse(TestFiles::BASIC)
+    assert_equal '<title>Sample XHTML</title>', @basic.search("title:contains('Sample')").to_s
+  end
 
   def test_get_element_by_id
     @basic = Hpricot.parse(TestFiles::BASIC)

@@ -397,7 +397,7 @@ module Hpricot
       self.comment?
     end
 
-    filter :contains do |arg,|
+    filter :contains do |arg, ignore|
       html.include? arg
     end
 
