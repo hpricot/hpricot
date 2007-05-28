@@ -176,7 +176,7 @@ class TestParser < Test::Unit::TestCase
 
   def test_alt_predicates
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
-    assert_equal 2, @boingboing.search('//table/tr:last').length
+    assert_equal 1, @boingboing.search('//table/tr:last').length
 
     @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal "<p>The third paragraph</p>",

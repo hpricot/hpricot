@@ -50,6 +50,7 @@ module Hpricot
 # Most of the useful element methods are in the mixins Hpricot::Traverse
 # and Hpricot::Container::Trav.
   class Elements < Array
+  
     # Searches this list for any elements (or children of these elements) matching
     # the CSS or XPath expression +expr+.  Root is assumed to be the element scanned.
     #
@@ -202,11 +203,12 @@ module Hpricot
     ATTR_RE = %r!\[ *(?:(@)([\w\(\)-]+)|([\w\(\)-]+\(\))) *([~\!\|\*$\^=]*) *'?"?([^\]'"]*)'?"? *\]!i
     BRACK_RE = %r!(\[) *([^\]]*) *\]+!i
     FUNC_RE = %r!(:)?([a-zA-Z0-9\*_-]*)\( *[\"']?([^ \)]*?)['\"]? *\)!
+    CUST_RE = %r!(:)([a-zA-Z0-9\*_-]*)()!
     CATCH_RE = %r!([:\.#]*)([a-zA-Z0-9\*_-]+)!
 
     def self.filter(nodes, expr, truth = true)
         until expr.empty?
-            _, *m = *expr.match(/^(?:#{ATTR_RE}|#{BRACK_RE}|#{FUNC_RE}|#{CATCH_RE})/)
+            _, *m = *expr.match(/^(?:#{ATTR_RE}|#{BRACK_RE}|#{FUNC_RE}|#{CUST_RE}|#{CATCH_RE})/)
             break unless _
 
             expr = $'
@@ -221,6 +223,12 @@ module Hpricot
 
             if m[0] == ":" && m[1] == "not"
                 nodes, = Elements.filter(nodes, m[2], false)
+            elsif "#{m[0]}#{m[1]}" =~ /^(:even|:odd)$/
+                new_nodes = []
+                nodes.each_with_index {|n,i| new_nodes.push(n) if (i % 2 == (m[1] == "even" ? 0 : 1)) }
+                nodes = new_nodes
+            elsif "#{m[0]}#{m[1]}" =~ /^(:first|:last)$/
+                nodes = [nodes.send(m[1])]
             else
                 meth = "filter[#{m[0]}#{m[1]}]" unless m[0].empty?
                 if meth and Traverse.method_defined? meth
@@ -351,9 +359,9 @@ module Hpricot
 
     filter ':nth-child' do |arg,i|
       case arg 
-      when 'even'; parent.containers.index(self) % 2 == 0
-      when 'odd';  parent.containers.index(self) % 2 == 1
-      else         self == parent.containers[arg.to_i]
+      when 'even'; (parent.containers.index(self) + 1) % 2 == 0
+      when 'odd';  (parent.containers.index(self) + 1) % 2 == 1
+      else         self == (parent.containers[arg.to_i + 1])
       end
     end
 
@@ -400,6 +408,8 @@ module Hpricot
     filter :contains do |arg, ignore|
       html.include? arg
     end
+    
+    
 
     pred_procs =
       {'text()' => proc { |ele, *_| ele.inner_text.strip },
