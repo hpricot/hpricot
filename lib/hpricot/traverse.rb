@@ -810,6 +810,7 @@ module Hpricot
     end
     alias_method :[]=, :set_attribute
     def remove_attribute(name)
+      name = name.to_s
       if has_attribute? name
         altered!
         self.raw_attributes.delete(name)

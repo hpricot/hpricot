@@ -172,10 +172,28 @@ module Hpricot
       end
     end
 
-    # Access a property on the first matched element.
-    def attr(k)
-      node = first
-      node.get_attribute(k) if node
+    def attr key, value = nil
+      if value
+        each do |el|
+          el.set_attribute(key, value)
+        end
+        return self      
+      end    
+      if key.is_a? Hash
+        key.each { |k,v| self.attr(k,v) }
+        return self
+      else
+        return self[0].get_attribute(key)
+      end
+    end
+  
+    def add_class class_name
+      each do |el|
+        next unless el.respond_to? :get_attribute
+        classes = el.get_attribute('class').to_s.split(" ")
+        el.set_attribute('class', classes.push(class_name).uniq.join(" "))
+      end
+      self
     end
 
     # Sets an attribute for all elements in this list.  You may use

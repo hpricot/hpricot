@@ -75,10 +75,16 @@ module Hpricot
       # turn arguments into children or attributes
       childs = []
       attrs = args.grep(Hash)
-      childs.concat((args - attrs).map { |x| Text.new(Hpricot.xs(x)) if x })
+      childs.concat((args - attrs).map do |x|
+        if x.respond_to? :to_html
+          Hpricot.make(x.to_html)
+        elsif x
+          Text.new(Hpricot.xs(x))
+        end
+      end.flatten)
       attrs = attrs.inject({}) do |hsh, ath|
         ath.each do |k, v|
-          hsh[k] = Hpricot.xs(v)
+          hsh[k] = Hpricot.xs(v.to_s) if v
         end
         hsh
       end
@@ -182,12 +188,6 @@ module Hpricot
         @attrs[:class] = @attrs[:class].nil? ? idc : "#{@attrs[:class]} #{idc}".strip
       end
 
-      unless args.empty?
-        if args.last.respond_to? :to_hash
-          @attrs.merge! args.pop.to_hash
-        end
-      end
-      
       if block or args.any?
         args.push(@attrs)
         return @builder.tag!(@sym, *args, &block)

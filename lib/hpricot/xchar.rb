@@ -51,7 +51,6 @@ module Hpricot
     PREDEFINED = {
       34 => '&quot;', # quotation mark
       38 => '&amp;',  # ampersand
-      39 => '&apos;', # apostrophe
       60 => '&lt;',   # left angle bracket
       62 => '&gt;'    # right angle bracket
     }
@@ -79,9 +78,9 @@ module Hpricot
 
     # XML escaped version of to_s
     def xs(str)
-      str.unpack('U*').map {|n| xchr(n)}.join # ASCII, UTF-8
+      str.to_s.unpack('U*').map {|n| xchr(n)}.join # ASCII, UTF-8
     rescue
-      str.unpack('C*').map {|n| xchr(n)}.join # ISO-8859-1, WIN-1252
+      str.to_s.unpack('C*').map {|n| xchr(n)}.join # ISO-8859-1, WIN-1252
     end
 
     # XML unescape
