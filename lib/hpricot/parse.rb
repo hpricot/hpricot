@@ -55,6 +55,10 @@ module Hpricot
           token[1] = token[3] if token[3]
         end
 
+        if token[0] == :emptytag and ElementContent[token[1].send(conv)] != :EMPTY and !opts[:xml]
+          token[0] = :stag
+        end
+
         case token[0]
         when :stag
           case opts[:encoding] when 'utf-8'

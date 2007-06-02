@@ -36,7 +36,7 @@
   XmlEncodingDecl = space+ "encoding" space* "=" space* ("'" XmlEncName "'" | '"' XmlEncName '"' ) ;
   XmlYesNo = ("yes" | "no") >_aval %xmlsd ;
   XmlSDDecl = space+ "standalone" space* "=" space* ("'" XmlYesNo "'" | '"' XmlYesNo '"') ;
-  XmlDecl = "<?xml" XmlVersionInfo XmlEncodingDecl? XmlSDDecl? space* "?>" ;
+  XmlDecl = "<?xml" XmlVersionInfo XmlEncodingDecl? XmlSDDecl? space* "?"? ">" ;
 
   SystemLiteral = '"' [^"]* >_aval %sysid '"' | "'" [^']* >_aval %sysid "'" ;
   PubidLiteral = '"' [\t a-zA-Z0-9\-'()+,./:=?;!*\#@$_%]*  >_aval %pubid '"' |
@@ -44,7 +44,7 @@
   ExternalID = ( "SYSTEM" | "PUBLIC" space+ PubidLiteral ) (space+ SystemLiteral)? ;
   DocType = "<!DOCTYPE" space+ NameCap (space+ ExternalID)? space* ("[" [^\]]* "]" space*)? ">" ;
   StartXmlProcIns = "<?" Name >{ TEXT_PASS(); } space+ ;
-  EndXmlProcIns = "?>" ;
+  EndXmlProcIns = "?"? ">" ;
 
   html_comment := |*
     EndComment @{ EBLK(comment, 3); fgoto main; };

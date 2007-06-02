@@ -114,7 +114,7 @@ class TestParser < Test::Unit::TestCase
     assert_equal 60, @boingboing.search("h3").length
     assert_equal 59, @boingboing.search("h3[text()!='College kids reportedly taking more smart drugs']").length
     assert_equal 17, @boingboing.search("h3[text()$='s']").length
-    assert_equal 128, @boingboing.search("p[text()]").length
+    assert_equal 129, @boingboing.search("p[text()]").length
     assert_equal 211, @boingboing.search("p").length
   end
 
@@ -154,8 +154,7 @@ class TestParser < Test::Unit::TestCase
     assert_equal 60, @boingboing.search("/*/body//p[@class='posted']").length
     assert_equal 18, @boingboing.search("//script").length
     divs = @boingboing.search("//script/../div")
-    assert_equal 2,  divs.length
-    assert_equal 1,  divs.search('a').length
+    assert_equal 1,  divs.length
     imgs = @boingboing.search('//div/p/a/img')
     assert_equal 15, imgs.length
     assert_equal 17, @boingboing.search('//div').search('p/a/img').length
@@ -325,6 +324,27 @@ class TestParser < Test::Unit::TestCase
       doc.at("//object/param[@value='http://www.youtube.com/v/NbDQ4M_cuwA']")['value']
   end
   
+  # ticket #84 by jamezilla
+  def test_screwed_xmlns
+    doc = Hpricot(<<-edoc)
+      <?xml:namespace prefix = cwi />
+      <html><body>HAI</body></html>
+    edoc
+    assert_equal "HAI", doc.at("body").inner_text
+  end
+
+  # Reported by Jonathan Nichols on the Hpricot list (24 May 2007)
+  def test_self_closed_form
+    doc = Hpricot(<<-edoc)
+      <body>
+      <form action="/loginRegForm" name="regForm" method="POST" />
+      <input type="button">
+      </form>
+      </body>
+    edoc
+    assert_equal "button", doc.at("//form/input")['type']
+  end
+
   def test_filters
     @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 0, (@basic/"title:parent").size
