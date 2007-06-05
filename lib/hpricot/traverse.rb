@@ -565,7 +565,7 @@ module Hpricot
     # +each_hyperlink_uri+ traverses hyperlinks such as HTML href attribute
     # of A element.
     #
-    # It yields Hpricot::Text (or Hpricot::Loc) and URI for each hyperlink.
+    # It yields Hpricot::Text and URI for each hyperlink.
     #
     # The URI objects are created with a base URI which is given by
     # HTML BASE element or the argument ((|base_uri|)).
@@ -590,7 +590,7 @@ module Hpricot
     # +each_hyperlink+ traverses hyperlinks such as HTML href attribute
     # of A element.
     #
-    # It yields Hpricot::Text or Hpricot::Loc.
+    # It yields Hpricot::Text.
     #
     # Note that +each_hyperlink+ yields HTML href attribute of BASE element.
     def each_hyperlink # :yields: text
