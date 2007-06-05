@@ -173,6 +173,13 @@ class TestParser < Test::Unit::TestCase
     assert_equal 1, @boingboing.search('//input[@checked]').length
   end
 
+  def test_tag_case 
+    @tenderlove = Hpricot.parse(TestFiles::TENDERLOVE) 
+    assert_equal 2, @tenderlove.search('//a').length 
+    assert_equal 2, @tenderlove.search('//area').length 
+    assert_equal 2, @tenderlove.search('//meta').length 
+  end 
+
   def test_alt_predicates
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 1, @boingboing.search('//table/tr:last').length

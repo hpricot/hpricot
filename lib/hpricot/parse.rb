@@ -50,13 +50,18 @@ module Hpricot
       stack = [[nil, nil, [], [], [], []]]
       Hpricot.scan(input) do |token|
         if stack.last[5] == :CDATA and ![:procins, :comment, :cdata].include?(token[0]) and
-            !(token[0] == :etag and token[1].send(conv) == stack.last[0])
+            !(token[0] == :etag and token[1].casecmp(stack.last[0]).zero?)
           token[0] = :text
           token[1] = token[3] if token[3]
         end
 
-        if token[0] == :emptytag and ElementContent[token[1].send(conv)] != :EMPTY and !opts[:xml]
+        if !opts[:xml] and token[0] == :emptytag and ElementContent[token[1].downcase] != :EMPTY
           token[0] = :stag
+        end
+
+        # TODO: downcase instead when parsing attributes?
+        if !opts[:xml] and token[2].is_a?(Hash)
+          token[2] = token[2].inject({}) { |hsh,(k,v)| hsh[k.downcase] = v; hsh }
         end
 
         case token[0]
@@ -65,7 +70,7 @@ module Hpricot
             token.map! { |str| u(str) if str.is_a? String }
           end
 
-          stagname = token[0] = token[1].send(conv)
+          stagname = token[0] = token[1] = token[1].send(conv)
           if ElementContent[stagname] == :EMPTY and !opts[:xml]
             token[0] = :emptytag
             stack.last[2] << token
