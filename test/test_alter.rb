@@ -37,10 +37,27 @@ class TestAlter < Test::Unit::TestCase
   def test_change_attributes
     all_ps = (@basic/"p").attr("title", "Some Title")
     all_as = (@basic/"a").attr("href", "http://my_new_href.com")
+    all_lb = (@basic/"link").attr("href") { |e| e.name }
     assert_changed(@basic, "p", all_ps) {|p| p.attributes["title"] == "Some Title"}
     assert_changed(@basic, "a", all_as) {|a| a.attributes["href"] == "http://my_new_href.com"}
+    assert_changed(@basic, "link", all_lb) {|a| a.attributes["href"] == "link" }
   end
   
+  def test_remove_attr
+    all_rl = (@basic/"link").remove_attr("href")
+    assert_changed(@basic, "link", all_rl) { |link| link['href'].nil? }
+  end
+
+  def test_remove_class
+    all_c1 = (@basic/"p[@class*='last']").remove_class("last")
+    assert_changed(@basic, "p[@class*='last']", all_c1) { |p| p['class'] == 'final' }
+  end
+
+  def test_remove_all_classes
+    all_c2 = (@basic/"p[@class]").remove_class
+    assert_changed(@basic, "p[@class]", all_c2) { |p| p['class'].nil? }
+  end
+
   def assert_changed original, selector, set, &block
     assert set.all?(&block)
     assert Hpricot(original.to_html).search(selector).all?(&block)

@@ -172,10 +172,36 @@ module Hpricot
       end
     end
 
-    def attr key, value = nil
-      if value
+    # Gets and sets attributes on all matched elements.
+    #
+    # Pass in a +key+ on its own and this method will return the string value
+    # assigned to that attribute for the first elements.  Or +nil+ if the 
+    # attribute isn't found.
+    #
+    #   doc.search("a").attr("href")
+    #     #=> "http://hacketyhack.net/"
+    #
+    # Or, pass in a +key+ and +value+.  This will set an attribute for all
+    # matched elements.
+    #
+    #   doc.search("p").attr("class", "basic")
+    # 
+    # You may also use a Hash to set a series of attributes:
+    #
+    #   (doc/"a").attr(:class => "basic", :href => "http://hackety.org/")
+    # 
+    # Lastly, a block can be used to rewrite an attribute based on the element
+    # it belongs to.  The block will pass in an element.  Return from the block
+    # the new value of the attribute.
+    #
+    #   records.attr("href") { |e| e['href'] + "#top" }
+    #
+    # This example adds a <tt>#top</tt> anchor to each link.
+    #
+    def attr key, value = nil, &blk
+      if value or blk
         each do |el|
-          el.set_attribute(key, value)
+          el.set_attribute(key, value || blk[el])
         end
         return self      
       end    
@@ -186,7 +212,13 @@ module Hpricot
         return self[0].get_attribute(key)
       end
     end
+    alias_method :set, :attr
   
+    # Adds the class to all matched elements.
+    #
+    #   (doc/"p").add_class("bacon")
+    #
+    # Now all paragraphs will have class="bacon".
     def add_class class_name
       each do |el|
         next unless el.respond_to? :get_attribute
@@ -196,26 +228,37 @@ module Hpricot
       self
     end
 
-    # Sets an attribute for all elements in this list.  You may use
-    # a simple pair (<em>attribute name</em>, <em>attribute value</em>):
+    # Remove an attribute from each of the matched elements.
     #
-    #   doc.search('p').set(:class, 'outline')
+    #   (doc/"input").remove_attr("disabled")
     #
-    # Or, use a hash of pairs:
+    def remove_attr name
+      each do |el|
+        next unless el.respond_to? :remove_attribute
+        el.remove_attribute(name)
+      end
+      self      
+    end
+
+    # Removes a class from all matched elements.
     #
-    #   doc.search('div#sidebar').set(:class => 'outline', :id => 'topbar')
+    #   (doc/"span").remove_class("lightgrey")
     #
-    def set(k, v = nil)
-      case k
-      when Hash
-        each do |node|
-          k.each { |a,b| node.set_attribute(a, b) }
-        end
-      else
-        each do |node|
-          node.set_attribute(k, v)
+    # Or, to remove all classes:
+    #
+    #   (doc/"span").remove_class
+    # 
+    def remove_class name = nil
+      each do |el|
+        next unless el.respond_to? :get_attribute
+        if name
+          classes = el.get_attribute('class').to_s.split(" ")
+          el.set_attribute('class', (classes - [name]).uniq.join(" "))
+        else
+          el.remove_attribute("class")
         end
       end
+      self      
     end
 
     ATTR_RE = %r!\[ *(?:(@)([\w\(\)-]+)|([\w\(\)-]+\(\))) *([~\!\|\*$\^=]*) *'?"?([^\]'"]*)'?"? *\]!i

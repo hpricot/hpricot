@@ -257,7 +257,7 @@ So, let's go beyond just trying to fix the hierarchy.  The
 
 What measures does <tt>:xhtml_strict</tt> take?
 
- 1. Shift elements into their proper containers just like <tt>:fixup_tags</tt>.
+ 1. Shift elements into their proper containers just like :fixup_tags.
  2. Remove unknown elements.
  3. Remove unknown attributes.
  4. Remove illegal content.
@@ -269,6 +269,9 @@ The last option is the <tt>:xml</tt> option, which makes some slight variations
 on the standard mode.  The main difference is that :xml mode won't try to output
 tags which are friendlier for browsers.  For example, if an opening and closing
 <tt>br</tt> tag is found, XML mode won't try to turn that into an empty element.
+
+XML mode also doesn't downcase the tags and attributes for you.  So pay attention
+to case, friends.
 
 The primary way to use Hpricot's XML mode is to call the Hpricot.XML method:
 
