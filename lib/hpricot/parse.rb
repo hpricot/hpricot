@@ -55,8 +55,11 @@ module Hpricot
           token[1] = token[3] if token[3]
         end
 
-        if !opts[:xml] and token[0] == :emptytag and ElementContent[token[1].downcase] != :EMPTY
-          token[0] = :stag
+        if !opts[:xml] and token[0] == :emptytag
+          token[1] = token[1].send(conv)
+          if ElementContent[token[1].downcase] != :EMPTY
+            token[0] = :stag
+          end
         end
 
         # TODO: downcase instead when parsing attributes?

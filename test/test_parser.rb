@@ -176,7 +176,7 @@ class TestParser < Test::Unit::TestCase
   def test_tag_case 
     @tenderlove = Hpricot.parse(TestFiles::TENDERLOVE) 
     assert_equal 2, @tenderlove.search('//a').length 
-    assert_equal 2, @tenderlove.search('//area').length 
+    assert_equal 3, @tenderlove.search('//area').length 
     assert_equal 2, @tenderlove.search('//meta').length 
   end 
 
