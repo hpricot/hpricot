@@ -1,3 +1,15 @@
+= 0.6
+=== 15th June, 2007
+* Hpricot for JRuby -- nice work Ola Bini!
+* Inline Markaby for Hpricot documents.
+* XML tags and attributes are no longer downcased like HTML is.
+* new syntax for grabbing everything between two elements using a Range in the search method: (doc/("font".."font/br")) or in nodes_at like so: (doc/"font").nodes_at("*".."br"). Only works with either a pair of siblings or a set of a parent and a sibling. 
+* Ignore self-closing endings on tags (such as form) which are containers. Treat them like open parent tags. Reported by Jonathan Nichols on the hpricot list.
+* Escaping of attributes, yanked from Jim Weirich and Sam Ruby's work in Builder.
+* Element#raw_attributes gives unescaped data.  Element#attributes gives escaped.
+* Added: Elements#attr, Elements#remove_attr, Elements#remove_class.
+* Added: Traverse#preceding, Traverse#following, Traverse#previous, Traverse#next. 
+
 = 0.5
 === 31rd January, 2007
 

@@ -8,7 +8,7 @@ include FileUtils
 
 NAME = "hpricot"
 REV = `svn info`[/Revision: (\d+)/, 1] rescue nil
-VERS = ENV['VERSION'] || "0.5" + (REV ? ".#{REV}" : "")
+VERS = ENV['VERSION'] || "0.6" + (REV ? ".#{REV}" : "")
 PKG = "#{NAME}-#{VERS}"
 BIN = "*.{bundle,jar,so,obj,pdb,lib,def,exp}"
 ARCHLIB = "lib/#{::Config::CONFIG['arch']}"
