@@ -21,4 +21,10 @@ class TestBuilder < Test::Unit::TestCase
     assert_equal "<b>&#8364;&#8226;</b>", doc.to_html
     assert_equal "\342\202\254\342\200\242", doc.at("text()").to_s
   end
+
+  def test_escaping_attrs
+    text = "<span style='font-family:\"MS Mincho\"'>Some text</span>"
+    assert_equal "<span style=\"font-family:\\\"MS Mincho\\\"\">Some text</span>",
+      Hpricot(text).to_html
+  end
 end

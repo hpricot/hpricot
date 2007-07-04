@@ -100,7 +100,7 @@ module Hpricot
       if @raw_attributes
         @raw_attributes.map do |aname, aval|
           " #{aname}" +
-            (aval ? "=\"#{aval}\"" : "")
+            (aval ? "=#{html_quote aval}" : "")
         end.join
       end
     end
