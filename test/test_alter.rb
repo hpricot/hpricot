@@ -58,6 +58,18 @@ class TestAlter < Test::Unit::TestCase
     assert_changed(@basic, "p[@class]", all_c2) { |p| p['class'].nil? }
   end
 
+  def test_xml_casing
+    doc = Hpricot.XML("<root><wildCat>text</wildCat></root>")
+    (doc/:root/:wildCat).after("<beanPole>gravity</beanPole>")
+    assert_equal doc.to_s, "<root><wildCat>text</wildCat><beanPole>gravity</beanPole></root>"
+
+    frag = Hpricot.XML do
+      b { i "A bit of HTML" }
+    end
+    (frag/:b).after("<beanPole>gravity</beanPole>")
+    assert_equal frag.to_s, "<b><i>A bit of HTML</i></b><beanPole>gravity</beanPole>"
+  end
+
   def assert_changed original, selector, set, &block
     assert set.all?(&block)
     assert Hpricot(original.to_html).search(selector).all?(&block)
