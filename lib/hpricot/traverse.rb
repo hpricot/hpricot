@@ -816,7 +816,7 @@ module Hpricot
     def set_attribute(name, val)
       altered!
       self.raw_attributes ||= {}
-      self.raw_attributes[name.to_s] = Hpricot.xs(val)
+      self.raw_attributes[name.to_s] = val.fast_xs
     end
     alias_method :[]=, :set_attribute
     def remove_attribute(name)

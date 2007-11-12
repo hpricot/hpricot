@@ -1,8 +1,23 @@
 require 'hpricot/tags'
-require 'hpricot/xchar'
+require 'fast_xs'
 require 'hpricot/blankslate'
 
 module Hpricot
+  PREDEFINED = {
+    34 => '&quot;', # quotation mark
+    38 => '&amp;',  # ampersand
+    60 => '&lt;',   # left angle bracket
+    62 => '&gt;'    # right angle bracket
+  }
+  PREDEFINED_U = PREDEFINED.inject({}) { |hsh, (k, v)| hsh[v] = k; hsh }
+
+  # XML unescape
+  def self.uxs(str)
+    str.to_s.
+        gsub(/\&\w+;/) { |x| (PREDEFINED_U[x] || ??).chr }.
+        gsub(/\&\#(\d+);/) { [$1.to_i].pack("U*") }
+  end
+
   def self.build(ele = Doc.new, assigns = {}, &blk)
     ele.extend Builder
     assigns.each do |k, v|
@@ -32,7 +47,7 @@ module Hpricot
 
     # Write a +string+ to the HTML stream, making sure to escape it.
     def text!(string)
-      @children << Text.new(Hpricot.xs(string))
+      @children << Text.new(string.fast_xs)
     end
 
     # Write a +string+ to the HTML stream without escaping it.
@@ -79,12 +94,12 @@ module Hpricot
         if x.respond_to? :to_html
           Hpricot.make(x.to_html)
         elsif x
-          Text.new(Hpricot.xs(x))
+          Text.new(x.fast_xs)
         end
       end.flatten)
       attrs = attrs.inject({}) do |hsh, ath|
         ath.each do |k, v|
-          hsh[k] = Hpricot.xs(v.to_s) if v
+          hsh[k] = v.to_s.fast_xs if v
         end
         hsh
       end

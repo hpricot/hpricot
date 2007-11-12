@@ -12,7 +12,8 @@ VERS = ENV['VERSION'] || "0.6" + (REV ? ".#{REV}" : "")
 PKG = "#{NAME}-#{VERS}"
 BIN = "*.{bundle,jar,so,obj,pdb,lib,def,exp}"
 ARCHLIB = "lib/#{::Config::CONFIG['arch']}"
-CLEAN.include ["ext/hpricot_scan/#{BIN}", "lib/**/#{BIN}", 'ext/hpricot_scan/Makefile', 
+CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}", 
+               'ext/fast_xs/Makefile', 'ext/hpricot_scan/Makefile', 
                '**/.*.sw?', '*.gem', '.config']
 RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README', '--inline-source']
 PKG_FILES = %w(CHANGELOG COPYING README Rakefile) +
@@ -66,24 +67,40 @@ Rake::GemPackageTask.new(SPEC) do |p|
     p.gem_spec = SPEC
 end
 
-extension = "hpricot_scan"
-ext = "ext/hpricot_scan"
-ext_so = "#{ext}/#{extension}.#{Config::CONFIG['DLEXT']}"
-ext_files = FileList[
-  "#{ext}/*.c",
-  "#{ext}/*.h",
-  "#{ext}/*.rl",
-  "#{ext}/extconf.rb",
-  "#{ext}/Makefile",
-  "lib"
-] 
+['hpricot_scan', 'fast_xs'].each do |extension|
+  ext = "ext/#{extension}"
+  ext_so = "#{ext}/#{extension}.#{Config::CONFIG['DLEXT']}"
+  ext_files = FileList[
+    "#{ext}/*.c",
+    "#{ext}/*.h",
+    "#{ext}/*.rl",
+    "#{ext}/extconf.rb",
+    "#{ext}/Makefile",
+    "lib"
+  ] 
+
+  desc "Builds just the #{extension} extension"
+  task extension.to_sym => ["#{ext}/Makefile", ext_so ]
+
+  file "#{ext}/Makefile" => ["#{ext}/extconf.rb"] do
+    Dir.chdir(ext) do ruby "extconf.rb" end
+  end
+
+  file ext_so => ext_files do
+    Dir.chdir(ext) do
+      sh(PLATFORM =~ /win32/ ? 'nmake' : 'make')
+    end
+    mkdir_p ARCHLIB
+    cp ext_so, ARCHLIB
+  end
+end
 
 task "lib" do
   directory "lib"
 end
 
 desc "Compiles the Ruby extension"
-task :compile => [:hpricot_scan] do
+task :compile => [:hpricot_scan, :fast_xs] do
   if Dir.glob(File.join(ARCHLIB,"hpricot_scan.*")).length == 0
     STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     STDERR.puts "Gem actually failed to build.  Your system is"
@@ -93,21 +110,6 @@ task :compile => [:hpricot_scan] do
   end
 end
 task :hpricot_scan => [:ragel]
-
-desc "Builds just the #{extension} extension"
-task extension.to_sym => ["#{ext}/Makefile", ext_so ]
-
-file "#{ext}/Makefile" => ["#{ext}/extconf.rb"] do
-  Dir.chdir(ext) do ruby "extconf.rb" end
-end
-
-file ext_so => ext_files do
-  Dir.chdir(ext) do
-    sh(PLATFORM =~ /win32/ ? 'nmake' : 'make')
-  end
-  mkdir_p ARCHLIB
-  cp ext_so, ARCHLIB
-end
 
 desc "returns the ragel version"
 task :ragel_version do
@@ -128,7 +130,7 @@ end
 
 Win32Spec = SPEC.dup
 Win32Spec.platform = Gem::Platform::WIN32
-Win32Spec.files = PKG_FILES + ["#{ARCHLIB}/hpricot_scan.so"]
+Win32Spec.files = PKG_FILES + ["#{ARCHLIB}/hpricot_scan.so", "#{ARCHLIB}/fast_xs.so"]
 Win32Spec.extensions = []
   
 WIN32_PKG_DIR = "#{PKG}-mswin32"
