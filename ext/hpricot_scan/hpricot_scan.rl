@@ -8,6 +8,12 @@
  */
 #include <ruby.h>
 
+#ifndef RARRAY_LEN
+#define RARRAY_LEN(arr)  RARRAY(arr)->len
+#define RSTRING_LEN(str) RSTRING(str)->len
+#define RSTRING_PTR(str) RSTRING(str)->ptr
+#endif
+
 #define NO_WAY_SERIOUSLY "*** This should not happen, please send a bug report with the HTML you're parsing to why@whytheluckystiff.net.  So sorry!"
 
 static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_emptytag, sym_comment,
@@ -169,7 +175,7 @@ VALUE hpricot_scan(VALUE self, VALUE port)
       /* We've used up the entire buffer storing an already-parsed token
        * prefix that must be preserved.  Likely caused by super-long attributes.
        * See ticket #13. */
-      rb_raise(rb_eHpricotParseError, "ran out of buffer space on element <%s>, starting on line %d.", RSTRING(tag)->ptr, curline);
+      rb_raise(rb_eHpricotParseError, "ran out of buffer space on element <%s>, starting on line %d.", RSTRING_PTR(tag), curline);
     }
 
     if ( rb_respond_to( port, s_read ) )
@@ -182,8 +188,8 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     }
 
     StringValue(str);
-    memcpy( p, RSTRING(str)->ptr, RSTRING(str)->len );
-    len = RSTRING(str)->len;
+    memcpy( p, RSTRING_PTR(str), RSTRING_LEN(str) );
+    len = RSTRING_LEN(str);
     nread += len;
 
     /* If this is the last buffer, tack on an EOF. */
@@ -199,7 +205,7 @@ VALUE hpricot_scan(VALUE self, VALUE port)
       free(buf);
       if ( !NIL_P(tag) )
       {
-        rb_raise(rb_eHpricotParseError, "parse error on element <%s>, starting on line %d.\n" NO_WAY_SERIOUSLY, RSTRING(tag)->ptr, curline);
+        rb_raise(rb_eHpricotParseError, "parse error on element <%s>, starting on line %d.\n" NO_WAY_SERIOUSLY, RSTRING_PTR(tag), curline);
       }
       else
       {
