@@ -6,6 +6,8 @@ require 'rake/testtask'
 require 'fileutils'
 include FileUtils
 
+RbConfig = Config unless defined?(RbConfig)
+
 NAME = "hpricot"
 REV = `svn info`[/Revision: (\d+)/, 1] rescue nil
 VERS = ENV['VERSION'] || "0.6" + (REV ? ".#{REV}" : "")
@@ -88,7 +90,7 @@ end
 
   file ext_so => ext_files do
     Dir.chdir(ext) do
-      sh(PLATFORM =~ /win32/ ? 'nmake' : 'make')
+      sh(RUBY_PLATFORM =~ /win32/ ? 'nmake' : 'make')
     end
     mkdir_p ARCHLIB
     cp ext_so, ARCHLIB
@@ -129,7 +131,7 @@ end
 ### Win32 Packages ###
 
 Win32Spec = SPEC.dup
-Win32Spec.platform = Gem::Platform::WIN32
+Win32Spec.platform = Gem::Platform::CURRENT
 Win32Spec.files = PKG_FILES + ["#{ARCHLIB}/hpricot_scan.so", "#{ARCHLIB}/fast_xs.so"]
 Win32Spec.extensions = []
   
