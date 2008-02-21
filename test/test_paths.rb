@@ -13,4 +13,13 @@ class TestParser < Test::Unit::TestCase
       assert_equal ele, @basic.at(ele.xpath)
     end
   end
+  def test_attr_brackets
+    doc = Hpricot('<input name="vendor[porkpies]"/>')
+    assert_equal 1, (doc/'input[@name^="vendor[porkpies]"]').length
+    assert_equal 1, (doc/'input[@name="vendor[porkpies]"]').length
+    assert_equal 0, (doc/'input[@name$="]]]]]"]').length
+
+    doc = Hpricot('<input name="vendor[porkpies][meaty]"/>')
+    assert_equal 1, (doc/'input[@name^="vendor[porkpies][meaty]"]').length
+  end
 end

@@ -90,7 +90,7 @@ module Hpricot
       # turn arguments into children or attributes
       childs = []
       attrs = args.grep(Hash)
-      childs.concat((args - attrs).map do |x|
+      childs.concat((args - attrs).flatten.map do |x|
         if x.respond_to? :to_html
           Hpricot.make(x.to_html)
         elsif x
