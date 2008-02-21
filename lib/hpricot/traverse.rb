@@ -523,8 +523,9 @@ module Hpricot
 
     def get_elements_by_tag_name(*a)
       list = Elements[]
+      a.delete("*")
       traverse_element(*a.map { |tag| [tag, "{http://www.w3.org/1999/xhtml}#{tag}"] }.flatten) do |e|
-          list << e
+        list << e if e.elem?
       end
       list
     end

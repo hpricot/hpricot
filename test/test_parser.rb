@@ -47,6 +47,13 @@ class TestParser < Test::Unit::TestCase
     assert_equal 'link1', @basic.get_elements_by_tag_name('a')[0].get_attribute('id')
     assert_equal 'link1', @basic.get_elements_by_tag_name('body')[0].get_element_by_id('link1').get_attribute('id')
   end
+  
+  def test_get_elements_by_tag_name_star
+    simple = Hpricot.parse("<div><p id='first'>First</p><p id='second'>Second</p></div>")
+    assert_equal 3, simple.get_elements_by_tag_name("*").size
+    assert_equal 1, simple.get_elements_by_tag_name("div").size
+    assert_equal 2, simple.get_elements_by_tag_name("p").size
+  end
 
   def test_output_basic
     @basic = Hpricot.parse(TestFiles::BASIC)
