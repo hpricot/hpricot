@@ -12,16 +12,16 @@ NAME = "hpricot"
 REV = `svn info`[/Revision: (\d+)/, 1] rescue nil
 VERS = ENV['VERSION'] || "0.6" + (REV ? ".#{REV}" : "")
 PKG = "#{NAME}-#{VERS}"
-BIN = "*.{bundle,jar,so,obj,pdb,lib,def,exp}"
+BIN = "*.{bundle,jar,so,obj,pdb,lib,def,exp,class}"
 ARCHLIB = "lib/#{::Config::CONFIG['arch']}"
-CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}", 
+CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}", ARCHLIB,
                'ext/fast_xs/Makefile', 'ext/hpricot_scan/Makefile', 
-               '**/.*.sw?', '*.gem', '.config']
+               '**/.*.sw?', '*.gem', '.config', 'pkg']
 RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README', '--inline-source']
 PKG_FILES = %w(CHANGELOG COPYING README Rakefile) +
       Dir.glob("{bin,doc,test,lib,extras}/**/*") + 
       Dir.glob("ext/**/*.{h,java,c,rb,rl}") + 
-      %w[ext/hpricot_scan/hpricot_scan.c] # needed because it's generated later
+      %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/HpricotScanService.java] # needed because it's generated later
 SPEC =
   Gem::Specification.new do |s|
     s.name = NAME
@@ -174,19 +174,44 @@ CLEAN.include WIN32_PKG_DIR
 
 ### JRuby Packages ###
 
-compile_java = proc do
-  sh %{javac -source 1.4 -target 1.4 -classpath $JRUBY_HOME/lib/jruby.jar HpricotScanService.java}
-  sh %{jar cf hpricot_scan.jar HpricotScanService.class}
+def java_classpath_arg 
+  # A myriad of ways to discover the JRuby classpath
+  classpath = begin
+    require 'java' 
+    # Already running in a JRuby JVM
+    Java::java.lang.System.getProperty('java.class.path')
+  rescue LoadError
+    ENV['JRUBY_PARENT_CLASSPATH'] || ENV['JRUBY_HOME'] && FileList["#{ENV['JRUBY_HOME']}/lib/*.jar"].join(File::PATH_SEPARATOR)
+  end
+  classpath ? "-cp #{classpath}" : ""
 end
 
-desc "Compiles the JRuby extension"
+def compile_java(filename, jarname)
+  sh %{javac -source 1.4 -target 1.4 #{java_classpath_arg} #{filename}}
+  sh %{jar cf #{jarname} *.class}
+end
+
 task :hpricot_scan_java => [:ragel_java] do
-  Dir.chdir("ext/hpricot_scan", &compile_java)
+  Dir.chdir "ext/hpricot_scan" do
+    compile_java("HpricotScanService.java", "hpricot_scan.jar")
+  end
+end
+
+task :fast_xs_java do
+  Dir.chdir "ext/fast_xs" do
+    compile_java("FastXsService.java", "fast_xs.jar")
+  end
+end
+
+desc "Compiles the JRuby extensions"
+task :hpricot_java => [:hpricot_scan_java, :fast_xs_java] do
+  mkdir_p "#{ARCHLIB}"
+  %w(hpricot_scan fast_xs).each {|ext| mv "ext/#{ext}/#{ext}.jar", "#{ARCHLIB}"}
 end
 
 JRubySpec = SPEC.dup
 JRubySpec.platform = 'jruby'
-JRubySpec.files = PKG_FILES + ["#{ARCHLIB}/hpricot_scan.jar"]
+JRubySpec.files = PKG_FILES + ["#{ARCHLIB}/hpricot_scan.jar", "#{ARCHLIB}/fast_xs.jar"]
 JRubySpec.extensions = []
 
 JRUBY_PKG_DIR = "#{PKG}-jruby"
@@ -197,15 +222,10 @@ file JRUBY_PKG_DIR => [:ragel_java, :package] do
   mv PKG, JRUBY_PKG_DIR
 end
 
-desc "Cross-compile the hpricot_scan extension for JRuby"
-file "hpricot_scan_jruby" => [JRUBY_PKG_DIR] do
-  Dir.chdir("#{JRUBY_PKG_DIR}/ext/hpricot_scan", &compile_java)
-  mv "#{JRUBY_PKG_DIR}/ext/hpricot_scan/hpricot_scan.jar", "#{JRUBY_PKG_DIR}/#{ARCHLIB}"
-end
-
 desc "Build the RubyGems package for JRuby"
-task :package_jruby => ["hpricot_scan_jruby"] do
+task :package_jruby => JRUBY_PKG_DIR do
   Dir.chdir("#{JRUBY_PKG_DIR}") do
+    Rake::Task[:hpricot_java].invoke
     Gem::Builder.new(JRubySpec).build
     verbose(true) {
       mv Dir["*.gem"].first, "../pkg/#{JRUBY_PKG_DIR}.gem"

@@ -6,7 +6,9 @@ import org.jruby.RubyClass;
 import org.jruby.RubyHash;
 import org.jruby.RubyModule;
 import org.jruby.RubyNumeric;
+import org.jruby.RubyObjectAdapter;
 import org.jruby.RubyString;
+import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.CallbackFactory;
 import org.jruby.runtime.builtin.IRubyObject;
@@ -15,6 +17,7 @@ import org.jruby.runtime.load.BasicLibraryService;
 
 public class HpricotScanService implements BasicLibraryService {
        public static String NO_WAY_SERIOUSLY="*** This should not happen, please send a bug report with the HTML you're parsing to why@whytheluckystiff.net.  So sorry!";
+       private static RubyObjectAdapter rubyApi;
 
        public void ELE(IRubyObject N) {
          if (tokend > tokstart || text) {
@@ -239,8 +242,8 @@ IRubyObject hpricot_scan(IRubyObject recv, IRubyObject port) {
   }
 
   buffer_size = BUFSIZE;
-  if (recv.getInstanceVariable("@buffer_size") != null) {
-    bufsize = recv.getInstanceVariable("@buffer_size");
+  if (rubyApi.getInstanceVariable(recv, "@buffer_size") != null) {
+    bufsize = rubyApi.getInstanceVariable(recv, "@buffer_size");
     if (!bufsize.isNil()) {
       buffer_size = RubyNumeric.fix2int(bufsize);
     }
@@ -359,5 +362,6 @@ public static void Init_hpricot_scan(Ruby runtime) {
   CallbackFactory fact = runtime.callbackFactory(HpricotScanService.class);
   mHpricot.getMetaClass().defineMethod("scan",fact.getSingletonMethod("__hpricot_scan",IRubyObject.class));
   mHpricot.defineClassUnder("ParseError",runtime.getClass("Exception"),runtime.getClass("Exception").getAllocator());
+  rubyApi = JavaEmbedUtils.newObjectAdapter();
 }
 }

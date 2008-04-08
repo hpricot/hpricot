@@ -27,4 +27,11 @@ class TestBuilder < Test::Unit::TestCase
     assert_equal "<span style=\"font-family:\\\"MS Mincho\\\"\">Some text</span>",
       Hpricot(text).to_html
   end
+
+  def test_korean_utf8_entities
+    # a = '한글'
+    a = "\xed\x95\x9c\xea\xb8\x80"
+    doc = Hpricot() { b a }
+    assert_equal "<b>&#54620;&#44544;</b>", doc.to_html
+  end
 end
