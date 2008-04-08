@@ -120,12 +120,22 @@ end
 
 desc "Generates the C scanner code with Ragel."
 task :ragel => [:ragel_version] do
-  sh %{ragel ext/hpricot_scan/hpricot_scan.rl | #{@ragel_v >= 5.18 ? 'rlgen-cd' : 'rlcodegen'} -G2 -o ext/hpricot_scan/hpricot_scan.c}
+  if @ragel_v >= 6.1
+    sh %{ragel ext/hpricot_scan/hpricot_scan.rl -G2 -o ext/hpricot_scan/hpricot_scan.c}
+  else
+    STDERR.puts "Ragel 6.1 or greater is required."
+    exit(1)
+  end
 end
 
 desc "Generates the Java scanner code with Ragel."
 task :ragel_java => [:ragel_version] do
-  sh %{ragel -J ext/hpricot_scan/hpricot_scan.java.rl | #{@ragel_v >= 5.18 ? 'rlgen-java' : 'rlcodegen'} -o  ext/hpricot_scan/HpricotScanService.java}
+  if @ragel_v >= 6.1
+    sh %{ragel -J ext/hpricot_scan/hpricot_scan.java.rl -G2 -o ext/hpricot_scan/HpricotScanService.java}
+  else
+    STDERR.puts "Ragel 6.1 or greater is required."
+    exit(1)
+  end
 end
 
 ### Win32 Packages ###

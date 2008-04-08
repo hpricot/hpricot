@@ -22,11 +22,11 @@ static VALUE rb_eHpricotParseError;
 static ID s_read, s_to_str;
 
 #define ELE(N) \
-  if (tokend > tokstart || text == 1) { \
+  if (te > ts || text == 1) { \
     VALUE raw_string = Qnil; \
     ele_open = 0; text = 0; \
-    if (tokstart != 0 && sym_##N != sym_cdata && sym_##N != sym_text && sym_##N != sym_procins && sym_##N != sym_comment) { \
-      raw_string = rb_str_new(tokstart, tokend-tokstart); \
+    if (ts != 0 && sym_##N != sym_cdata && sym_##N != sym_text && sym_##N != sym_procins && sym_##N != sym_comment) { \
+      raw_string = rb_str_new(ts, te-ts); \
     } \
     rb_yield_tokens(sym_##N, tag, attr, raw_string, taint); \
   }
@@ -39,7 +39,7 @@ static ID s_read, s_to_str;
 
 #define CAT(N, E) if (NIL_P(N)) { SET(N, E); } else { rb_str_cat(N, mark_##N, E - mark_##N); }
 
-#define SLIDE(N) if ( mark_##N > tokstart ) mark_##N = buf + (mark_##N - tokstart);
+#define SLIDE(N) if ( mark_##N > ts ) mark_##N = buf + (mark_##N - ts);
 
 #define ATTR(K, V) \
     if (!NIL_P(K)) { \
@@ -52,8 +52,8 @@ static ID s_read, s_to_str;
     { \
       if (ele_open == 1) { \
         ele_open = 0; \
-        if (tokstart > 0) { \
-          mark_tag = tokstart; \
+        if (ts > 0) { \
+          mark_tag = ts; \
         } \
       } else { \
         mark_tag = p; \
@@ -135,7 +135,7 @@ void rb_yield_tokens(VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
 VALUE hpricot_scan(VALUE self, VALUE port)
 {
   int cs, act, have = 0, nread = 0, curline = 1, text = 0;
-  char *tokstart = 0, *tokend = 0, *buf = NULL;
+  char *ts = 0, *te = 0, *buf = NULL, *eof = NULL;
 
   VALUE attr = Qnil, tag = Qnil, akey = Qnil, aval = Qnil, bufsize = Qnil;
   char *mark_tag = 0, *mark_akey = 0, *mark_aval = 0;
@@ -216,17 +216,17 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     if ( done && ele_open )
     {
       ele_open = 0;
-      if (tokstart > 0) {
-        mark_tag = tokstart;
-        tokstart = 0;
+      if (ts > 0) {
+        mark_tag = ts;
+        ts = 0;
         text = 1;
       }
     }
 
-    if ( tokstart == 0 )
+    if ( ts == 0 )
     {
       have = 0;
-      /* text nodes have no tokstart because each byte is parsed alone */
+      /* text nodes have no ts because each byte is parsed alone */
       if ( mark_tag != NULL && text == 1 )
       {
         if (done)
@@ -246,13 +246,13 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     }
     else
     {
-      have = pe - tokstart;
-      memmove( buf, tokstart, have );
+      have = pe - ts;
+      memmove( buf, ts, have );
       SLIDE(tag);
       SLIDE(akey);
       SLIDE(aval);
-      tokend = buf + (tokend - tokstart);
-      tokstart = buf;
+      te = buf + (te - ts);
+      ts = buf;
     }
   }
   free(buf);
