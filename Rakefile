@@ -21,7 +21,18 @@ RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README', 
 PKG_FILES = %w(CHANGELOG COPYING README Rakefile) +
       Dir.glob("{bin,doc,test,lib,extras}/**/*") + 
       Dir.glob("ext/**/*.{h,java,c,rb,rl}") + 
-      %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/HpricotScanService.java] # needed because it's generated later
+      %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/HpricotScanService.java] # needed because they are generated later
+RAGEL_C_CODE_GENERATION_STYLES = {
+  "table_driven" => 'T0',
+  "faster_table_driven" => 'T1',
+  "flat_table_driven" => 'F0',
+  "faster_flat_table_driven" => 'F1',
+  "goto_driven" => 'G0',
+  "faster_goto_driven" => 'G1',
+  "really_fast goto_driven" => 'G2'
+  # "n_way_split_really_fast_goto_driven" => 'P<N>'
+}
+DEFAULT_RAGEL_C_CODE_GENERATION = "really_fast goto_driven"
 SPEC =
   Gem::Specification.new do |s|
     s.name = NAME
@@ -113,25 +124,31 @@ task :compile => [:hpricot_scan, :fast_xs] do
 end
 task :hpricot_scan => [:ragel]
 
-desc "returns the ragel version"
+desc "Determines the Ragel version and displays it on the console along with the location of the Ragel binary."
 task :ragel_version do
   @ragel_v = `ragel -v`[/(version )(\S*)/,2].to_f
+  puts "Using ragel version: #{@ragel_v}, location: #{`which ragel`}"
+  @ragel_v
 end
 
 desc "Generates the C scanner code with Ragel."
 task :ragel => [:ragel_version] do
   if @ragel_v >= 6.1
-    sh %{ragel ext/hpricot_scan/hpricot_scan.rl -G2 -o ext/hpricot_scan/hpricot_scan.c}
+    @ragel_c_code_generation_style = RAGEL_C_CODE_GENERATION_STYLES[DEFAULT_RAGEL_C_CODE_GENERATION]
+    sh %{ragel ext/hpricot_scan/hpricot_scan.rl -#{@ragel_c_code_generation_style} -o ext/hpricot_scan/hpricot_scan.c}
   else
     STDERR.puts "Ragel 6.1 or greater is required."
     exit(1)
   end
 end
 
-desc "Generates the Java scanner code with Ragel."
+# Java only supports the table-driven code 
+# generation style at this point. 
+desc "Generates the Java scanner code using the Ragel table-driven code generation style."
 task :ragel_java => [:ragel_version] do
   if @ragel_v >= 6.1
-    sh %{ragel -J ext/hpricot_scan/hpricot_scan.java.rl -G2 -o ext/hpricot_scan/HpricotScanService.java}
+    puts "compiling with ragel version #{@ragel_v}"
+    sh %{ragel -J -o ext/hpricot_scan/HpricotScanService.java ext/hpricot_scan/hpricot_scan.java.rl}    
   else
     STDERR.puts "Ragel 6.1 or greater is required."
     exit(1)

@@ -108,7 +108,7 @@ static ID s_read, s_to_str;
     ATTR(akey, aval);
   }
 
-  include hpricot_common "ext/hpricot_scan/hpricot_common.rl";
+  include hpricot_common "hpricot_common.rl";
 
 }%%
 
