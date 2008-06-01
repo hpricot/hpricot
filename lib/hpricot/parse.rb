@@ -138,7 +138,7 @@ module Hpricot
               matched_elem = stack[i]
               stack[i][1] += token
               eles = stack.slice!((i+1)..-1)
-              stack.last[2] += eles
+              stack.last[2] += eles if eles
               break
             end
           end
