@@ -135,7 +135,7 @@ desc "Generates the C scanner code with Ragel."
 task :ragel => [:ragel_version] do
   if @ragel_v >= 6.1
     @ragel_c_code_generation_style = RAGEL_C_CODE_GENERATION_STYLES[DEFAULT_RAGEL_C_CODE_GENERATION]
-    sh %{ragel ext/hpricot_scan/hpricot_scan.rl -#{@ragel_c_code_generation_style} -o ext/hpricot_scan/hpricot_scan.c}
+    sh %{cd ext/hpricot_scan; ragel hpricot_scan.rl -#{@ragel_c_code_generation_style} -o hpricot_scan.c}
   else
     STDERR.puts "Ragel 6.1 or greater is required."
     exit(1)
