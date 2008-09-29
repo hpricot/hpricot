@@ -25,7 +25,7 @@ public class FastXsService implements BasicLibraryService {
         String string = recv.convertToString().getUnicodeValue();
         StringWriter writer = new StringWriter ((int)(string.length() * 1.5));
         try {
-            Entities.HTML40.escape(writer, string);
+            Entities.XML.escape(writer, string);
             return recv.getRuntime().newString(writer.toString());
         } catch (IOException e) {
             throw recv.getRuntime().newIOErrorFromException(e);
