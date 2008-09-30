@@ -209,7 +209,7 @@ module Hpricot
     when :cdata
       Text.parse_cdata_section(structure[1])
     else
-      raise Exception, "[bug] unknown structure: #{structure.inspect}"
+      raise "[bug] unknown structure: #{structure.inspect}"
     end
   end
 

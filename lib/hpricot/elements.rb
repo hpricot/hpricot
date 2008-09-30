@@ -164,7 +164,7 @@ module Hpricot
         wrap = x.make(str, &blk)
         nest = wrap.detect { |w| w.respond_to? :children }
         unless nest
-          raise Exception, "No wrapping element found."
+          raise "No wrapping element found."
         end
         x.parent.replace_child(x, wrap)
         nest = nest.children.first until nest.empty?

@@ -263,7 +263,7 @@ void Init_hpricot_scan()
   VALUE mHpricot = rb_define_module("Hpricot");
   rb_define_attr(rb_singleton_class(mHpricot), "buffer_size", 1, 1);
   rb_define_singleton_method(mHpricot, "scan", hpricot_scan, 1);
-  rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eException);
+  rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eStandardError);
 
   s_read = rb_intern("read");
   s_to_str = rb_intern("to_str");

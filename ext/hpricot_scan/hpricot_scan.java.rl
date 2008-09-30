@@ -363,7 +363,7 @@ public static void Init_hpricot_scan(Ruby runtime) {
   mHpricot.getMetaClass().attr_accessor(runtime.getCurrentContext(),new IRubyObject[]{runtime.newSymbol("buffer_size")});
   CallbackFactory fact = runtime.callbackFactory(HpricotScanService.class);
   mHpricot.getMetaClass().defineMethod("scan",fact.getSingletonMethod("__hpricot_scan",IRubyObject.class));
-  mHpricot.defineClassUnder("ParseError",runtime.getClass("Exception"),runtime.getClass("Exception").getAllocator());
+  mHpricot.defineClassUnder("ParseError",runtime.getClass("StandardError"),runtime.getClass("StandardError").getAllocator());
   rubyApi = JavaEmbedUtils.newObjectAdapter();
 }
 }
