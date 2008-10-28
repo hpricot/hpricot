@@ -306,10 +306,8 @@ class TestParser < Test::Unit::TestCase
     assert_equal "blah='blah'", doc.children[2].content
   end
 
-  def test_buffer_error
-    assert_raise Hpricot::ParseError, "ran out of buffer space on element <input>, starting on line 3." do
-      Hpricot(%{<p>\n\n<input type="hidden" name="__VIEWSTATE"  value="#{(("X" * 2000) + "\n") * 22}" />\n\n</p>})
-    end
+  def test_no_buffer_error
+    Hpricot(%{<p>\n\n<input type="hidden" name="__VIEWSTATE"  value="#{(("X" * 2000) + "\n") * 44}" />\n\n</p>})
   end
 
   def test_youtube_attr
