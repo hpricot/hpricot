@@ -19,9 +19,16 @@
 static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_emptytag, sym_comment,
       sym_cdata, sym_text, sym_EMPTY;
 static VALUE mHpricot, rb_eHpricotParseError;
-static ID s_BogusETag, s_CData, s_Comment, s_Doc, s_Element, s_ElementContent, s_ETag, s_Text;
+static VALUE cBaseEle, cBogusETag, cCData, cComment, cDoc, cDocType, cElement, cETag, cText,
+      cXMLDecl, cProcIns;
+static ID s_ElementContent;
 static ID s_new, s_parent, s_read, s_to_str;
 static ID iv_parent;
+
+typedef struct {
+  VALUE tag, attr, raw, etag;
+  VALUE parent, children;
+} hpricot_ele;
 
 #define ELE(N) \
   if (te > ts || text == 1) { \
@@ -140,11 +147,13 @@ void rb_yield_tokens(VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
 static void
 rb_hpricot_add(VALUE focus, VALUE ele)
 {
-  VALUE children = rb_iv_get(focus, "@children");
-  if (NIL_P(children))
-    children = rb_iv_set(focus, "@children", rb_ary_new());
-  rb_ary_push(children, ele);
-  rb_ivar_set(ele, iv_parent, focus);
+  hpricot_ele *he, *he2;
+  Data_Get_Struct(focus, hpricot_ele, he);
+  Data_Get_Struct(ele, hpricot_ele, he2);
+  if (NIL_P(he->children))
+    he->children = rb_ary_new();
+  rb_ary_push(he->children, ele);
+  he2->parent = focus;
 }
 
 typedef struct {
@@ -153,15 +162,37 @@ typedef struct {
   unsigned char xml, strict;
 } hpricot_state;
 
+static void
+hpricot_ele_mark(hpricot_ele *he)
+{
+  rb_gc_mark(he->tag);
+  rb_gc_mark(he->attr);
+  rb_gc_mark(he->raw);
+  rb_gc_mark(he->etag);
+  rb_gc_mark(he->parent);
+  rb_gc_mark(he->children);
+}
+
+static void
+hpricot_ele_free(hpricot_ele *he)
+{
+  free(he);
+}
+
+#define H_ELE(klass) \
+  hpricot_ele *he = ALLOC(hpricot_ele); \
+  he->tag = tag; \
+  he->attr = attr; \
+  he->raw = raw; \
+  he->etag = he->parent = he->children = Qnil; \
+  ele = Data_Wrap_Struct(klass, hpricot_ele_mark, hpricot_ele_free, he)
+
 VALUE
 rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
 {
   VALUE ele;
   if (sym == sym_emptytag || sym == sym_stag) {
-    ele = rb_obj_alloc(rb_const_get(mHpricot, s_Element));
-    rb_iv_set(ele, "@name", tag);
-    rb_iv_set(ele, "@raw_attributes", attr);
-    rb_iv_set(ele, "@raw_string", raw);
+    H_ELE(cElement);
     rb_hpricot_add(S->focus, ele);
     if (sym == sym_stag) {
       VALUE content = rb_const_get(mHpricot, s_ElementContent);
@@ -178,43 +209,50 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, VALUE raw, 
       }
     }
 
-    while (rb_ivar_defined(e, iv_parent))
+    //
+    // a big optimization will be to improve this very simple
+    // O(n) tag search, where n is the depth of the current tag.
+    //
+    while (e != S->doc)
     {
-      VALUE name = rb_iv_get(e, "@name");
-      if (TYPE(name) == T_STRING && rb_str_cmp(name, tag) == 0)
+      hpricot_ele *he;
+      Data_Get_Struct(e, hpricot_ele, he);
+
+      if (TYPE(he->tag) == T_STRING && rb_str_cmp(he->tag, tag) == 0)
       {
         match = e;
         break;
       }
-      e = rb_ivar_get(ele, iv_parent);
+
+      e = he->parent;
     }
 
     if (NIL_P(match))
     {
-      VALUE etag = rb_obj_alloc(rb_const_get(mHpricot, s_BogusETag));
-      rb_iv_set(etag, "@name", tag);
-      rb_iv_set(etag, "@raw_string", raw);
-      rb_hpricot_add(S->focus, etag);
+      H_ELE(cBogusETag);
+      rb_hpricot_add(S->focus, ele);
     }
     else
     {
-      VALUE etag = rb_obj_alloc(rb_const_get(mHpricot, s_ETag));
-      rb_iv_set(etag, "@name", tag);
-      rb_iv_set(etag, "@raw_string", raw);
-      rb_iv_set(match, "@etag", etag);
-      S->focus = rb_ivar_get(match, iv_parent);
+      H_ELE(cETag);
+      Data_Get_Struct(match, hpricot_ele, he);
+      he->etag = ele;
+      S->focus = he->parent;
     }
-  } else if (sym == sym_text) {
-    VALUE ele = rb_obj_alloc(rb_const_get(mHpricot, s_Text));
-    rb_iv_set(ele, "@content", tag);
+  } else if (sym == sym_cdata) {
+    H_ELE(cCData);
     rb_hpricot_add(S->focus, ele);
   } else if (sym == sym_comment) {
-    VALUE ele = rb_obj_alloc(rb_const_get(mHpricot, s_Comment));
-    rb_iv_set(ele, "@content", tag);
+    H_ELE(cComment);
     rb_hpricot_add(S->focus, ele);
-  } else if (sym == sym_cdata) {
-    VALUE ele = rb_obj_alloc(rb_const_get(mHpricot, s_CData));
-    rb_iv_set(ele, "@content", tag);
+  } else if (sym == sym_procins) {
+    H_ELE(cProcIns);
+    rb_hpricot_add(S->focus, ele);
+  } else if (sym == sym_text) {
+    H_ELE(cText);
+    rb_hpricot_add(S->focus, ele);
+  } else if (sym == sym_xmldecl) {
+    H_ELE(cXMLDecl);
     rb_hpricot_add(S->focus, ele);
   }
 }
@@ -246,7 +284,9 @@ VALUE hpricot_scan(VALUE self, VALUE port)
   if (!rb_block_given_p())
   {
     S = ALLOC(hpricot_state);
-    S->doc = rb_funcall(rb_const_get(mHpricot, s_Doc), s_new, 0);
+    hpricot_ele *he = ALLOC(hpricot_ele);
+    he->tag = he->attr = he->raw = he->etag = he->parent = he->children = Qnil;
+    S->doc = Data_Wrap_Struct(cDoc, hpricot_ele_mark, hpricot_ele_free, he);
     rb_gc_register_address(&S->doc);
     S->focus = S->doc;
     S->xml = 0;
@@ -372,15 +412,19 @@ void Init_hpricot_scan()
   rb_define_attr(rb_singleton_class(mHpricot), "buffer_size", 1, 1);
   rb_define_singleton_method(mHpricot, "scan", hpricot_scan, 1);
   rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eStandardError);
+  cBaseEle = rb_define_class_under(mHpricot, "XBaseEle", rb_cObject);
+  cBogusETag = rb_define_class_under(mHpricot, "XBogusETag", cBaseEle);
+  cCData = rb_define_class_under(mHpricot, "XCData", cBaseEle);
+  cComment = rb_define_class_under(mHpricot, "XComment", cBaseEle);
+  cDoc = rb_define_class_under(mHpricot, "XDoc", cBaseEle);
+  cDocType = rb_define_class_under(mHpricot, "XDocType", cBaseEle);
+  cElement = rb_define_class_under(mHpricot, "XElement", cBaseEle);
+  cETag = rb_define_class_under(mHpricot, "XETag", cBaseEle);
+  cText = rb_define_class_under(mHpricot, "XText", cBaseEle);
+  cXMLDecl = rb_define_class_under(mHpricot, "XXMLDecl", cBaseEle);
+  cProcIns = rb_define_class_under(mHpricot, "XProcIns", cBaseEle);
 
-  s_BogusETag = rb_intern("BogusETag");
-  s_CData = rb_intern("CData");
-  s_Comment = rb_intern("Comment");
-  s_Doc = rb_intern("Doc");
-  s_Element = rb_intern("Element");
   s_ElementContent = rb_intern("ElementContent");
-  s_ETag = rb_intern("ETag");
-  s_Text = rb_intern("Text");
   s_new = rb_intern("new");
   s_parent = rb_intern("parent");
   s_read = rb_intern("read");
