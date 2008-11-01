@@ -658,7 +658,7 @@ module Hpricot
   module Elem::Trav
     def traverse_some_element(name_set, &block)
       yield self if name_set.include? self.name
-      children.each {|c| c.traverse_some_element(name_set, &block) }
+      children.each {|c| c.traverse_some_element(name_set, &block) } if children
     end
   end
 

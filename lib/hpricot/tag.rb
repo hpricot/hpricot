@@ -288,5 +288,175 @@ module Hpricot
     end
   end
 
+  #
+  # --- new hpricot classes ---
+  #
+  class Doc
+    def output(out, opts = {})
+      children.each do |n|
+        n.output(out, opts)
+      end
+      out
+    end
+    def make(input = nil, &blk)
+      Hpricot.make(input, @options, &blk)
+    end
+    def altered!; end
+  end
+
+  class XBaseEle
+    def html_quote(str)
+      "\"" + str.gsub('"', '\\"') + "\""
+    end
+    def if_output(opts)
+      if opts[:preserve] and not raw_string.nil?
+        raw_string
+      else
+        yield opts
+      end
+    end
+    def pathname; self.name end
+    def altered!
+      clear_raw
+    end
+  end
+
+  class XElement
+    def empty?; children and children.empty? end
+    def attributes
+      if raw_attributes
+        raw_attributes.inject({}) do |hsh, (k, v)|
+          hsh[k] = Hpricot.uxs(v)
+          hsh
+        end
+      end
+    end
+    def to_plain_text
+      if self.name == 'br'
+        "\n"
+      elsif self.name == 'p'
+        "\n\n" + super + "\n\n"
+      elsif self.name == 'a' and self.has_attribute?('href')
+        "#{super} [#{self['href']}]"
+      elsif self.name == 'img' and self.has_attribute?('src')
+        "[img:#{self['src']}]"
+      else
+        super
+      end
+    end
+    def pathname; self.name end
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "<#{name}#{attributes_as_html}" +
+            (empty? and not etag ? " /" : "") +
+            ">"
+        end
+      if children
+        children.each { |n| n.output(out, opts) }
+      end
+      if etag
+        etag.output(out, opts)
+      elsif !opts[:preserve]
+        ETag.new(name).output(out, opts)
+      end
+      out
+    end
+    def attributes_as_html
+      if raw_attributes
+        raw_attributes.map do |aname, aval|
+          " #{aname}" +
+            (aval ? "=#{html_quote aval}" : "")
+        end.join
+      end
+    end
+  end
+
+  class XETag
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "</#{name}>"
+        end
+    end
+  end
+
+  class XBogusETag
+    def output(out, opts = {}); out << if_output(opts) { '' }; end
+  end
+
+  class XText
+    def pathname; "text()" end
+    def to_s
+      Hpricot.uxs(content)
+    end
+    alias_method :inner_text, :to_s
+    alias_method :to_plain_text, :to_s
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          content
+        end
+    end
+  end
+
+  class XCData
+    alias_method :to_s, :content
+    alias_method :to_plain_text, :content
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "<![CDATA[#{content}]]>"
+        end
+    end
+  end
+
+  class XXMLDecl
+    def pathname; "xmldecl()" end
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "<?xml version=\"#{version}\"" +
+            (encoding ? " encoding=\"#{encoding}\"" : "") +
+            (standalone != nil ? " standalone=\"#{standalone ? 'yes' : 'no'}\"" : "") +
+            "?>"
+        end
+    end
+  end
+
+  class XDocType
+    def pathname; "doctype()" end
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "<!DOCTYPE #{target} " +
+            (public_id ? "PUBLIC \"#{public_id}\"" : "SYSTEM") +
+            (system_id ? " #{html_quote(system_id)}" : "") + ">"
+        end
+    end
+  end
+
+  class XProcIns
+    def pathname; "procins()" end
+    def output(out, opts = {})
+      out << 
+        if_output(opts) do
+          "<?#{target}" +
+           (content ? " #{content}" : "") +
+           "?>"
+        end
+    end
+  end
+
+  class XComment
+    def pathname; "comment()" end
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "<!--#{content}-->"
+        end
+    end
+  end
+
   # :startdoc:
 end
