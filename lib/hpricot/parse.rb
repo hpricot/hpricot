@@ -48,6 +48,7 @@ module Hpricot
         opts[:fixup_tags] = true
       end
 
+      # [type, token, children, excluded, included, uncontainable]
       stack = [[nil, nil, [], [], [], []]]
       Hpricot.scan(input) do |token|
         if stack.last[5] == :CDATA and ![:procins, :comment, :cdata].include?(token[0]) and

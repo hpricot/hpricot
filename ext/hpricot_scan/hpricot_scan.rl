@@ -17,9 +17,11 @@
 #define NO_WAY_SERIOUSLY "*** This should not happen, please send a bug report with the HTML you're parsing to why@whytheluckystiff.net.  So sorry!"
 
 static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_emptytag, sym_comment,
-      sym_cdata, sym_text;
-static VALUE rb_eHpricotParseError;
-static ID s_read, s_to_str;
+      sym_cdata, sym_text, sym_EMPTY;
+static VALUE mHpricot, rb_eHpricotParseError;
+static ID s_BogusETag, s_CData, s_Comment, s_Doc, s_Element, s_ElementContent, s_ETag, s_Text;
+static ID s_new, s_parent, s_read, s_to_str;
+static ID iv_parent;
 
 #define ELE(N) \
   if (te > ts || text == 1) { \
@@ -28,7 +30,10 @@ static ID s_read, s_to_str;
     if (ts != 0 && sym_##N != sym_cdata && sym_##N != sym_text && sym_##N != sym_procins && sym_##N != sym_comment) { \
       raw_string = rb_str_new(ts, te-ts); \
     } \
-    rb_yield_tokens(sym_##N, tag, attr, raw_string, taint); \
+    if (rb_block_given_p()) \
+      rb_yield_tokens(sym_##N, tag, attr, raw_string, taint); \
+    else \
+      rb_hpricot_token(S, sym_##N, tag, attr, raw_string, taint); \
   }
 
 #define SET(N, E) \
@@ -132,11 +137,94 @@ void rb_yield_tokens(VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
   rb_yield(ary);
 }
 
+static void
+rb_hpricot_add(VALUE focus, VALUE ele)
+{
+  VALUE children = rb_iv_get(focus, "@children");
+  if (NIL_P(children))
+    children = rb_iv_set(focus, "@children", rb_ary_new());
+  rb_ary_push(children, ele);
+  rb_ivar_set(ele, iv_parent, focus);
+}
+
+typedef struct {
+  VALUE doc;
+  VALUE focus;
+  unsigned char xml, strict;
+} hpricot_state;
+
+VALUE
+rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
+{
+  VALUE ele;
+  if (sym == sym_emptytag || sym == sym_stag) {
+    ele = rb_obj_alloc(rb_const_get(mHpricot, s_Element));
+    rb_iv_set(ele, "@name", tag);
+    rb_iv_set(ele, "@raw_attributes", attr);
+    rb_iv_set(ele, "@raw_string", raw);
+    rb_hpricot_add(S->focus, ele);
+    if (sym == sym_stag) {
+      VALUE content = rb_const_get(mHpricot, s_ElementContent);
+      if (!(rb_hash_aref(content, tag) == sym_EMPTY && !S->xml)) {
+        S->focus = ele;
+      }
+    }
+  } else if (sym == sym_etag) {
+    VALUE match = Qnil, e = S->focus;
+    if (S->strict) {
+      VALUE content = rb_const_get(mHpricot, s_ElementContent);
+      if (NIL_P(rb_hash_aref(content, tag))) {
+        tag = rb_str_new2("div");
+      }
+    }
+
+    while (rb_ivar_defined(e, iv_parent))
+    {
+      VALUE name = rb_iv_get(e, "@name");
+      if (TYPE(name) == T_STRING && rb_str_cmp(name, tag) == 0)
+      {
+        match = e;
+        break;
+      }
+      e = rb_ivar_get(ele, iv_parent);
+    }
+
+    if (NIL_P(match))
+    {
+      VALUE etag = rb_obj_alloc(rb_const_get(mHpricot, s_BogusETag));
+      rb_iv_set(etag, "@name", tag);
+      rb_iv_set(etag, "@raw_string", raw);
+      rb_hpricot_add(S->focus, etag);
+    }
+    else
+    {
+      VALUE etag = rb_obj_alloc(rb_const_get(mHpricot, s_ETag));
+      rb_iv_set(etag, "@name", tag);
+      rb_iv_set(etag, "@raw_string", raw);
+      rb_iv_set(match, "@etag", etag);
+      S->focus = rb_ivar_get(match, iv_parent);
+    }
+  } else if (sym == sym_text) {
+    VALUE ele = rb_obj_alloc(rb_const_get(mHpricot, s_Text));
+    rb_iv_set(ele, "@content", tag);
+    rb_hpricot_add(S->focus, ele);
+  } else if (sym == sym_comment) {
+    VALUE ele = rb_obj_alloc(rb_const_get(mHpricot, s_Comment));
+    rb_iv_set(ele, "@content", tag);
+    rb_hpricot_add(S->focus, ele);
+  } else if (sym == sym_cdata) {
+    VALUE ele = rb_obj_alloc(rb_const_get(mHpricot, s_CData));
+    rb_iv_set(ele, "@content", tag);
+    rb_hpricot_add(S->focus, ele);
+  }
+}
+
 VALUE hpricot_scan(VALUE self, VALUE port)
 {
   int cs, act, have = 0, nread = 0, curline = 1, text = 0;
   char *ts = 0, *te = 0, *buf = NULL, *eof = NULL;
 
+  hpricot_state *S = NULL;
   VALUE attr = Qnil, tag = Qnil, akey = Qnil, aval = Qnil, bufsize = Qnil;
   char *mark_tag = 0, *mark_akey = 0, *mark_aval = 0;
   int done = 0, ele_open = 0, buffer_size = 0;
@@ -153,6 +241,15 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     {
       rb_raise( rb_eArgError, "bad Hpricot argument, String or IO only please." );
     }
+  }
+
+  if (!rb_block_given_p())
+  {
+    S = ALLOC(hpricot_state);
+    S->doc = rb_funcall(rb_const_get(mHpricot, s_Doc), s_new, 0);
+    S->focus = S->doc;
+    S->xml = 0;
+    S->strict = 0;
   }
 
   buffer_size = BUFSIZE;
@@ -256,17 +353,37 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     }
   }
   free(buf);
+
+  if (S != NULL)
+  {
+    VALUE doc = S->doc;
+    free(S);
+    return doc;
+  }
+
+  return Qnil;
 }
 
 void Init_hpricot_scan()
 {
-  VALUE mHpricot = rb_define_module("Hpricot");
+  mHpricot = rb_define_module("Hpricot");
   rb_define_attr(rb_singleton_class(mHpricot), "buffer_size", 1, 1);
   rb_define_singleton_method(mHpricot, "scan", hpricot_scan, 1);
   rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eStandardError);
 
+  s_BogusETag = rb_intern("BogusETag");
+  s_CData = rb_intern("CData");
+  s_Comment = rb_intern("Comment");
+  s_Doc = rb_intern("Doc");
+  s_Element = rb_intern("Element");
+  s_ElementContent = rb_intern("ElementContent");
+  s_ETag = rb_intern("ETag");
+  s_Text = rb_intern("Text");
+  s_new = rb_intern("new");
+  s_parent = rb_intern("parent");
   s_read = rb_intern("read");
   s_to_str = rb_intern("to_str");
+  iv_parent = rb_intern("parent");
   sym_xmldecl = ID2SYM(rb_intern("xmldecl"));
   sym_doctype = ID2SYM(rb_intern("doctype"));
   sym_procins = ID2SYM(rb_intern("procins"));
@@ -276,4 +393,5 @@ void Init_hpricot_scan()
   sym_comment = ID2SYM(rb_intern("comment"));
   sym_cdata = ID2SYM(rb_intern("cdata"));
   sym_text = ID2SYM(rb_intern("text"));
+  sym_EMPTY = ID2SYM(rb_intern("EMPTY"));
 }

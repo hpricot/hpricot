@@ -94,10 +94,69 @@ module Hpricot
     end
   end
 
+  class Element < BaseEle
+    attr_accessor :etag, :children
+    def initialize(name, attributes=nil, raw_string=nil)
+      @name = name
+      @raw_attributes = attributes
+      @raw_string = raw_string
+    end
+    alterable :name, :raw_attributes
+    def empty?; @children and @children.empty? end
+    def attributes
+      if raw_attributes
+        raw_attributes.inject({}) do |hsh, (k, v)|
+          hsh[k] = Hpricot.uxs(v)
+          hsh
+        end
+      end
+    end
+    def to_plain_text
+      if self.name == 'br'
+        "\n"
+      elsif self.name == 'p'
+        "\n\n" + super + "\n\n"
+      elsif self.name == 'a' and self.has_attribute?('href')
+        "#{super} [#{self['href']}]"
+      elsif self.name == 'img' and self.has_attribute?('src')
+        "[img:#{self['src']}]"
+      else
+        super
+      end
+    end
+    def pathname; self.name end
+    def output(out, opts = {})
+      out <<
+        if_output(opts) do
+          "<#{@name}#{attributes_as_html}" +
+            (empty? and not @etag ? " /" : "") +
+            ">"
+        end
+      if @children
+        @children.each { |n| n.output(out, opts) }
+      end
+      if @etag
+        @etag.output(out, opts)
+      elsif !opts[:preserve]
+        ETag.new(@stag.name).output(out, opts)
+      end
+      out
+    end
+    def attributes_as_html
+      if @raw_attributes
+        @raw_attributes.map do |aname, aval|
+          " #{aname}" +
+            (aval ? "=#{html_quote aval}" : "")
+        end.join
+      end
+    end
+  end
+
   class STag < BaseEle
-    def initialize(name, attributes=nil)
-      @name = name.to_s
-      @raw_attributes = attributes || {}
+    def initialize(name, attributes=nil, raw_string=nil)
+      @name = name
+      @raw_attributes = attributes
+      @raw_string = raw_string
     end
     alterable :name, :raw_attributes
     def attributes_as_html
@@ -119,8 +178,9 @@ module Hpricot
   end
 
   class ETag < BaseEle
-    def initialize(qualified_name)
-      @name = qualified_name.to_s
+    def initialize(qualified_name, raw_string=nil)
+      @name = qualified_name
+      @raw_string = raw_string
     end
     alterable :name
     def output(out, opts = {})

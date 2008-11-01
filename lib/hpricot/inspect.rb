@@ -55,6 +55,43 @@ module Hpricot
     alias inspect pretty_print_inspect
   end
 
+  class Element
+    def pretty_print(q)
+      if empty?
+        q.group(1, '{emptyelem', '}') {
+          q.breakable; pretty_print_stag q
+        }
+      else
+        q.group(1, "{elem", "}") {
+          q.breakable; pretty_print_stag q
+          if @children
+            @children.each {|elt| q.breakable; q.pp elt }
+          end
+          if @etag
+            q.breakable; q.pp @etag
+          end
+        }
+      end
+    end
+    def pretty_print_stag(q)
+      q.group(1, '<', '>') {
+        q.text @name
+
+        if @raw_attributes
+          @raw_attributes.each {|n, t|
+            q.breakable
+            if t
+              q.text "#{n}=\"#{Hpricot.uxs(t)}\""
+            else
+              q.text n
+            end
+          }
+        end
+      }
+    end
+    alias inspect pretty_print_inspect
+  end
+
   class STag
     def pretty_print(q)
       q.group(1, '<', '>') {
