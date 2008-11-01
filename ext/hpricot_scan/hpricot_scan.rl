@@ -247,6 +247,7 @@ VALUE hpricot_scan(VALUE self, VALUE port)
   {
     S = ALLOC(hpricot_state);
     S->doc = rb_funcall(rb_const_get(mHpricot, s_Doc), s_new, 0);
+    rb_gc_register_address(&S->doc);
     S->focus = S->doc;
     S->xml = 0;
     S->strict = 0;
@@ -357,6 +358,7 @@ VALUE hpricot_scan(VALUE self, VALUE port)
   if (S != NULL)
   {
     VALUE doc = S->doc;
+    rb_gc_unregister_address(&S->doc);
     free(S);
     return doc;
   }
