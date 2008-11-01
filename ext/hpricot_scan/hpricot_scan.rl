@@ -26,21 +26,27 @@ static ID s_new, s_parent, s_read, s_to_str;
 static ID iv_parent;
 
 typedef struct {
-  VALUE tag, attr, raw, etag;
+  int name;
+  VALUE tag, attr, etag;
+  char *raw;
+  int rawlen;
   VALUE parent, children;
 } hpricot_ele;
 
 #define ELE(N) \
   if (te > ts || text == 1) { \
-    VALUE raw_string = Qnil; \
+    char *raw = NULL; \
+    int rawlen = 0; \
     ele_open = 0; text = 0; \
     if (ts != 0 && sym_##N != sym_cdata && sym_##N != sym_text && sym_##N != sym_procins && sym_##N != sym_comment) { \
-      raw_string = rb_str_new(ts, te-ts); \
+      raw = ts; rawlen = te - ts; \
     } \
-    if (rb_block_given_p()) \
-      rb_yield_tokens(sym_##N, tag, attr, raw_string, taint); \
-    else \
-      rb_hpricot_token(S, sym_##N, tag, attr, raw_string, taint); \
+    if (rb_block_given_p()) { \
+      VALUE raw_string = Qnil; \
+      if (raw != NULL) raw_string = rb_str_new(raw, rawlen); \
+      rb_yield_tokens(sym_##N, tag, attr, Qnil, taint); \
+    } else \
+      rb_hpricot_token(S, sym_##N, tag, attr, raw, rawlen, taint); \
   }
 
 #define SET(N, E) \
@@ -167,7 +173,6 @@ hpricot_ele_mark(hpricot_ele *he)
 {
   rb_gc_mark(he->tag);
   rb_gc_mark(he->attr);
-  rb_gc_mark(he->raw);
   rb_gc_mark(he->etag);
   rb_gc_mark(he->parent);
   rb_gc_mark(he->children);
@@ -181,18 +186,21 @@ hpricot_ele_free(hpricot_ele *he)
 
 #define H_ELE(klass) \
   hpricot_ele *he = ALLOC(hpricot_ele); \
+  he->name = 0; \
   he->tag = tag; \
   he->attr = attr; \
   he->raw = raw; \
+  he->rawlen = rawlen; \
   he->etag = he->parent = he->children = Qnil; \
   ele = Data_Wrap_Struct(klass, hpricot_ele_mark, hpricot_ele_free, he)
 
 VALUE
-rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
+rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, int rawlen, int taint)
 {
   VALUE ele;
   if (sym == sym_emptytag || sym == sym_stag) {
     H_ELE(cElement);
+    he->name = rb_str_hash(tag);
     rb_hpricot_add(S->focus, ele);
     if (sym == sym_stag) {
       VALUE content = rb_const_get(mHpricot, s_ElementContent);
@@ -201,6 +209,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, VALUE raw, 
       }
     }
   } else if (sym == sym_etag) {
+    int name;
     VALUE match = Qnil, e = S->focus;
     if (S->strict) {
       VALUE content = rb_const_get(mHpricot, s_ElementContent);
@@ -213,12 +222,13 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, VALUE raw, 
     // a big optimization will be to improve this very simple
     // O(n) tag search, where n is the depth of the current tag.
     //
+    name = rb_str_hash(tag);
     while (e != S->doc)
     {
       hpricot_ele *he;
       Data_Get_Struct(e, hpricot_ele, he);
 
-      if (TYPE(he->tag) == T_STRING && rb_str_cmp(he->tag, tag) == 0)
+      if (he->name == name)
       {
         match = e;
         break;
@@ -285,7 +295,8 @@ VALUE hpricot_scan(VALUE self, VALUE port)
   {
     S = ALLOC(hpricot_state);
     hpricot_ele *he = ALLOC(hpricot_ele);
-    he->tag = he->attr = he->raw = he->etag = he->parent = he->children = Qnil;
+    MEMZERO(he, hpricot_ele, 1);
+    he->tag = he->attr = he->etag = he->parent = he->children = Qnil;
     S->doc = Data_Wrap_Struct(cDoc, hpricot_ele_mark, hpricot_ele_free, he);
     rb_gc_register_address(&S->doc);
     S->focus = S->doc;
