@@ -34,6 +34,8 @@ typedef struct {
   VALUE parent, children;
 } hpricot_ele;
 
+#define OPT(opts, key) (!NIL_P(opts) && RTEST(rb_hash_aref(opts, ID2SYM(rb_intern("" # key)))))
+
 #define ELE(N) \
   if (te > ts || text == 1) { \
     char *raw = NULL; \
@@ -166,7 +168,9 @@ rb_hpricot_add(VALUE focus, VALUE ele)
 typedef struct {
   VALUE doc;
   VALUE focus;
-  unsigned char xml, strict;
+  VALUE last;
+  VALUE EC;
+  unsigned char xml, strict, fixup;
 } hpricot_state;
 
 static void
@@ -231,35 +235,54 @@ hpricot_ele_clear_raw(VALUE self)
   he->raw = raw; \
   he->rawlen = rawlen; \
   he->etag = he->parent = he->children = Qnil; \
-  ele = Data_Wrap_Struct(klass, hpricot_ele_mark, hpricot_ele_free, he)
+  ele = Data_Wrap_Struct(klass, hpricot_ele_mark, hpricot_ele_free, he); \
+  S->last = ele
 
+//
+// the swift, compact parser logic.  most of the complicated stuff is done
+// in the lexer.  this step just pairs up the start and end tags.
+//
 VALUE
 rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, int rawlen, int taint)
 {
   VALUE ele;
+
+  //
+  // in html mode, fix up start tags incorrectly formed as empty tags
+  //
+  if (!S->xml && sym == sym_emptytag) {
+    if (rb_hash_aref(S->EC, tag) != sym_EMPTY)
+      tag = sym_stag;
+  }
+
   if (sym == sym_emptytag || sym == sym_stag) {
     H_ELE(cElement);
     he->name = rb_str_hash(tag);
     rb_hpricot_add(S->focus, ele);
+
+    //
+    // in the case of a start tag that should be empty, just
+    // skip the step that focuses the element.  focusing moves
+    // us deeper into the document.
+    //
     if (sym == sym_stag) {
-      VALUE content = rb_const_get(mHpricot, s_ElementContent);
-      if (!(rb_hash_aref(content, tag) == sym_EMPTY && !S->xml)) {
+      if (S->xml || rb_hash_aref(S->EC, tag) != sym_EMPTY) {
         S->focus = ele;
+        S->last = Qnil;
       }
     }
   } else if (sym == sym_etag) {
     int name;
     VALUE match = Qnil, e = S->focus;
     if (S->strict) {
-      VALUE content = rb_const_get(mHpricot, s_ElementContent);
-      if (NIL_P(rb_hash_aref(content, tag))) {
+      if (NIL_P(rb_hash_aref(S->EC, tag))) {
         tag = rb_str_new2("div");
       }
     }
 
     //
-    // a big optimization will be to improve this very simple
-    // O(n) tag search, where n is the depth of the current tag.
+    // another optimization will be to improve this very simple
+    // O(n) tag search, where n is the depth of the focused tag.
     //
     name = rb_str_hash(tag);
     while (e != S->doc)
@@ -287,12 +310,20 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
       Data_Get_Struct(match, hpricot_ele, he);
       he->etag = ele;
       S->focus = he->parent;
+      S->last = Qnil;
     }
   } else if (sym == sym_cdata) {
     H_ELE(cCData);
     rb_hpricot_add(S->focus, ele);
   } else if (sym == sym_comment) {
     H_ELE(cComment);
+    rb_hpricot_add(S->focus, ele);
+  } else if (sym == sym_doctype) {
+    H_ELE(cDocType);
+    if (S->strict) {
+      rb_hash_aset(attr, rb_str_new2("system_id"), rb_str_new2("http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"));
+      rb_hash_aset(attr, rb_str_new2("public_id"), rb_str_new2("-//W3C//DTD XHTML 1.0 Strict//EN"));
+    }
     rb_hpricot_add(S->focus, ele);
   } else if (sym == sym_procins) {
     VALUE match = rb_funcall(tag, rb_intern("match"), 1, reProcInsParse);
@@ -301,25 +332,34 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     H_ELE(cProcIns);
     rb_hpricot_add(S->focus, ele);
   } else if (sym == sym_text) {
-    H_ELE(cText);
-    rb_hpricot_add(S->focus, ele);
+    // TODO: add raw_string as well?
+    if (!NIL_P(S->last) && RBASIC(S->last)->klass == cText) {
+      hpricot_ele *he;
+      Data_Get_Struct(S->last, hpricot_ele, he);
+      rb_str_append(he->tag, tag);
+    } else {
+      H_ELE(cText);
+      rb_hpricot_add(S->focus, ele);
+    }
   } else if (sym == sym_xmldecl) {
     H_ELE(cXMLDecl);
     rb_hpricot_add(S->focus, ele);
   }
 }
 
-VALUE hpricot_scan(VALUE self, VALUE port)
+VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
 {
   int cs, act, have = 0, nread = 0, curline = 1, text = 0;
   char *ts = 0, *te = 0, *buf = NULL, *eof = NULL;
 
   hpricot_state *S = NULL;
+  VALUE port, opts;
   VALUE attr = Qnil, tag = Qnil, akey = Qnil, aval = Qnil, bufsize = Qnil;
   char *mark_tag = 0, *mark_akey = 0, *mark_aval = 0;
-  int done = 0, ele_open = 0, buffer_size = 0;
+  int done = 0, ele_open = 0, buffer_size = 0, taint = 0;
 
-  int taint = OBJ_TAINTED( port );
+  rb_scan_args(argc, argv, "11", &port, &opts);
+  taint = OBJ_TAINTED( port );
   if ( !rb_respond_to( port, s_read ) )
   {
     if ( rb_respond_to( port, s_to_str ) )
@@ -329,9 +369,12 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     }
     else
     {
-      rb_raise( rb_eArgError, "bad Hpricot argument, String or IO only please." );
+      rb_raise(rb_eArgError, "an Hpricot document must be built from an input source (a String or IO object.)");
     }
   }
+
+  if (TYPE(opts) != T_HASH)
+    opts = Qnil;
 
   if (!rb_block_given_p())
   {
@@ -342,8 +385,13 @@ VALUE hpricot_scan(VALUE self, VALUE port)
     S->doc = Data_Wrap_Struct(cDoc, hpricot_ele_mark, hpricot_ele_free, he);
     rb_gc_register_address(&S->doc);
     S->focus = S->doc;
-    S->xml = 0;
-    S->strict = 0;
+    S->last = Qnil;
+    S->xml = OPT(opts, xml);
+    S->strict = OPT(opts, xhtml_strict);
+    S->fixup = OPT(opts, fixup_tags);
+    if (S->strict) S->fixup = 1;
+
+    S->EC = rb_const_get(mHpricot, s_ElementContent);
   }
 
   buffer_size = BUFSIZE;
@@ -463,7 +511,7 @@ void Init_hpricot_scan()
 {
   mHpricot = rb_define_module("Hpricot");
   rb_define_attr(rb_singleton_class(mHpricot), "buffer_size", 1, 1);
-  rb_define_singleton_method(mHpricot, "scan", hpricot_scan, 1);
+  rb_define_singleton_method(mHpricot, "scan", hpricot_scan, -1);
   rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eStandardError);
 
   cDoc = rb_define_class_under(mHpricot, "XDoc", rb_cObject);
