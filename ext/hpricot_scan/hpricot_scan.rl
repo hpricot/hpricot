@@ -14,6 +14,8 @@
 #define RSTRING_PTR(str) RSTRING(str)->ptr
 #endif
 
+VALUE hpricot_css(VALUE, VALUE, VALUE, VALUE, VALUE);
+
 #define NO_WAY_SERIOUSLY "*** This should not happen, please send a bug report with the HTML you're parsing to why@whytheluckystiff.net.  So sorry!"
 
 static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_emptytag, sym_comment,
@@ -512,6 +514,7 @@ void Init_hpricot_scan()
   mHpricot = rb_define_module("Hpricot");
   rb_define_attr(rb_singleton_class(mHpricot), "buffer_size", 1, 1);
   rb_define_singleton_method(mHpricot, "scan", hpricot_scan, -1);
+  rb_define_singleton_method(mHpricot, "css", hpricot_css, 4);
   rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eStandardError);
 
   cDoc = rb_define_class_under(mHpricot, "XDoc", rb_cObject);

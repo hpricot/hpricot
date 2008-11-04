@@ -20,7 +20,7 @@ RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README', 
 PKG_FILES = %w(CHANGELOG COPYING README Rakefile) +
       Dir.glob("{bin,doc,test,lib,extras}/**/*") + 
       Dir.glob("ext/**/*.{h,java,c,rb,rl}") + 
-      %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/HpricotScanService.java] # needed because they are generated later
+      %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/hpricot_css.c ext/hpricot_scan/HpricotScanService.java] # needed because they are generated later
 RAGEL_C_CODE_GENERATION_STYLES = {
   "table_driven" => 'T0',
   "faster_table_driven" => 'T1',
@@ -148,7 +148,7 @@ desc "Generates the C scanner code with Ragel."
 task :ragel => [:ragel_version] do
   if @ragel_v >= 6.1
     @ragel_c_code_generation_style = RAGEL_C_CODE_GENERATION_STYLES[DEFAULT_RAGEL_C_CODE_GENERATION]
-    sh %{cd ext/hpricot_scan; ragel hpricot_scan.rl -#{@ragel_c_code_generation_style} -o hpricot_scan.c}
+    sh %{cd ext/hpricot_scan; ragel hpricot_scan.rl -#{@ragel_c_code_generation_style} -o hpricot_scan.c && ragel hpricot_css.rl -#{@ragel_c_code_generation_style} -o hpricot_css.c}
   else
     STDERR.puts "Ragel 6.1 or greater is required."
     exit(1)
