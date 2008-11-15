@@ -20,7 +20,7 @@ class TestParser < Test::Unit::TestCase
   end 
 
   def test_scan_text
-    assert_equal 'FOO', Hpricot.make("FOO").first.content
+    assert_equal 'FOO', Hpricot.make("FOO").children.first.content
   end
 
   def test_filter_by_attr

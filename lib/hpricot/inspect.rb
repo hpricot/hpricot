@@ -9,7 +9,7 @@ module Hpricot
     alias inspect pretty_print_inspect
   end
 
-  class XDoc
+  class Doc
     def pretty_print(q)
       q.object_group(self) { children.each {|elt| q.breakable; q.pp elt } }
     end
@@ -34,7 +34,7 @@ module Hpricot
     alias inspect pretty_print_inspect
   end
 
-  class XElement
+  class Elem
     def pretty_print(q)
       if empty?
         q.group(1, '{emptyelem', '}') {
@@ -71,7 +71,7 @@ module Hpricot
     alias inspect pretty_print_inspect
   end
 
-  class XETag
+  class ETag
     def pretty_print(q)
       q.group(1, '</', '>') {
         q.text name
@@ -80,13 +80,13 @@ module Hpricot
     alias inspect pretty_print_inspect
   end
 
-  class XText
+  class Text
     def pretty_print(q)
       q.text content.dump
     end
   end
 
-  class XBogusETag
+  class BogusETag
     def pretty_print(q)
       q.group(1, '{', '}') {
         q.text self.class.name.sub(/.*::/,'').downcase
