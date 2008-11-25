@@ -148,6 +148,8 @@ module Hpricot
     def to_plain_text
       if respond_to?(:children) and children
         children.map { |x| x.to_plain_text }.join.strip.gsub(/\n{2,}/, "\n\n")
+      else
+        ""
       end
     end
 
@@ -156,6 +158,8 @@ module Hpricot
     def inner_text
       if respond_to?(:children) and children
         children.map { |x| x.inner_text }.join
+      else
+        ""
       end
     end
     alias_method :innerText, :inner_text
@@ -174,6 +178,8 @@ module Hpricot
       else
         if respond_to?(:children) and children
           children.map { |x| x.output("") }.join
+        else
+          ""
         end
       end
     end
