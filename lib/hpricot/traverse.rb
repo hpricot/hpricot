@@ -146,7 +146,7 @@ module Hpricot
     # Builds a string from the text contained in this node.  All
     # HTML elements are removed.
     def to_plain_text
-      if respond_to? :children
+      if respond_to?(:children) and children
         children.map { |x| x.to_plain_text }.join.strip.gsub(/\n{2,}/, "\n\n")
       end
     end
@@ -154,7 +154,7 @@ module Hpricot
     # Builds a string from the text contained in this node.  All
     # HTML elements are removed.
     def inner_text
-      if respond_to? :children
+      if respond_to?(:children) and children
         children.map { |x| x.inner_text }.join
       end
     end
@@ -172,7 +172,7 @@ module Hpricot
         end
         reparent self.children
       else
-        if respond_to? :children
+        if respond_to?(:children) and children
           children.map { |x| x.output("") }.join
         end
       end
