@@ -250,7 +250,7 @@ hpricot_ele_clear_raw(VALUE self)
   he->attr = attr; \
   he->raw = Qnil; \
   he->etag = he->parent = he->children = Qnil; \
-  if (raw != NULL && (sym == sym_emptytag || sym == sym_stag || sym == sym_etag)) { \
+  if (raw != NULL && (sym == sym_emptytag || sym == sym_stag || sym == sym_etag || sym == sym_doctype)) { \
     he->raw = rb_str_new(raw, rawlen); \
   } \
   ele = Data_Wrap_Struct(klass, hpricot_ele_mark, hpricot_ele_free, he); \

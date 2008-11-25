@@ -68,7 +68,10 @@ module Hpricot
       if etag
         etag.output(out, opts)
       elsif !opts[:preserve]
-        ETag.new(name).output(out, opts)
+        out <<
+          if_output(opts) do
+            "</#{name}>"
+          end
       end
       out
     end
