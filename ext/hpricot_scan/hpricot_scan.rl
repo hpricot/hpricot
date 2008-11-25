@@ -263,7 +263,7 @@ hpricot_ele_clear_raw(VALUE self)
 VALUE
 rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, int rawlen, int taint)
 {
-  VALUE ele, dtag = tag, ec = Qnil;
+  VALUE ele, ec = Qnil;
 
   //
   // in html mode, fix up start tags incorrectly formed as empty tags
@@ -272,8 +272,8 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     if (sym == sym_emptytag || sym == sym_stag || sym == sym_etag) {
       ec = rb_hash_aref(S->EC, tag);
       if (NIL_P(ec)) {
-        dtag = rb_funcall(tag, s_downcase, 0);
-        ec = rb_hash_aref(S->EC, dtag);
+        tag = rb_funcall(tag, s_downcase, 0);
+        ec = rb_hash_aref(S->EC, tag);
       }
       if (sym == sym_emptytag) {
         if (ec != sym_EMPTY)
@@ -287,7 +287,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
 
   if (sym == sym_emptytag || sym == sym_stag) {
     H_ELE(cElem);
-    he->name = rb_str_hash(dtag);
+    he->name = rb_str_hash(tag);
     rb_hpricot_add(S->focus, ele);
 
     //
@@ -305,8 +305,8 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     int name;
     VALUE match = Qnil, e = S->focus;
     if (S->strict) {
-      if (NIL_P(rb_hash_aref(S->EC, dtag))) {
-        dtag = tag = rb_str_new2("div");
+      if (NIL_P(rb_hash_aref(S->EC, tag))) {
+        tag = rb_str_new2("div");
       }
     }
 
@@ -314,7 +314,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     // another optimization will be to improve this very simple
     // O(n) tag search, where n is the depth of the focused tag.
     //
-    name = rb_str_hash(dtag);
+    name = rb_str_hash(tag);
     while (e != S->doc)
     {
       hpricot_ele *he;
