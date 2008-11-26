@@ -5,7 +5,7 @@ module Hpricot
     def output(out, opts = {})
       children.each do |n|
         n.output(out, opts)
-      end
+      end if children
       out
     end
     def make(input = nil, &blk)
@@ -111,6 +111,7 @@ module Hpricot
     end
     alias_method :inner_text, :to_s
     alias_method :to_plain_text, :to_s
+    def << str; self.content << str end
     def output(out, opts = {})
       out <<
         if_output(opts) do
