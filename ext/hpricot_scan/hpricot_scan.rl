@@ -256,6 +256,18 @@ hpricot_ele_clear_raw(VALUE self)
   ele = Data_Wrap_Struct(klass, hpricot_ele_mark, hpricot_ele_free, he); \
   S->last = ele
 
+VALUE
+hpricot_ele_alloc(VALUE klass)
+{
+  VALUE ele;
+  hpricot_ele *he = ALLOC(hpricot_ele);
+  he->name = 0;
+  he->tag = he->attr = he->raw = Qnil;
+  he->etag = he->parent = he->children = Qnil;
+  ele = Data_Wrap_Struct(klass, hpricot_ele_mark, hpricot_ele_free, he);
+  return ele;
+}
+
 //
 // the swift, compact parser logic.  most of the complicated stuff is done
 // in the lexer.  this step just pairs up the start and end tags.
@@ -546,10 +558,12 @@ void Init_hpricot_scan()
   rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eStandardError);
 
   cDoc = rb_define_class_under(mHpricot, "Doc", rb_cObject);
+  rb_define_alloc_func(cDoc, hpricot_ele_alloc);
   rb_define_method(cDoc, "children", hpricot_ele_get_children, 0);
   rb_define_method(cDoc, "children=", hpricot_ele_set_children, 1);
 
   cBaseEle = rb_define_class_under(mHpricot, "BaseEle", rb_cObject);
+  rb_define_alloc_func(cBaseEle, hpricot_ele_alloc);
   rb_define_method(cBaseEle, "raw_string", hpricot_ele_get_raw, 0);
   rb_define_method(cBaseEle, "clear_raw", hpricot_ele_clear_raw, 0);
   rb_define_method(cBaseEle, "parent", hpricot_ele_get_parent, 0);
@@ -573,6 +587,7 @@ void Init_hpricot_scan()
   rb_define_method(cElem, "children", hpricot_ele_get_children, 0);
   rb_define_method(cElem, "children=", hpricot_ele_set_children, 1);
   rb_define_method(cElem, "etag", hpricot_ele_get_etag, 0);
+  rb_define_method(cElem, "etag=", hpricot_ele_set_etag, 1);
   rb_define_method(cElem, "name", hpricot_ele_get_tag, 0);
   rb_define_method(cElem, "name=", hpricot_ele_set_tag, 1);
   cETag = rb_define_class_under(mHpricot, "ETag", cBaseEle);
