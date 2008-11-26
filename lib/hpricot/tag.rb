@@ -32,7 +32,7 @@ module Hpricot
   end
 
   class Elem
-    def initialize tag, attrs, children, etag
+    def initialize tag, attrs = nil, children = nil, etag = nil
       self.name, self.raw_attributes, self.children, self.etag =
         tag, attrs, children, etag
     end
