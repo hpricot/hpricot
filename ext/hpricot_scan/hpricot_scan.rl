@@ -554,7 +554,7 @@ void Init_hpricot_scan()
   mHpricot = rb_define_module("Hpricot");
   rb_define_attr(rb_singleton_class(mHpricot), "buffer_size", 1, 1);
   rb_define_singleton_method(mHpricot, "scan", hpricot_scan, -1);
-  rb_define_singleton_method(mHpricot, "css", hpricot_css, 4);
+  rb_define_singleton_method(mHpricot, "css", hpricot_css, 3);
   rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eStandardError);
 
   cDoc = rb_define_class_under(mHpricot, "Doc", rb_cObject);

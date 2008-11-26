@@ -105,6 +105,7 @@ module Hpricot
       end
 
       # create the element itself
+      tag = tag.to_s
       f = Elem.new(tag, attrs, childs, ETag.new(tag))
 
       # build children from the block

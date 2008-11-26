@@ -6,18 +6,16 @@
  */
 #include <ruby.h>
 
-static ID s_to_str;
-
 #define FILTER(id) \
   rb_funcall2(mod, rb_intern("" # id), fargs, fvals); \
   rb_ary_clear(tmpt); \
-  fargs = 0
+  fargs = 1
 #define FILTERAUTO() \
   char filt[10]; \
   sprintf(filt, "%.*s", te - ts, ts); \
   rb_funcall2(mod, rb_intern(filt), fargs, fvals); \
   rb_ary_clear(tmpt); \
-  fargs = 0
+  fargs = 1
 #define PUSH(aps, ape) rb_ary_push(tmpt, fvals[fargs++] = rb_str_new(aps, ape - aps))
 #define P(id) printf(id ": %.*s\n", te - ts, ts);
 
@@ -88,23 +86,22 @@ static ID s_to_str;
   write data nofinal;
 }%%
 
-VALUE hpricot_css(VALUE self, VALUE mod, VALUE str, VALUE node, VALUE matches)
+VALUE hpricot_css(VALUE self, VALUE mod, VALUE str, VALUE node)
 {
   int cs, act, eof;
   char *p, *pe, *ts, *te, *aps, *ape, *aps2, *ape2;
 
-  int fargs = 0;
-  VALUE fvals[5];
-
+  int fargs = 1;
+  VALUE fvals[6];
   VALUE focus = rb_ary_new3(1, node);
   VALUE tmpt = rb_ary_new();
   rb_gc_register_address(&focus);
   rb_gc_register_address(&tmpt);
+  fvals[0] = focus;
 
-  if (!rb_respond_to(str, s_to_str))
+  if (TYPE(str) != T_STRING)
     rb_raise(rb_eArgError, "bad CSS selector, String only please.");
  
-  str = rb_funcall(str, s_to_str, 0);
   StringValue(str);
   p = RSTRING_PTR(str);
   pe = p + RSTRING_LEN(str);
@@ -113,6 +110,6 @@ VALUE hpricot_css(VALUE self, VALUE mod, VALUE str, VALUE node, VALUE matches)
   %% write exec;
   
   rb_gc_unregister_address(&focus);
-  rb_gc_register_address(&tmpt);
-  return str;
+  rb_gc_unregister_address(&tmpt);
+  return focus;
 }
