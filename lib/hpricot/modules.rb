@@ -4,7 +4,6 @@ module Hpricot
 
   # :stopdoc:
   module Tag; include Hpricot end
-    class STag; include Tag end
     class ETag; include Tag end
   # :startdoc:
 
