@@ -14,13 +14,13 @@ class TestParser < Test::Unit::TestCase
 
   # Test creating a new element 
   def test_new_element 
-    elem = Hpricot::Elem.new(Hpricot::STag.new('form')) 
+    elem = Hpricot::Elem.new('form') 
     assert_not_nil(elem) 
     assert_not_nil(elem.attributes) 
   end 
 
   def test_scan_text
-    assert_equal 'FOO', Hpricot.make("FOO").first.content
+    assert_equal 'FOO', Hpricot.make("FOO").children.first.content
   end
 
   def test_filter_by_attr

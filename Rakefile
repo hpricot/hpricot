@@ -9,19 +9,18 @@ include FileUtils
 RbConfig = Config unless defined?(RbConfig)
 
 NAME = "hpricot"
-REV = `svn info`[/Revision: (\d+)/, 1] rescue nil
+REV = (`#{ENV['GIT'] || "git"} rev-list HEAD`.split.length + 1).to_s
 VERS = ENV['VERSION'] || "0.6" + (REV ? ".#{REV}" : "")
 PKG = "#{NAME}-#{VERS}"
-BIN = "*.{bundle,jar,so,obj,pdb,lib,def,exp,class}"
-ARCHLIB = "lib/#{::Config::CONFIG['arch']}"
-CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}", ARCHLIB,
+BIN = "*.{bundle,jar,so,o,obj,pdb,lib,def,exp,class}"
+CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}",
                'ext/fast_xs/Makefile', 'ext/hpricot_scan/Makefile', 
                '**/.*.sw?', '*.gem', '.config', 'pkg']
 RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README', '--inline-source']
 PKG_FILES = %w(CHANGELOG COPYING README Rakefile) +
       Dir.glob("{bin,doc,test,lib,extras}/**/*") + 
       Dir.glob("ext/**/*.{h,java,c,rb,rl}") + 
-      %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/HpricotScanService.java] # needed because they are generated later
+      %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/hpricot_css.c ext/hpricot_scan/HpricotScanService.java] # needed because they are generated later
 RAGEL_C_CODE_GENERATION_STYLES = {
   "table_driven" => 'T0',
   "faster_table_driven" => 'T1',
@@ -46,11 +45,19 @@ SPEC =
     s.author = "why the lucky stiff"
     s.email = 'why@ruby-lang.org'
     s.homepage = 'http://code.whytheluckystiff.net/hpricot/'
+    s.rubyforge_project = 'hobix'
     s.files = PKG_FILES
-    s.require_paths = [ARCHLIB, "lib"] 
+    s.require_paths = ["lib"] 
     s.extensions = FileList["ext/**/extconf.rb"].to_a
     s.bindir = "bin"
   end
+
+Win32Spec = SPEC.dup
+Win32Spec.platform = 'mswin32'
+Win32Spec.files = PKG_FILES + ["lib/hpricot_scan.so", "lib/fast_xs.so"]
+Win32Spec.extensions = []
+  
+WIN32_PKG_DIR = "#{PKG}-mswin32"
 
 desc "Does a full compile, test run"
 task :default => [:compile, :test]
@@ -63,7 +70,7 @@ task :release => [:package, :package_win32, :package_jruby]
 
 desc "Run all the tests"
 Rake::TestTask.new do |t|
-    t.libs << "test" << ARCHLIB
+    t.libs << "test"
     t.test_files = FileList['test/test_*.rb']
     t.verbose = true
 end
@@ -103,8 +110,14 @@ end
     Dir.chdir(ext) do
       sh(RUBY_PLATFORM =~ /win32/ ? 'nmake' : 'make')
     end
-    mkdir_p ARCHLIB
-    cp ext_so, ARCHLIB
+    cp ext_so, "lib"
+  end
+
+  desc "Cross-compile the #{extension} extension for win32"
+  file "#{extension}_win32" => [WIN32_PKG_DIR] do
+    cp "extras/mingw-rbconfig.rb", "#{WIN32_PKG_DIR}/ext/#{extension}/rbconfig.rb"
+    sh "cd #{WIN32_PKG_DIR}/ext/#{extension}/ && ruby -I. extconf.rb && make"
+    mv "#{WIN32_PKG_DIR}/ext/#{extension}/#{extension}.so", "#{WIN32_PKG_DIR}/lib"
   end
 end
 
@@ -114,7 +127,7 @@ end
 
 desc "Compiles the Ruby extension"
 task :compile => [:hpricot_scan, :fast_xs] do
-  if Dir.glob(File.join(ARCHLIB,"hpricot_scan.*")).length == 0
+  if Dir.glob(File.join("lib","hpricot_scan.*")).length == 0
     STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
     STDERR.puts "Gem actually failed to build.  Your system is"
     STDERR.puts "NOT configured properly to build hpricot."
@@ -135,7 +148,7 @@ desc "Generates the C scanner code with Ragel."
 task :ragel => [:ragel_version] do
   if @ragel_v >= 6.1
     @ragel_c_code_generation_style = RAGEL_C_CODE_GENERATION_STYLES[DEFAULT_RAGEL_C_CODE_GENERATION]
-    sh %{cd ext/hpricot_scan; ragel hpricot_scan.rl -#{@ragel_c_code_generation_style} -o hpricot_scan.c}
+    sh %{cd ext/hpricot_scan; ragel hpricot_scan.rl -#{@ragel_c_code_generation_style} -o hpricot_scan.c && ragel hpricot_css.rl -#{@ragel_c_code_generation_style} -o hpricot_css.c}
   else
     STDERR.puts "Ragel 6.1 or greater is required."
     exit(1)
@@ -157,28 +170,14 @@ end
 
 ### Win32 Packages ###
 
-Win32Spec = SPEC.dup
-Win32Spec.platform = Gem::Platform::CURRENT
-Win32Spec.files = PKG_FILES + ["#{ARCHLIB}/hpricot_scan.so", "#{ARCHLIB}/fast_xs.so"]
-Win32Spec.extensions = []
-  
-WIN32_PKG_DIR = "#{PKG}-mswin32"
-
 desc "Package up the Win32 distribution."
 file WIN32_PKG_DIR => [:package] do
   sh "tar zxf pkg/#{PKG}.tgz"
   mv PKG, WIN32_PKG_DIR
 end
 
-desc "Cross-compile the hpricot_scan extension for win32"
-file "hpricot_scan_win32" => [WIN32_PKG_DIR] do
-  cp "extras/mingw-rbconfig.rb", "#{WIN32_PKG_DIR}/ext/hpricot_scan/rbconfig.rb"
-  sh "cd #{WIN32_PKG_DIR}/ext/hpricot_scan/ && ruby -I. extconf.rb && make"
-  mv "#{WIN32_PKG_DIR}/ext/hpricot_scan/hpricot_scan.so", "#{WIN32_PKG_DIR}/#{ARCHLIB}"
-end
-
 desc "Build the binary RubyGems package for win32"
-task :package_win32 => ["hpricot_scan_win32"] do
+task :package_win32 => ["fast_xs_win32", "hpricot_scan_win32"] do
   Dir.chdir("#{WIN32_PKG_DIR}") do
     Gem::Builder.new(Win32Spec).build
     verbose(true) {
@@ -222,13 +221,12 @@ end
 
 desc "Compiles the JRuby extensions"
 task :hpricot_java => [:hpricot_scan_java, :fast_xs_java] do
-  mkdir_p "#{ARCHLIB}"
-  %w(hpricot_scan fast_xs).each {|ext| mv "ext/#{ext}/#{ext}.jar", "#{ARCHLIB}"}
+  %w(hpricot_scan fast_xs).each {|ext| mv "ext/#{ext}/#{ext}.jar", "lib"}
 end
 
 JRubySpec = SPEC.dup
 JRubySpec.platform = 'jruby'
-JRubySpec.files = PKG_FILES + ["#{ARCHLIB}/hpricot_scan.jar", "#{ARCHLIB}/fast_xs.jar"]
+JRubySpec.files = PKG_FILES + ["lib/hpricot_scan.jar", "lib/fast_xs.jar"]
 JRubySpec.extensions = []
 
 JRUBY_PKG_DIR = "#{PKG}-jruby"
