@@ -449,15 +449,31 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
   
   while ( !done ) {
     VALUE str;
-    char *p = buf + have, *pe;
-    int len, space = buffer_size - have;
+    char *p, *pe;
+    int len, space = buffer_size - have, tokstart_diff, tokend_diff, mark_tag_diff, mark_akey_diff, mark_aval_diff;
 
     if ( space == 0 ) {
       /* We've used up the entire buffer storing an already-parsed token
        * prefix that must be preserved.  Likely caused by super-long attributes.
-       * See ticket #13. */
-      rb_raise(rb_eHpricotParseError, "ran out of buffer space on element <%s>, starting on line %d.", RSTRING_PTR(tag), curline);
+       * Increase buffer size and continue  */
+       tokstart_diff = ts - buf;
+       tokend_diff = te - buf;
+       mark_tag_diff = mark_tag - buf;
+       mark_akey_diff = mark_akey - buf;
+       mark_aval_diff = mark_aval - buf;
+
+       buffer_size += BUFSIZE;
+       buf = REALLOC_N(buf, char, buffer_size);
+
+       space = buffer_size - have;
+
+       ts= buf + tokstart_diff;
+       te = buf + tokend_diff;
+       mark_tag = buf + mark_tag_diff;
+       mark_akey = buf + mark_akey_diff;
+       mark_aval = buf + mark_aval_diff;
     }
+    p = buf + have;
 
     if ( rb_respond_to( port, s_read ) )
     {

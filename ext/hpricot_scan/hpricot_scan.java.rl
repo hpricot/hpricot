@@ -264,7 +264,11 @@ IRubyObject hpricot_scan(IRubyObject recv, IRubyObject port) {
       /* We've used up the entire buffer storing an already-parsed token
        * prefix that must be preserved.  Likely caused by super-long attributes.
        * See ticket #13. */
-      rb_raise(rb_eHpricotParseError, "ran out of buffer space on element <" + tag.toString() + ">, starting on line "+curline+".");
+       buffer_size += BUFSIZE;
+       char[] new_buf = new char[buffer_size];
+       System.arraycopy(buf, 0, new_buf, 0, buf.length);
+       buf = new_buf;
+       space = buffer_size - have;
     }
 
     if (port.respondsTo("read")) {
