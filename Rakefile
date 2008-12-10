@@ -100,7 +100,7 @@ end
   ] 
 
   desc "Builds just the #{extension} extension"
-  task extension.to_sym => ["#{ext}/Makefile", ext_so ]
+  task extension.to_sym => [:ragel, "#{ext}/Makefile", ext_so ]
 
   file "#{ext}/Makefile" => ["#{ext}/extconf.rb"] do
     Dir.chdir(ext) do ruby "extconf.rb" end
@@ -135,7 +135,6 @@ task :compile => [:hpricot_scan, :fast_xs] do
     exit(1)
   end
 end
-task :hpricot_scan => [:ragel]
 
 desc "Determines the Ragel version and displays it on the console along with the location of the Ragel binary."
 task :ragel_version do
