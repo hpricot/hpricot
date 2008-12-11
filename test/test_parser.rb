@@ -381,4 +381,20 @@ class TestParser < Test::Unit::TestCase
     assert (doc/"//t:sam").size > 0 # at least this should probably work
     # assert (doc/"//sam").size > 0  # this would be nice 
   end
+
+  def test_uxs_ignores_non_entities
+    assert_equal 'abc', Hpricot.uxs('abc')
+  end
+
+  def test_uxs_handles_gt_lt_amp_quot
+    assert_equal '"&<>', Hpricot.uxs('&quot;&amp;&lt;&gt;')
+  end
+
+  def test_uxs_handles_numeric_values
+    assert_equal "\303\251", Hpricot.uxs('&#233;')
+  end
+
+  def test_uxs_handles_entities
+    assert_equal "\303\251", Hpricot.uxs('&eacute;')
+  end
 end

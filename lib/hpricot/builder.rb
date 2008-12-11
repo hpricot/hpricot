@@ -1,20 +1,13 @@
 require 'hpricot/tags'
 require 'fast_xs'
 require 'hpricot/blankslate'
+require 'hpricot/htmlinfo'
 
 module Hpricot
-  PREDEFINED = {
-    34 => '&quot;', # quotation mark
-    38 => '&amp;',  # ampersand
-    60 => '&lt;',   # left angle bracket
-    62 => '&gt;'    # right angle bracket
-  }
-  PREDEFINED_U = PREDEFINED.inject({}) { |hsh, (k, v)| hsh[v] = k; hsh }
-
   # XML unescape
   def self.uxs(str)
     str.to_s.
-        gsub(/\&\w+;/) { |x| (PREDEFINED_U[x] || ??).chr }.
+        gsub(/\&(\w+);/) { [NamedCharacters[$1] || ??].pack("U*") }.
         gsub(/\&\#(\d+);/) { [$1.to_i].pack("U*") }
   end
 
