@@ -1,8 +1,7 @@
 Gem::Specification.new do |s|
   s.name = %q{hpricot}
-  s.version = "0.6.168"
+  s.version = "0.6.169"
  
-  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["why the lucky stiff"]
   s.date = %q{2008-12-11}
   s.description = %q{a swift, liberal HTML parser with a fantastic library}
@@ -13,17 +12,6 @@ Gem::Specification.new do |s|
   s.has_rdoc = true
   s.homepage = %q{http://code.whytheluckystiff.net/hpricot/}
   s.rdoc_options = ["--quiet", "--title", "The Hpricot Reference", "--main", "README", "--inline-source"]
-  s.require_paths = ["lib/universal-darwin9.0", "lib"]
-  s.rubygems_version = %q{1.3.0}
+  s.require_paths = ["lib"]
   s.summary = %q{a swift, liberal HTML parser with a fantastic library}
- 
-  if s.respond_to? :specification_version then
-    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
-    s.specification_version = 2
- 
-    if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
-    else
-    end
-  else
-  end
 end

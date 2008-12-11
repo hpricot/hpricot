@@ -121,6 +121,7 @@ module Hpricot
   end
 
   class CData
+    attr_reader :content
     def initialize content; self.content = content end
     alias_method :to_s, :content
     alias_method :to_plain_text, :content
