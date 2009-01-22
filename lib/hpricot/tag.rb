@@ -71,7 +71,7 @@ module Hpricot
       end
       if etag
         etag.output(out, opts)
-      elsif !opts[:preserve]
+      elsif !opts[:preserve] && !empty?
         out <<
           if_output(opts) do
             "</#{name}>"
