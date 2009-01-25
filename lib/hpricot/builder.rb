@@ -23,7 +23,7 @@ module Hpricot
     assigns.each do |k, v|
       ele.instance_variable_set("@#{k}", v)
     end
-    ele.instance_eval &blk
+    ele.instance_eval(&blk)
     ele
   end
 
@@ -67,11 +67,11 @@ module Hpricot
               raise InvalidXhtmlError, "no element `#{tag}' for #{tagset.doctype}"
           elsif args.last.respond_to?(:to_hash)
               attrs = args.last.to_hash
-              
+
               if @tagset.forms.include?(tag) and attrs[:id]
                 attrs[:name] ||= attrs[:id]
               end
-              
+
               attrs.each do |k, v|
                   atname = k.to_s.downcase.intern
                   unless k =~ /:/ or @tagset.tagset[tag].include? atname
@@ -150,7 +150,7 @@ module Hpricot
     end
 
     remove_method :head
-    
+
     # Builds a head tag.  Adds a <tt>meta</tt> tag inside with Content-Type
     # set to <tt>text/html; charset=utf-8</tt>.
     def head(*args, &block)
@@ -194,7 +194,7 @@ module Hpricot
     def initialize(builder, sym)
       @builder, @sym, @attrs = builder, sym, {}
     end
-    
+
     # Adds attributes to an element.  Bang methods set the :id attribute.
     # Other methods add to the :class attribute.
     def method_missing(id_or_class, *args, &block)
@@ -208,7 +208,7 @@ module Hpricot
         args.push(@attrs)
         return @builder.tag!(@sym, *args, &block)
       end
-      
+
       return self
     end
 
