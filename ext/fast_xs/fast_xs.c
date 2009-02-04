@@ -115,7 +115,7 @@ static long escape(char *buf, int n)
 
 	if (VALID_VALUE(n)) {
 		/* return snprintf(buf, sizeof("&#1114111;"), "&#%i;", n); */
-		extern const char ruby_digitmap[];
+		RUBY_EXTERN const char ruby_digitmap[];
 		int rv = 3; /* &#; */
 		buf += bytes_for(n);
 		*--buf = ';';
