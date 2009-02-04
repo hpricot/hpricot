@@ -38,14 +38,20 @@ module Hpricot
       @@default[option] = value
     end
 
+    def add_child ele
+      ele.parent = self
+      (self.children ||= []) << ele
+      ele
+    end
+
     # Write a +string+ to the HTML stream, making sure to escape it.
     def text!(string)
-      (self.children ||= []) << Text.new(string.fast_xs)
+      add_child Text.new(string.fast_xs)
     end
 
     # Write a +string+ to the HTML stream without escaping it.
     def text(string)
-      (self.children ||= []) << Text.new(string)
+      add_child Text.new(string)
       nil
     end
     alias_method :<<, :text
@@ -106,7 +112,7 @@ module Hpricot
         build(f, &block)
       end
 
-      (self.children ||= []) << f
+      add_child f
       f
     end
 
@@ -139,7 +145,7 @@ module Hpricot
     end
 
     def doctype(target, pub, sys)
-      (self.children ||= []) << DocType.new(target, pub, sys)
+      add_child DocType.new(target, pub, sys)
     end
 
     remove_method :head

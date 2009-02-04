@@ -26,7 +26,9 @@ module Hpricot
 
   def Hpricot.make(input = nil, opts = {}, &blk)
     if blk
-      Hpricot.build(&blk)
+      doc = Hpricot.build(&blk)
+      doc.instance_variable_set("@options", opts)
+      doc
     else
       Hpricot.scan(input, opts)
     end

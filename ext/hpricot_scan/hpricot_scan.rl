@@ -432,6 +432,7 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
     S->strict = OPT(opts, xhtml_strict);
     S->fixup = OPT(opts, fixup_tags);
     if (S->strict) S->fixup = 1;
+    rb_ivar_set(S->doc, rb_intern("@options"), opts);
 
     S->EC = rb_const_get(mHpricot, s_ElementContent);
   }
