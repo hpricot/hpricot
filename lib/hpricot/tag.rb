@@ -43,6 +43,8 @@ module Hpricot
           hsh[k] = Hpricot.uxs(v)
           hsh
         end
+      else
+        {}
       end
     end
     def to_plain_text
@@ -121,7 +123,6 @@ module Hpricot
   end
 
   class CData
-    attr_reader :content
     def initialize content; self.content = content end
     alias_method :to_s, :content
     alias_method :to_plain_text, :content
