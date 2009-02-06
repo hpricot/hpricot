@@ -300,10 +300,10 @@ module Hpricot
                         args = m[1..-1]
                     end
                 end
-                i = -1
+                args << -1
                 nodes = Elements[*nodes.find_all do |x| 
-                                      i += 1
-                                      x.send(meth, *([*args] + [i])) ? truth : !truth
+                                      args[-1] += 1
+                                      x.send(meth, *args) ? truth : !truth
                                   end]
             end
         end

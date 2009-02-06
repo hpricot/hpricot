@@ -12,6 +12,9 @@ module Hpricot
       Hpricot.make(input, @options, &blk).children
     end
     def altered!; end
+    def inspect_tree
+      children.map { |x| x.inspect_tree }.join if children
+    end
   end
 
   class BaseEle
@@ -28,6 +31,9 @@ module Hpricot
     def pathname; self.name end
     def altered!
       clear_raw
+    end
+    def inspect_tree(depth = 0)
+      %{#{" " * depth}} + self.class.name.split(/::/).last.downcase + "\n"
     end
   end
 
@@ -88,6 +94,10 @@ module Hpricot
             (aval ? "=#{html_quote aval}" : "")
         end.join
       end
+    end
+    def inspect_tree(depth = 0)
+      %{#{" " * depth}} + name + "\n" +
+        (children ? children.map { |x| x.inspect_tree(depth + 1) }.join : "")
     end
   end
 
