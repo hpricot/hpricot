@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env ruby
 
 require 'test/unit'
@@ -391,10 +392,18 @@ class TestParser < Test::Unit::TestCase
   end
 
   def test_uxs_handles_numeric_values
-    assert_equal "\303\251", Hpricot.uxs('&#233;')
+    if String.method_defined? :encoding
+      assert_equal "é", Hpricot.uxs('&#233;')
+    else
+      assert_equal "\303\251", Hpricot.uxs('&#233;')
+    end
   end
 
   def test_uxs_handles_entities
-    assert_equal "\303\251", Hpricot.uxs('&eacute;')
+    if String.method_defined? :encoding
+      assert_equal "é", Hpricot.uxs('&eacute;')
+    else
+      assert_equal "\303\251", Hpricot.uxs('&eacute;')
+    end
   end
 end

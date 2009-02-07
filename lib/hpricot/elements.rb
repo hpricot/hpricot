@@ -275,7 +275,7 @@ module Hpricot
             expr = $'
             m.compact!
             if m[0] == '@'
-                m[0] = "@#{m.slice!(2,1)}"
+                m[0] = "@#{m.slice!(2,1).join}"
             end
 
             if m[0] == '[' && m[1] =~ /^\d+$/
@@ -446,23 +446,23 @@ module Hpricot
       parent.containers.length == 1
     end
 
-    filter :parent do
+    filter :parent do |*a|
       containers.length > 0
     end
 
-    filter :empty do
+    filter :empty do |*a|
       containers.length == 0
     end
 
-    filter :root do
+    filter :root do |*a|
       self.is_a? Hpricot::Doc
     end
     
-    filter 'text' do
+    filter 'text' do |*a|
       self.text?
     end
 
-    filter 'comment' do
+    filter 'comment' do |*a|
       self.comment?
     end
 

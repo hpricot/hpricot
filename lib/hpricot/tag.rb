@@ -127,7 +127,7 @@ module Hpricot
     def output(out, opts = {})
       out <<
         if_output(opts) do
-          content
+          content.to_s
         end
     end
   end
