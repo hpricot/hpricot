@@ -495,7 +495,7 @@ module Hpricot
     end
 
     filter 'text()' do |val,i|
-      !self.inner_text.strip.empty?
+      self.children.grep(Hpricot::Text).detect { |x| x.content =~ /\S/ } if self.children
     end
 
     filter '@' do |attr,val,i|

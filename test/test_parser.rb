@@ -122,7 +122,7 @@ class TestParser < Test::Unit::TestCase
     assert_equal 60, @boingboing.search("h3").length
     assert_equal 59, @boingboing.search("h3[text()!='College kids reportedly taking more smart drugs']").length
     assert_equal 17, @boingboing.search("h3[text()$='s']").length
-    assert_equal 129, @boingboing.search("p[text()]").length
+    assert_equal 116, @boingboing.search("p[text()]").length
     assert_equal 211, @boingboing.search("p").length
   end
 
@@ -162,10 +162,10 @@ class TestParser < Test::Unit::TestCase
     assert_equal 60, @boingboing.search("/*/body//p[@class='posted']").length
     assert_equal 18, @boingboing.search("//script").length
     divs = @boingboing.search("//script/../div")
-    assert_equal 1,  divs.length
+    assert_equal 2,  divs.length
     imgs = @boingboing.search('//div/p/a/img')
-    assert_equal 15, imgs.length
-    assert_equal 17, @boingboing.search('//div').search('p/a/img').length
+    assert_equal 16, imgs.length
+    assert_equal 16, @boingboing.search('//div').search('p/a/img').length
     assert imgs.all? { |x| x.name == 'img' }
   end
 
@@ -173,10 +173,10 @@ class TestParser < Test::Unit::TestCase
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 2, @boingboing.search('//link[@rel="alternate"]').length
     p_imgs = @boingboing.search('//div/p[/a/img]')
-    assert_equal 15, p_imgs.length
+    assert_equal 16, p_imgs.length
     assert p_imgs.all? { |x| x.name == 'p' }
     p_imgs = @boingboing.search('//div/p[a/img]')
-    assert_equal 18, p_imgs.length
+    assert_equal 16, p_imgs.length
     assert p_imgs.all? { |x| x.name == 'p' }
     assert_equal 1, @boingboing.search('//input[@checked]').length
   end
@@ -219,7 +219,7 @@ class TestParser < Test::Unit::TestCase
   def test_many_paths
     @boingboing = Hpricot.parse(TestFiles::BOINGBOING)
     assert_equal 62, @boingboing.search('p.posted, link[@rel="alternate"]').length
-    assert_equal 20, @boingboing.search('//div/p[a/img]|//link[@rel="alternate"]').length
+    assert_equal 18, @boingboing.search('//div/p[a/img]|//link[@rel="alternate"]').length
   end
 
   def test_stacked_search
