@@ -273,7 +273,7 @@ hpricot_ele_alloc(VALUE klass)
 // the swift, compact parser logic.  most of the complicated stuff is done
 // in the lexer.  this step just pairs up the start and end tags.
 //
-VALUE
+void
 rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, int rawlen, int taint)
 {
   VALUE ele, ec = Qnil;
@@ -508,7 +508,7 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
        mark_aval_diff = mark_aval - buf;
 
        buffer_size += BUFSIZE;
-       buf = REALLOC_N(buf, char, buffer_size);
+       REALLOC_N(buf, char, buffer_size);
 
        space = buffer_size - have;
 
@@ -522,16 +522,17 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
 
     if ( rb_respond_to( port, s_read ) )
     {
-      str = rb_funcall( port, s_read, 1, INT2FIX(space) );
+      str = rb_funcall(port, s_read, 1, INT2FIX(space));
+      len = RSTRING_LEN(str);
+      memcpy(p, StringValuePtr(str), len);
     }
     else
     {
-      str = rb_str_substr( port, nread, space );
+      len = RSTRING_LEN(port) - nread;
+      if (len > space) len = space;
+      memcpy(p, StringValuePtr(port) + nread, len);
     }
 
-    StringValue(str);
-    memcpy( p, RSTRING_PTR(str), RSTRING_LEN(str) );
-    len = RSTRING_LEN(str);
     nread += len;
 
     /* If this is the last buffer, tack on an EOF. */
