@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env ruby
 
 require 'test/unit'
@@ -40,7 +41,7 @@ class TestPreserved < Test::Unit::TestCase
 
   def test_escaping_of_contents
     doc = Hpricot(TestFiles::BOINGBOING)
-    assert_equal "Fukuda\342\200\231s Automatic Door opens around your body as you pass through it. The idea is to save energy and keep the room clean.", doc.at("img[@alt='200606131240']").next.to_s.strip
+    assert_equal "Fukuda’s Automatic Door opens around your body as you pass through it. The idea is to save energy and keep the room clean.", doc.at("img[@alt='200606131240']").next.to_s.strip
   end
 
   def test_files

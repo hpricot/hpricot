@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env ruby
 
 require 'test/unit'
@@ -17,9 +18,9 @@ class TestBuilder < Test::Unit::TestCase
   end
 
   def test_latin1_entities
-    doc = Hpricot() { b "\200\225" }
+    doc = Hpricot() { b "€•" }
     assert_equal "<b>&#8364;&#8226;</b>", doc.to_html
-    assert_equal "\342\202\254\342\200\242", doc.at("text()").to_s
+    assert_equal "€•", doc.at("text()").to_s
   end
 
   def test_escaping_attrs
@@ -29,8 +30,7 @@ class TestBuilder < Test::Unit::TestCase
   end
 
   def test_korean_utf8_entities
-    # a = '한글'
-    a = "\xed\x95\x9c\xea\xb8\x80"
+    a = '한글'
     doc = Hpricot() { b a }
     assert_equal "<b>&#54620;&#44544;</b>", doc.to_html
   end
