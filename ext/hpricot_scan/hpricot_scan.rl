@@ -415,8 +415,10 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     VALUE match = rb_funcall(tag, rb_intern("match"), 1, reProcInsParse);
     tag = rb_reg_nth_match(1, match);
     attr = rb_reg_nth_match(2, match);
-    H_ELE(cProcIns);
-    rb_hpricot_add(S->focus, ele);
+    {
+        H_ELE(cProcIns);
+        rb_hpricot_add(S->focus, ele);
+    }
   } else if (sym == sym_text) {
     // TODO: add raw_string as well?
     if (!NIL_P(S->last) && RBASIC(S->last)->klass == cText) {
@@ -464,8 +466,8 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
 
   if (!rb_block_given_p())
   {
-    S = ALLOC(hpricot_state);
     hpricot_ele *he = ALLOC(hpricot_ele);
+    S = ALLOC(hpricot_state);
     MEMZERO(he, hpricot_ele, 1);
     he->tag = he->attr = he->etag = he->parent = he->children = Qnil;
     S->doc = Data_Wrap_Struct(cDoc, hpricot_ele_mark, hpricot_ele_free, he);

@@ -108,7 +108,7 @@ end
 
   file ext_so => ext_files do
     Dir.chdir(ext) do
-      sh(RUBY_PLATFORM =~ /win32/ ? 'nmake' : 'make')
+      sh(RUBY_PLATFORM =~ /mswin/ ? 'nmake' : 'make')
     end
     cp ext_so, "lib"
   end
@@ -147,7 +147,8 @@ desc "Generates the C scanner code with Ragel."
 task :ragel => [:ragel_version] do
   if @ragel_v >= 6.1
     @ragel_c_code_generation_style = RAGEL_C_CODE_GENERATION_STYLES[DEFAULT_RAGEL_C_CODE_GENERATION]
-    sh %{cd ext/hpricot_scan; ragel hpricot_scan.rl -#{@ragel_c_code_generation_style} -o hpricot_scan.c && ragel hpricot_css.rl -#{@ragel_c_code_generation_style} -o hpricot_css.c}
+    console_sep = (ENV['COMSPEC'] =~ /cmd\.exe/) ? '&' : ';'
+    sh %{cd ext/hpricot_scan #{console_sep} ragel hpricot_scan.rl -#{@ragel_c_code_generation_style} -o hpricot_scan.c && ragel hpricot_css.rl -#{@ragel_c_code_generation_style} -o hpricot_css.c}
   else
     STDERR.puts "Ragel 6.1 or greater is required."
     exit(1)
