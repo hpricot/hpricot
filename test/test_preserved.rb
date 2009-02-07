@@ -10,7 +10,7 @@ class TestPreserved < Test::Unit::TestCase
     doc = Hpricot(str)
     yield doc if block_given?
     str2 = doc.to_original_html
-    [*str].zip([*str2]).each do |s1, s2|
+    str.lines.zip(str2.lines).each do |s1, s2|
       assert_equal s1, s2
     end
   end
@@ -46,7 +46,7 @@ class TestPreserved < Test::Unit::TestCase
 
   def test_files
     assert_roundtrip TestFiles::BASIC
-    # assert_roundtrip TestFiles::BOINGBOING
+    assert_roundtrip TestFiles::BOINGBOING
     assert_roundtrip TestFiles::CY0
   end
 
