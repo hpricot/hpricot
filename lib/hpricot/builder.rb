@@ -40,7 +40,8 @@ module Hpricot
 
     def add_child ele
       ele.parent = self
-      (self.children ||= []) << ele
+      self.children ||= []
+      self.children << ele
       ele
     end
 
