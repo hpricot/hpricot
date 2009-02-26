@@ -422,7 +422,7 @@ module Hpricot
       case arg 
       when 'even'; (parent.containers.index(self) + 1) % 2 == 0
       when 'odd';  (parent.containers.index(self) + 1) % 2 == 1
-      else         self == (parent.containers[arg.to_i + 1])
+      else         self == (parent.containers[arg.to_i - 1])
       end
     end
 
