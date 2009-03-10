@@ -153,6 +153,19 @@ void rb_yield_tokens(VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
   rb_yield(ary);
 }
 
+/* rb_hash_lookup() is only in Ruby 1.8.7 */
+static VALUE
+our_rb_hash_lookup(VALUE hash, VALUE key)
+{
+  VALUE val;
+
+  if (!st_lookup(RHASH(hash)->tbl, key, &val)) {
+    return Qnil; /* without Hash#default */
+  }
+
+  return val;
+}
+
 static void
 rb_hpricot_add(VALUE focus, VALUE ele)
 {
@@ -321,7 +334,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
 
         if (TYPE(hee->EC) == T_HASH)
         {
-          VALUE has = rb_hash_lookup(hee->EC, INT2NUM(he->name));
+          VALUE has = our_rb_hash_lookup(hee->EC, INT2NUM(he->name));
           if (has != Qnil) {
             if (has == Qtrue) {
               if (match == Qnil)
