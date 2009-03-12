@@ -53,7 +53,7 @@ SPEC =
   end
 
 Win32Spec = SPEC.dup
-Win32Spec.platform = 'mswin32'
+Win32Spec.platform = 'x86-mswin32'
 Win32Spec.files = PKG_FILES + ["lib/hpricot_scan.so", "lib/fast_xs.so"]
 Win32Spec.extensions = []
   
@@ -181,7 +181,7 @@ task :package_win32 => ["fast_xs_win32", "hpricot_scan_win32"] do
   Dir.chdir("#{WIN32_PKG_DIR}") do
     Gem::Builder.new(Win32Spec).build
     verbose(true) {
-      mv Dir["*.gem"].first, "../pkg/#{WIN32_PKG_DIR}.gem"
+      mv Dir["*.gem"].first, "../pkg/"
     }
   end
 end
