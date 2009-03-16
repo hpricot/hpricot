@@ -60,7 +60,7 @@ typedef struct {
 
 #define CAT(N, E) if (NIL_P(N)) { SET(N, E); } else { rb_str_cat(N, mark_##N, E - mark_##N); }
 
-#define SLIDE(N) if ( mark_##N > ts ) mark_##N = buf + (mark_##N - ts);
+#define SLIDE(N) if (mark_##N > ts) mark_##N = buf + (mark_##N - ts);
 
 #define ATTR(K, V) \
     if (!NIL_P(K)) { \
@@ -450,7 +450,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
 
 VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
 {
-  int cs, act, have = 0, nread = 0, curline = 1, text = 0;
+  int cs, act, have = 0, nread = 0, curline = 1, text = 0, io = 0;
   char *ts = 0, *te = 0, *buf = NULL, *eof = NULL;
 
   hpricot_state *S = NULL;
@@ -460,12 +460,13 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
   int done = 0, ele_open = 0, buffer_size = 0, taint = 0;
 
   rb_scan_args(argc, argv, "11", &port, &opts);
-  taint = OBJ_TAINTED( port );
-  if ( !rb_respond_to( port, s_read ) )
+  taint = OBJ_TAINTED(port);
+  io = rb_respond_to(port, s_read);
+  if (!io)
   {
-    if ( rb_respond_to( port, s_to_str ) )
+    if (rb_respond_to(port, s_to_str))
     {
-      port = rb_funcall( port, s_to_str, 0 );
+      port = rb_funcall(port, s_to_str, 0);
       StringValue(port);
     }
     else
@@ -503,55 +504,57 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
       buffer_size = NUM2INT(bufsize);
     }
   }
-  buf = ALLOC_N(char, buffer_size);
+
+  if (io)
+    buf = ALLOC_N(char, buffer_size);
 
   %% write init;
   
-  while ( !done ) {
+  while (!done) {
     VALUE str;
     char *p, *pe;
     int len, space = buffer_size - have, tokstart_diff, tokend_diff, mark_tag_diff, mark_akey_diff, mark_aval_diff;
 
-    if ( space == 0 ) {
-      /* We've used up the entire buffer storing an already-parsed token
-       * prefix that must be preserved.  Likely caused by super-long attributes.
-       * Increase buffer size and continue  */
-       tokstart_diff = ts - buf;
-       tokend_diff = te - buf;
-       mark_tag_diff = mark_tag - buf;
-       mark_akey_diff = mark_akey - buf;
-       mark_aval_diff = mark_aval - buf;
-
-       buffer_size += BUFSIZE;
-       REALLOC_N(buf, char, buffer_size);
-
-       space = buffer_size - have;
-
-       ts= buf + tokstart_diff;
-       te = buf + tokend_diff;
-       mark_tag = buf + mark_tag_diff;
-       mark_akey = buf + mark_akey_diff;
-       mark_aval = buf + mark_aval_diff;
-    }
-    p = buf + have;
-
-    if ( rb_respond_to( port, s_read ) )
+    if (io)
     {
+      if (space == 0) {
+        /* We've used up the entire buffer storing an already-parsed token
+         * prefix that must be preserved.  Likely caused by super-long attributes.
+         * Increase buffer size and continue  */
+         tokstart_diff = ts - buf;
+         tokend_diff = te - buf;
+         mark_tag_diff = mark_tag - buf;
+         mark_akey_diff = mark_akey - buf;
+         mark_aval_diff = mark_aval - buf;
+
+         buffer_size += BUFSIZE;
+         REALLOC_N(buf, char, buffer_size);
+
+         space = buffer_size - have;
+
+         ts = buf + tokstart_diff;
+         te = buf + tokend_diff;
+         mark_tag = buf + mark_tag_diff;
+         mark_akey = buf + mark_akey_diff;
+         mark_aval = buf + mark_aval_diff;
+      }
+      p = buf + have;
+
       str = rb_funcall(port, s_read, 1, INT2FIX(space));
       len = RSTRING_LEN(str);
       memcpy(p, StringValuePtr(str), len);
     }
     else
     {
-      len = RSTRING_LEN(port) - nread;
-      if (len > space) len = space;
-      memcpy(p, StringValuePtr(port) + nread, len);
+      p = RSTRING_PTR(port);
+      len = RSTRING_LEN(port) + 1;
+      done = 1;
     }
 
     nread += len;
 
     /* If this is the last buffer, tack on an EOF. */
-    if ( len < space ) {
+    if (io && len < space) {
       p[len++] = 0;
       done = 1;
     }
@@ -559,9 +562,10 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
     pe = p + len;
     %% write exec;
     
-    if ( cs == hpricot_scan_error ) {
-      free(buf);
-      if ( !NIL_P(tag) )
+    if (cs == hpricot_scan_error) {
+      if (buf != NULL)
+        free(buf);
+      if (!NIL_P(tag))
       {
         rb_raise(rb_eHpricotParseError, "parse error on element <%s>, starting on line %d.\n" NO_WAY_SERIOUSLY, RSTRING_PTR(tag), curline);
       }
@@ -571,7 +575,7 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
       }
     }
     
-    if ( done && ele_open )
+    if (done && ele_open)
     {
       ele_open = 0;
       if (ts > 0) {
@@ -581,11 +585,11 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
       }
     }
 
-    if ( ts == 0 )
+    if (ts == 0)
     {
       have = 0;
       /* text nodes have no ts because each byte is parsed alone */
-      if ( mark_tag != NULL && text == 1 )
+      if (mark_tag != NULL && text == 1)
       {
         if (done)
         {
@@ -600,12 +604,15 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
           CAT(tag, p);
         }
       }
-      mark_tag = buf;
+      if (io)
+        mark_tag = buf;
+      else
+        mark_tag = RSTRING_PTR(port);
     }
-    else
+    else if (io)
     {
       have = pe - ts;
-      memmove( buf, ts, have );
+      memmove(buf, ts, have);
       SLIDE(tag);
       SLIDE(akey);
       SLIDE(aval);
@@ -613,7 +620,9 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
       ts = buf;
     }
   }
-  free(buf);
+
+  if (buf != NULL)
+    free(buf);
 
   if (S != NULL)
   {
