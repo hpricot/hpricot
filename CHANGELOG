@@ -1,3 +1,9 @@
+= 0.7
+=== 17th March, 2009
+* Rewritten parser routine, much lighter on memory, quite a bit faster.
+* Friendlier with Ruby 1.9.
+* Fixes to nth-child and text() selectors.
+
 = 0.6
 === 15th June, 2007
 * Hpricot for JRuby -- nice work Ola Bini!
