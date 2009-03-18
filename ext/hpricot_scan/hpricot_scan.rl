@@ -160,6 +160,7 @@ void rb_yield_tokens(VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
   rb_yield(ary);
 }
 
+#ifndef rb_hash_lookup
 /* rb_hash_lookup() is only in Ruby 1.8.7 */
 static VALUE
 our_rb_hash_lookup(VALUE hash, VALUE key)
@@ -172,6 +173,8 @@ our_rb_hash_lookup(VALUE hash, VALUE key)
 
   return val;
 }
+#define rb_hash_lookup our_rb_hash_lookup
+#endif
 
 static void
 rb_hpricot_add(VALUE focus, VALUE ele)
@@ -181,7 +184,7 @@ rb_hpricot_add(VALUE focus, VALUE ele)
   Data_Get_Struct(focus, hpricot_ele, he);
   Data_Get_Struct(ele, hpricot_basic, he2);
   if (NIL_P(he->children))
-    he->children = rb_ary_new();
+    he->children = rb_ary_new2(1);
   rb_ary_push(he->children, ele);
   he2->parent = focus;
 }
@@ -413,7 +416,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
 
         if (TYPE(hee->EC) == T_HASH)
         {
-          VALUE has = our_rb_hash_lookup(hee->EC, INT2NUM(he->name));
+          VALUE has = rb_hash_lookup(hee->EC, INT2NUM(he->name));
           if (has != Qnil) {
             if (has == Qtrue) {
               if (match == Qnil)
