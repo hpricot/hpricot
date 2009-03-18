@@ -21,6 +21,7 @@ module Hpricot
     def html_quote(str)
       "\"" + str.gsub('"', '\\"') + "\""
     end
+    def clear_raw; end
     def if_output(opts)
       if opts[:preserve] and not raw_string.nil?
         raw_string
