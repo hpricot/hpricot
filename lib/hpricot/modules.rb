@@ -14,6 +14,7 @@ module Hpricot
       class Elem; include Container end
 
     module Leaf; include Node end
+      class CData; include Leaf end
       class Text; include Leaf end
       class XMLDecl; include Leaf end
       class DocType; include Leaf end

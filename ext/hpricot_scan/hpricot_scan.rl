@@ -263,7 +263,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
   if (!S->xml) {
     if (H_ELE_GET(S->focus, H_ELE_EC) == sym_CDATA &&
        (sym != sym_procins && sym != sym_comment && sym != sym_cdata && sym != sym_text) &&
-      !(sym == sym_etag && rb_str_hash(tag) == H_ELE_GET(S->focus, H_ELE_HASH)))
+      !(sym == sym_etag && INT2NUM(rb_str_hash(tag)) == H_ELE_GET(S->focus, H_ELE_HASH)))
     {
       sym = sym_text;
       tag = rb_str_new(raw, rawlen);
