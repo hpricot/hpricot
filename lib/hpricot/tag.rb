@@ -78,13 +78,12 @@ module Hpricot
       if children
         children.each { |n| n.output(out, opts) }
       end
-      if etag
-        etag.output(out, opts)
-      elsif !opts[:preserve] && !empty?
-        out <<
-          if_output(opts) do
-            "</#{name}>"
-          end
+      if opts[:preserve]
+        if etag
+          out << etag
+        end
+      elsif !empty?
+        out << "</#{name}>"
       end
       out
     end
@@ -102,7 +101,7 @@ module Hpricot
     end
   end
 
-  class ETag
+  class BogusETag
     def initialize name; self.name = name end
     def output(out, opts = {})
       out <<
@@ -112,7 +111,7 @@ module Hpricot
     end
   end
 
-  class BogusETag
+  class ETag < BogusETag
     def output(out, opts = {}); out << if_output(opts) { '' }; end
   end
 
