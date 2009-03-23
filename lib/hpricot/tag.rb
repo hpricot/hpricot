@@ -17,7 +17,7 @@ module Hpricot
     end
   end
 
-  class BaseEle
+  module Node
     def html_quote(str)
       "\"" + str.gsub('"', '\\"') + "\""
     end
@@ -137,6 +137,7 @@ module Hpricot
     def initialize content; self.content = content end
     alias_method :to_s, :content
     alias_method :to_plain_text, :content
+    def raw_string; "<![CDATA[#{content}]]>" end
     def output(out, opts = {})
       out <<
         if_output(opts) do
@@ -147,6 +148,7 @@ module Hpricot
 
   class XMLDecl
     def pathname; "xmldecl()" end
+    def raw_string; output("") end
     def output(out, opts = {})
       out <<
         if_output(opts) do
@@ -163,6 +165,7 @@ module Hpricot
       self.target, self.public_id, self.system_id = target, pub, sys
     end
     def pathname; "doctype()" end
+    def raw_string; output("") end
     def output(out, opts = {})
       out <<
         if_output(opts) do
@@ -175,6 +178,7 @@ module Hpricot
 
   class ProcIns
     def pathname; "procins()" end
+    def raw_string; output("") end
     def output(out, opts = {})
       out << 
         if_output(opts) do
@@ -187,6 +191,7 @@ module Hpricot
 
   class Comment
     def pathname; "comment()" end
+    def raw_string; "<!--#{content}-->" end
     def output(out, opts = {})
       out <<
         if_output(opts) do

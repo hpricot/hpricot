@@ -19,7 +19,8 @@ VALUE hpricot_css(VALUE, VALUE, VALUE, VALUE, VALUE);
 #define NO_WAY_SERIOUSLY "*** This should not happen, please send a bug report with the HTML you're parsing to why@whytheluckystiff.net.  So sorry!"
 
 static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_emptytag, sym_comment,
-      sym_cdata, sym_text, sym_EMPTY, sym_CDATA;
+      sym_cdata, sym_name, sym_parent, sym_raw_attributes, sym_raw_string, sym_tagno,
+      sym_allowed, sym_text, sym_children, sym_EMPTY, sym_CDATA;
 static VALUE mHpricot, rb_eHpricotParseError;
 static VALUE cBaseEle, cBogusETag, cCData, cComment, cDoc, cDocType, cElem, cETag, cText,
       cXMLDecl, cProcIns, symAllow, symDeny;
@@ -36,9 +37,8 @@ static VALUE reProcInsParse;
 #define H_ELE_HASH     6
 #define H_ELE_CHILDREN 7
 
-#define H_ELEM_SIZE    8
-#define H_ATTR_SIZE    3
-#define H_BASIC_SIZE   2
+#define H_ELE_GET(ele, idx)      RSTRUCT_PTR(ele)[idx]
+#define H_ELE_SET(ele, idx, val) RSTRUCT_PTR(ele)[idx] = val
 
 #define OPT(opts, key) (!NIL_P(opts) && RTEST(rb_hash_aref(opts, ID2SYM(rb_intern("" # key)))))
 
@@ -178,11 +178,11 @@ our_rb_hash_lookup(VALUE hash, VALUE key)
 static void
 rb_hpricot_add(VALUE focus, VALUE ele)
 {
-  VALUE children = rb_ary_entry(focus, H_ELE_CHILDREN);
+  VALUE children = H_ELE_GET(focus, H_ELE_CHILDREN);
   if (NIL_P(children))
-    rb_ary_store(focus, H_ELE_CHILDREN, (children = rb_ary_new2(1)));
+    H_ELE_SET(focus, H_ELE_CHILDREN, (children = rb_ary_new2(1)));
   rb_ary_push(children, ele);
-  rb_ary_store(ele, H_ELE_PARENT, focus);
+  H_ELE_SET(ele, H_ELE_PARENT, focus);
 }
 
 typedef struct {
@@ -195,27 +195,27 @@ typedef struct {
 
 #define H_PROP(prop, idx) \
   static VALUE hpricot_ele_set_##prop(VALUE self, VALUE x) { \
-    rb_ary_store(self, idx, x); \
+    H_ELE_SET(self, idx, x); \
     return self; \
   } \
   static VALUE hpricot_ele_clear_##prop(VALUE self) { \
-    rb_ary_store(self, idx, Qnil); \
+    H_ELE_SET(self, idx, Qnil); \
     return Qtrue; \
   } \
   static VALUE hpricot_ele_get_##prop(VALUE self) { \
-    return rb_ary_entry(self, idx); \
+    return H_ELE_GET(self, idx); \
   }
 
 #define H_ATTR(prop) \
   static VALUE hpricot_ele_set_##prop(VALUE self, VALUE x) { \
-    rb_hash_aset(rb_ary_entry(self, H_ELE_ATTR), ID2SYM(rb_intern("" # prop)), x); \
+    rb_hash_aset(H_ELE_GET(self, H_ELE_ATTR), ID2SYM(rb_intern("" # prop)), x); \
     return self; \
   } \
   static VALUE hpricot_ele_get_##prop(VALUE self) { \
-    return rb_hash_aref(rb_ary_entry(self, H_ELE_ATTR), ID2SYM(rb_intern("" # prop))); \
+    return rb_hash_aref(H_ELE_GET(self, H_ELE_ATTR), ID2SYM(rb_intern("" # prop))); \
   }
 
-H_PROP(tag, H_ELE_TAG);
+H_PROP(name, H_ELE_TAG);
 H_PROP(raw, H_ELE_RAW);
 H_PROP(parent, H_ELE_PARENT);
 H_PROP(attr, H_ELE_ATTR);
@@ -228,29 +228,23 @@ H_ATTR(system_id);
 H_ATTR(public_id);
 
 #define H_ELE(klass) \
-  VALUE args[1]; \
+  ele = rb_obj_alloc(klass); \
   if (klass == cElem) { \
-    args[0] = INT2NUM(H_ELEM_SIZE); \
-    ele = rb_class_new_instance(1, args, klass); \
-    rb_ary_store(ele, H_ELE_TAG, tag); \
-    rb_ary_store(ele, H_ELE_ATTR, attr); \
-    rb_ary_store(ele, H_ELE_EC, ec); \
+    H_ELE_SET(ele, H_ELE_TAG, tag); \
+    H_ELE_SET(ele, H_ELE_ATTR, attr); \
+    H_ELE_SET(ele, H_ELE_EC, ec); \
     if (raw != NULL && (sym == sym_emptytag || sym == sym_stag || sym == sym_etag || sym == sym_doctype)) { \
-      rb_ary_store(ele, H_ELE_RAW, rb_str_new(raw, rawlen)); \
+      H_ELE_SET(ele, H_ELE_RAW, rb_str_new(raw, rawlen)); \
     } \
   } else if (klass == cDocType || klass == cProcIns || klass == cXMLDecl || klass == cETag || klass == cBogusETag) { \
-    args[0] = INT2NUM(H_ATTR_SIZE); \
-    ele = rb_class_new_instance(1, args, klass); \
-    rb_ary_store(ele, H_ELE_TAG, tag); \
+    H_ELE_SET(ele, H_ELE_TAG, tag); \
     if (klass == cETag || klass == cBogusETag) { \
       if (raw != NULL) \
-        rb_ary_store(ele, H_ELE_ATTR, rb_str_new(raw, rawlen)); \
+        H_ELE_SET(ele, H_ELE_ATTR, rb_str_new(raw, rawlen)); \
     } else \
-      rb_ary_store(ele, H_ELE_ATTR, attr); \
+      H_ELE_SET(ele, H_ELE_ATTR, attr); \
   } else { \
-    args[0] = INT2NUM(H_BASIC_SIZE); \
-    ele = rb_class_new_instance(1, args, klass); \
-    rb_ary_store(ele, H_ELE_TAG, tag); \
+    H_ELE_SET(ele, H_ELE_TAG, tag); \
   } \
   S->last = ele
 
@@ -267,9 +261,9 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
   // in html mode, fix up start tags incorrectly formed as empty tags
   //
   if (!S->xml) {
-    if (rb_ary_entry(S->focus, H_ELE_EC) == sym_CDATA &&
+    if (H_ELE_GET(S->focus, H_ELE_EC) == sym_CDATA &&
        (sym != sym_procins && sym != sym_comment && sym != sym_cdata && sym != sym_text) &&
-      !(sym == sym_etag && rb_str_hash(tag) == rb_ary_entry(S->focus, H_ELE_HASH)))
+      !(sym == sym_etag && rb_str_hash(tag) == H_ELE_GET(S->focus, H_ELE_HASH)))
     {
       sym = sym_text;
       tag = rb_str_new(raw, rawlen);
@@ -294,13 +288,13 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
   if (sym == sym_emptytag || sym == sym_stag) {
     VALUE name = INT2NUM(rb_str_hash(tag));
     H_ELE(cElem);
-    rb_ary_store(ele, H_ELE_HASH, name);
+    H_ELE_SET(ele, H_ELE_HASH, name);
 
     if (!S->xml) {
       VALUE match = Qnil, e = S->focus;
       while (e != S->doc)
       {
-        VALUE hEC = rb_ary_entry(e, H_ELE_EC);
+        VALUE hEC = H_ELE_GET(e, H_ELE_EC);
 
         if (TYPE(hEC) == T_HASH)
         {
@@ -317,7 +311,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
           }
         }
 
-        e = rb_ary_entry(e, H_ELE_PARENT);
+        e = H_ELE_GET(e, H_ELE_PARENT);
       }
 
       if (match == Qnil)
@@ -355,13 +349,13 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     name = INT2NUM(rb_str_hash(tag));
     while (e != S->doc)
     {
-      if (rb_ary_entry(e, H_ELE_HASH) == name)
+      if (H_ELE_GET(e, H_ELE_HASH) == name)
       {
         match = e;
         break;
       }
 
-      e = rb_ary_entry(e, H_ELE_PARENT);
+      e = H_ELE_GET(e, H_ELE_PARENT);
     }
 
     if (NIL_P(match))
@@ -372,8 +366,8 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     else
     {
       H_ELE(cETag);
-      rb_ary_store(match, H_ELE_ETAG, ele);
-      S->focus = rb_ary_entry(match, H_ELE_PARENT);
+      H_ELE_SET(match, H_ELE_ETAG, ele);
+      S->focus = H_ELE_GET(match, H_ELE_PARENT);
       S->last = Qnil;
     }
   } else if (sym == sym_cdata) {
@@ -400,7 +394,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
   } else if (sym == sym_text) {
     // TODO: add raw_string as well?
     if (!NIL_P(S->last) && RBASIC(S->last)->klass == cText) {
-      rb_str_append(rb_ary_entry(S->last, H_ELE_TAG), tag);
+      rb_str_append(H_ELE_GET(S->last, H_ELE_TAG), tag);
     } else {
       H_ELE(cText);
       rb_hpricot_add(S->focus, ele);
@@ -444,7 +438,7 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
   if (!rb_block_given_p())
   {
     S = ALLOC(hpricot_state);
-    S->doc = rb_funcall(cDoc, s_new, 1, INT2NUM(H_ELEM_SIZE));
+    S->doc = rb_obj_alloc(cDoc);
     rb_gc_register_address(&S->doc);
     S->focus = S->doc;
     S->last = Qnil;
@@ -595,67 +589,91 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
   return Qnil;
 }
 
+static VALUE
+alloc_hpricot_struct(VALUE klass)
+{
+  VALUE size;
+  long n;
+  NEWOBJ(st, struct RStruct);
+  OBJSETUP(st, klass, T_STRUCT);
+
+  size = rb_struct_iv_get(klass, "__size__");
+  n = FIX2LONG(size);
+
+  st->ptr = ALLOC_N(VALUE, n);
+  rb_mem_clear(st->ptr, n);
+  st->len = n;
+
+  return (VALUE)st;
+}
+
+static VALUE hpricot_struct_ref0(VALUE obj) {return H_ELE_GET(obj, 0);}
+static VALUE hpricot_struct_ref1(VALUE obj) {return H_ELE_GET(obj, 1);}
+static VALUE hpricot_struct_ref2(VALUE obj) {return H_ELE_GET(obj, 2);}
+static VALUE hpricot_struct_ref3(VALUE obj) {return H_ELE_GET(obj, 3);}
+static VALUE hpricot_struct_ref4(VALUE obj) {return H_ELE_GET(obj, 4);}
+static VALUE hpricot_struct_ref5(VALUE obj) {return H_ELE_GET(obj, 5);}
+static VALUE hpricot_struct_ref6(VALUE obj) {return H_ELE_GET(obj, 6);}
+static VALUE hpricot_struct_ref7(VALUE obj) {return H_ELE_GET(obj, 7);}
+static VALUE hpricot_struct_ref8(VALUE obj) {return H_ELE_GET(obj, 8);}
+static VALUE hpricot_struct_ref9(VALUE obj) {return H_ELE_GET(obj, 9);}
+
+static VALUE (*ref_func[10])() = {
+  hpricot_struct_ref0,
+  hpricot_struct_ref1,
+  hpricot_struct_ref2,
+  hpricot_struct_ref3,
+  hpricot_struct_ref4,
+  hpricot_struct_ref5,
+  hpricot_struct_ref6,
+  hpricot_struct_ref7,
+  hpricot_struct_ref8,
+  hpricot_struct_ref9,
+};
+
+static VALUE hpricot_struct_set0(VALUE obj, VALUE val) {return H_ELE_SET(obj, 0, val);}
+static VALUE hpricot_struct_set1(VALUE obj, VALUE val) {return H_ELE_SET(obj, 1, val);}
+static VALUE hpricot_struct_set2(VALUE obj, VALUE val) {return H_ELE_SET(obj, 2, val);}
+static VALUE hpricot_struct_set3(VALUE obj, VALUE val) {return H_ELE_SET(obj, 3, val);}
+static VALUE hpricot_struct_set4(VALUE obj, VALUE val) {return H_ELE_SET(obj, 4, val);}
+static VALUE hpricot_struct_set5(VALUE obj, VALUE val) {return H_ELE_SET(obj, 5, val);}
+static VALUE hpricot_struct_set6(VALUE obj, VALUE val) {return H_ELE_SET(obj, 6, val);}
+static VALUE hpricot_struct_set7(VALUE obj, VALUE val) {return H_ELE_SET(obj, 7, val);}
+static VALUE hpricot_struct_set8(VALUE obj, VALUE val) {return H_ELE_SET(obj, 8, val);}
+static VALUE hpricot_struct_set9(VALUE obj, VALUE val) {return H_ELE_SET(obj, 9, val);}
+
+static VALUE (*set_func[10])() = {
+  hpricot_struct_set0,
+  hpricot_struct_set1,
+  hpricot_struct_set2,
+  hpricot_struct_set3,
+  hpricot_struct_set4,
+  hpricot_struct_set5,
+  hpricot_struct_set6,
+  hpricot_struct_set7,
+  hpricot_struct_set8,
+  hpricot_struct_set9,
+};
+
+static VALUE
+make_hpricot_struct(VALUE members)
+{
+  int i = 0;
+  VALUE klass = rb_class_new(rb_cObject);
+  rb_iv_set(klass, "__size__", INT2NUM(RARRAY_LEN(members)));
+  rb_define_alloc_func(klass, alloc_hpricot_struct);
+  rb_define_singleton_method(klass, "new", rb_class_new_instance, -1);
+  for (i = 0; i < RARRAY(members)->len; i++) {
+    ID id = SYM2ID(RARRAY(members)->ptr[i]);
+		rb_define_method_id(klass, id, ref_func[i], 0);
+	  rb_define_method_id(klass, rb_id_attrset(id), set_func[i], 1);
+	}
+  return klass;
+}
+
 void Init_hpricot_scan()
 {
-  mHpricot = rb_define_module("Hpricot");
-  rb_define_attr(rb_singleton_class(mHpricot), "buffer_size", 1, 1);
-  rb_define_singleton_method(mHpricot, "scan", hpricot_scan, -1);
-  rb_define_singleton_method(mHpricot, "css", hpricot_css, 3);
-  rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eStandardError);
-
-  cDoc = rb_define_class_under(mHpricot, "Doc", rb_cArray);
-  rb_define_method(cDoc, "children", hpricot_ele_get_children, 0);
-  rb_define_method(cDoc, "children=", hpricot_ele_set_children, 1);
-
-  cBaseEle = rb_define_class_under(mHpricot, "BaseEle", rb_cArray);
-  rb_define_method(cBaseEle, "raw_string", hpricot_ele_get_tag, 0);
-  rb_define_method(cBaseEle, "parent", hpricot_ele_get_parent, 0);
-  rb_define_method(cBaseEle, "parent=", hpricot_ele_set_parent, 1);
-  cCData = rb_define_class_under(mHpricot, "CData", cBaseEle);
-  rb_define_method(cCData, "content", hpricot_ele_get_tag, 0);
-  rb_define_method(cCData, "content=", hpricot_ele_set_tag, 1);
-  cComment = rb_define_class_under(mHpricot, "Comment", cBaseEle);
-  rb_define_method(cComment, "content", hpricot_ele_get_tag, 0);
-  rb_define_method(cComment, "content=", hpricot_ele_set_tag, 1);
-  cDocType = rb_define_class_under(mHpricot, "DocType", cBaseEle);
-  rb_define_method(cDocType, "target", hpricot_ele_get_tag, 0);
-  rb_define_method(cDocType, "target=", hpricot_ele_set_tag, 1);
-  rb_define_method(cDocType, "public_id", hpricot_ele_get_public_id, 0);
-  rb_define_method(cDocType, "public_id=", hpricot_ele_set_public_id, 1);
-  rb_define_method(cDocType, "system_id", hpricot_ele_get_system_id, 0);
-  rb_define_method(cDocType, "system_id=", hpricot_ele_set_system_id, 1);
-  cElem = rb_define_class_under(mHpricot, "Elem", cBaseEle);
-  rb_define_method(cElem, "raw_string", hpricot_ele_get_raw, 0);
-  rb_define_method(cElem, "clear_raw", hpricot_ele_clear_raw, 0);
-  rb_define_method(cElem, "raw_attributes", hpricot_ele_get_attr, 0);
-  rb_define_method(cElem, "raw_attributes=", hpricot_ele_set_attr, 1);
-  rb_define_method(cElem, "children", hpricot_ele_get_children, 0);
-  rb_define_method(cElem, "children=", hpricot_ele_set_children, 1);
-  rb_define_method(cElem, "etag", hpricot_ele_get_etag, 0);
-  rb_define_method(cElem, "etag=", hpricot_ele_set_etag, 1);
-  rb_define_method(cElem, "name", hpricot_ele_get_tag, 0);
-  rb_define_method(cElem, "name=", hpricot_ele_set_tag, 1);
-  cETag = rb_define_class_under(mHpricot, "ETag", cBaseEle);
-  rb_define_method(cETag, "raw_string", hpricot_ele_get_attr, 0);
-  rb_define_method(cETag, "clear_raw", hpricot_ele_clear_attr, 0);
-  rb_define_method(cETag, "name", hpricot_ele_get_tag, 0);
-  rb_define_method(cETag, "name=", hpricot_ele_set_tag, 1);
-  cBogusETag = rb_define_class_under(mHpricot, "BogusETag", cETag);
-  cText = rb_define_class_under(mHpricot, "Text", cBaseEle);
-  rb_define_method(cText, "content", hpricot_ele_get_tag, 0);
-  rb_define_method(cText, "content=", hpricot_ele_set_tag, 1);
-  cXMLDecl = rb_define_class_under(mHpricot, "XMLDecl", cBaseEle);
-  rb_define_method(cXMLDecl, "encoding", hpricot_ele_get_encoding, 0);
-  rb_define_method(cXMLDecl, "encoding=", hpricot_ele_set_encoding, 1);
-  rb_define_method(cXMLDecl, "standalone", hpricot_ele_get_standalone, 0);
-  rb_define_method(cXMLDecl, "standalone=", hpricot_ele_set_standalone, 1);
-  rb_define_method(cXMLDecl, "version", hpricot_ele_get_version, 0);
-  rb_define_method(cXMLDecl, "version=", hpricot_ele_set_version, 1);
-  cProcIns = rb_define_class_under(mHpricot, "ProcIns", cBaseEle);
-  rb_define_method(cProcIns, "target", hpricot_ele_get_tag, 0);
-  rb_define_method(cProcIns, "target=", hpricot_ele_set_tag, 1);
-  rb_define_method(cProcIns, "content", hpricot_ele_get_attr, 0);
-  rb_define_method(cProcIns, "content=", hpricot_ele_set_attr, 1);
+  VALUE structElem, structAttr, structBasic;
 
   s_ElementContent = rb_intern("ElementContent");
   symAllow = ID2SYM(rb_intern("allow"));
@@ -671,11 +689,69 @@ void Init_hpricot_scan()
   sym_stag = ID2SYM(rb_intern("stag"));
   sym_etag = ID2SYM(rb_intern("etag"));
   sym_emptytag = ID2SYM(rb_intern("emptytag"));
+  sym_allowed = ID2SYM(rb_intern("allowed"));
+  sym_children = ID2SYM(rb_intern("children"));
   sym_comment = ID2SYM(rb_intern("comment"));
   sym_cdata = ID2SYM(rb_intern("cdata"));
+  sym_name = ID2SYM(rb_intern("name"));
+  sym_parent = ID2SYM(rb_intern("parent"));
+  sym_raw_attributes = ID2SYM(rb_intern("raw_attributes"));
+  sym_raw_string = ID2SYM(rb_intern("raw_string"));
+  sym_tagno = ID2SYM(rb_intern("tagno"));
   sym_text = ID2SYM(rb_intern("text"));
   sym_EMPTY = ID2SYM(rb_intern("EMPTY"));
   sym_CDATA = ID2SYM(rb_intern("CDATA"));
+
+  mHpricot = rb_define_module("Hpricot");
+  rb_define_attr(rb_singleton_class(mHpricot), "buffer_size", 1, 1);
+  rb_define_singleton_method(mHpricot, "scan", hpricot_scan, -1);
+  rb_define_singleton_method(mHpricot, "css", hpricot_css, 3);
+  rb_eHpricotParseError = rb_define_class_under(mHpricot, "ParseError", rb_eStandardError);
+
+  structElem = make_hpricot_struct(rb_ary_new3(8, sym_name, sym_parent,
+    sym_raw_attributes, sym_etag, sym_raw_string, sym_allowed,
+    sym_tagno, sym_children));
+  structAttr = make_hpricot_struct(rb_ary_new3(3, sym_name, sym_parent, sym_raw_attributes));
+  structBasic = make_hpricot_struct(rb_ary_new3(2, sym_name, sym_parent));
+
+  cDoc = rb_define_class_under(mHpricot, "Doc", structElem);
+  cCData = rb_define_class_under(mHpricot, "CData", structBasic);
+  rb_define_method(cCData, "content", hpricot_ele_get_name, 0);
+  rb_define_method(cCData, "content=", hpricot_ele_set_name, 1);
+  cComment = rb_define_class_under(mHpricot, "Comment", structBasic);
+  rb_define_method(cComment, "content", hpricot_ele_get_name, 0);
+  rb_define_method(cComment, "content=", hpricot_ele_set_name, 1);
+  cDocType = rb_define_class_under(mHpricot, "DocType", structAttr);
+  rb_define_method(cDocType, "target", hpricot_ele_get_name, 0);
+  rb_define_method(cDocType, "target=", hpricot_ele_set_name, 1);
+  rb_define_method(cDocType, "public_id", hpricot_ele_get_public_id, 0);
+  rb_define_method(cDocType, "public_id=", hpricot_ele_set_public_id, 1);
+  rb_define_method(cDocType, "system_id", hpricot_ele_get_system_id, 0);
+  rb_define_method(cDocType, "system_id=", hpricot_ele_set_system_id, 1);
+  cElem = rb_define_class_under(mHpricot, "Elem", structElem);
+  rb_define_method(cElem, "clear_raw", hpricot_ele_clear_raw, 0);
+  cETag = rb_define_class_under(mHpricot, "ETag", structAttr);
+  rb_define_method(cETag, "raw_string", hpricot_ele_get_attr, 0);
+  rb_define_method(cETag, "clear_raw", hpricot_ele_clear_attr, 0);
+  rb_define_method(cETag, "name", hpricot_ele_get_name, 0);
+  rb_define_method(cETag, "name=", hpricot_ele_set_name, 1);
+  cBogusETag = rb_define_class_under(mHpricot, "BogusETag", cETag);
+  cText = rb_define_class_under(mHpricot, "Text", structBasic);
+  rb_define_method(cText, "raw_string", hpricot_ele_get_name, 0);
+  rb_define_method(cText, "content", hpricot_ele_get_name, 0);
+  rb_define_method(cText, "content=", hpricot_ele_set_name, 1);
+  cXMLDecl = rb_define_class_under(mHpricot, "XMLDecl", structAttr);
+  rb_define_method(cXMLDecl, "encoding", hpricot_ele_get_encoding, 0);
+  rb_define_method(cXMLDecl, "encoding=", hpricot_ele_set_encoding, 1);
+  rb_define_method(cXMLDecl, "standalone", hpricot_ele_get_standalone, 0);
+  rb_define_method(cXMLDecl, "standalone=", hpricot_ele_set_standalone, 1);
+  rb_define_method(cXMLDecl, "version", hpricot_ele_get_version, 0);
+  rb_define_method(cXMLDecl, "version=", hpricot_ele_set_version, 1);
+  cProcIns = rb_define_class_under(mHpricot, "ProcIns", structAttr);
+  rb_define_method(cProcIns, "target", hpricot_ele_get_name, 0);
+  rb_define_method(cProcIns, "target=", hpricot_ele_set_name, 1);
+  rb_define_method(cProcIns, "content", hpricot_ele_get_attr, 0);
+  rb_define_method(cProcIns, "content=", hpricot_ele_set_attr, 1);
 
   rb_const_set(mHpricot, rb_intern("ProcInsParse"),
     reProcInsParse = rb_eval_string("/\\A<\\?(\\S+)\\s+(.+)/m"));
