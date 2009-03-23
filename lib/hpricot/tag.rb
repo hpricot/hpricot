@@ -148,7 +148,6 @@ module Hpricot
 
   class XMLDecl
     def pathname; "xmldecl()" end
-    def raw_string; output("") end
     def output(out, opts = {})
       out <<
         if_output(opts) do
@@ -165,7 +164,6 @@ module Hpricot
       self.target, self.public_id, self.system_id = target, pub, sys
     end
     def pathname; "doctype()" end
-    def raw_string; output("") end
     def output(out, opts = {})
       out <<
         if_output(opts) do
