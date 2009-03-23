@@ -22,7 +22,7 @@ static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_empt
       sym_cdata, sym_name, sym_parent, sym_raw_attributes, sym_raw_string, sym_tagno,
       sym_allowed, sym_text, sym_children, sym_EMPTY, sym_CDATA;
 static VALUE mHpricot, rb_eHpricotParseError;
-static VALUE cBaseEle, cBogusETag, cCData, cComment, cDoc, cDocType, cElem, cText,
+static VALUE cBogusETag, cCData, cComment, cDoc, cDocType, cElem, cText,
       cXMLDecl, cProcIns, symAllow, symDeny;
 static ID s_ElementContent;
 static ID s_downcase, s_new, s_parent, s_read, s_to_str;
@@ -159,7 +159,7 @@ void rb_yield_tokens(VALUE sym, VALUE tag, VALUE attr, VALUE raw, int taint)
   rb_yield(ary);
 }
 
-#ifndef rb_hash_lookup
+#ifndef RHASH_TBL
 /* rb_hash_lookup() is only in Ruby 1.8.7 */
 static VALUE
 our_rb_hash_lookup(VALUE hash, VALUE key)
@@ -611,9 +611,21 @@ alloc_hpricot_struct(VALUE klass)
   size = rb_struct_iv_get(klass, "__size__");
   n = FIX2LONG(size);
 
+#ifndef RSTRUCT_EMBED_LEN_MAX
   st->ptr = ALLOC_N(VALUE, n);
   rb_mem_clear(st->ptr, n);
   st->len = n;
+#else
+  if (0 < n && n <= RSTRUCT_EMBED_LEN_MAX) {
+    RBASIC(st)->flags &= ~RSTRUCT_EMBED_LEN_MASK;
+    RBASIC(st)->flags |= n << RSTRUCT_EMBED_LEN_SHIFT;
+    rb_mem_clear(st->as.ary, n);
+  } else {
+    st->as.heap.ptr = ALLOC_N(VALUE, n);
+    rb_mem_clear(st->as.heap.ptr, n);
+    st->as.heap.len = n;
+  }
+#endif
 
   return (VALUE)st;
 }
@@ -674,11 +686,11 @@ make_hpricot_struct(VALUE members)
   rb_iv_set(klass, "__size__", INT2NUM(RARRAY_LEN(members)));
   rb_define_alloc_func(klass, alloc_hpricot_struct);
   rb_define_singleton_method(klass, "new", rb_class_new_instance, -1);
-  for (i = 0; i < RARRAY(members)->len; i++) {
-    ID id = SYM2ID(RARRAY(members)->ptr[i]);
-		rb_define_method_id(klass, id, ref_func[i], 0);
-	  rb_define_method_id(klass, rb_id_attrset(id), set_func[i], 1);
-	}
+  for (i = 0; i < RARRAY_LEN(members); i++) {
+    ID id = SYM2ID(RARRAY_PTR(members)[i]);
+    rb_define_method_id(klass, id, ref_func[i], 0);
+    rb_define_method_id(klass, rb_id_attrset(id), set_func[i], 1);
+  }
   return klass;
 }
 
