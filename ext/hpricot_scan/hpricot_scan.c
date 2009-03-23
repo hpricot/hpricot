@@ -23,7 +23,7 @@ static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_empt
       sym_cdata, sym_name, sym_parent, sym_raw_attributes, sym_raw_string, sym_tagno,
       sym_allowed, sym_text, sym_children, sym_EMPTY, sym_CDATA;
 static VALUE mHpricot, rb_eHpricotParseError;
-static VALUE cBaseEle, cBogusETag, cCData, cComment, cDoc, cDocType, cElem, cText,
+static VALUE cBogusETag, cCData, cComment, cDoc, cDocType, cElem, cText,
       cXMLDecl, cProcIns, symAllow, symDeny;
 static ID s_ElementContent;
 static ID s_downcase, s_new, s_parent, s_read, s_to_str;
