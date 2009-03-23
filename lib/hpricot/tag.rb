@@ -79,10 +79,8 @@ module Hpricot
         children.each { |n| n.output(out, opts) }
       end
       if opts[:preserve]
-        if etag
-          out << etag
-        end
-      elsif !empty?
+        out << etag if etag
+      elsif etag or !empty?
         out << "</#{name}>"
       end
       out
