@@ -270,6 +270,14 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
   // in html mode, fix up start tags incorrectly formed as empty tags
   //
   if (!S->xml) {
+    if (sym == sym_emptytag || sym == sym_stag || sym == sym_etag) {
+      ec = rb_hash_aref(S->EC, tag);
+      if (NIL_P(ec)) {
+        tag = rb_funcall(tag, s_downcase, 0);
+        ec = rb_hash_aref(S->EC, tag);
+      }
+    }
+
     if (H_ELE_GET(S->focus, H_ELE_EC) == sym_CDATA &&
        (sym != sym_procins && sym != sym_comment && sym != sym_cdata && sym != sym_text) &&
       !(sym == sym_etag && INT2NUM(rb_str_hash(tag)) == H_ELE_GET(S->focus, H_ELE_HASH)))
@@ -278,12 +286,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
       tag = rb_str_new(raw, rawlen);
     }
 
-    if (sym == sym_emptytag || sym == sym_stag || sym == sym_etag) {
-      ec = rb_hash_aref(S->EC, tag);
-      if (NIL_P(ec)) {
-        tag = rb_funcall(tag, s_downcase, 0);
-        ec = rb_hash_aref(S->EC, tag);
-      }
+    if (!NIL_P(ec)) {
       if (sym == sym_emptytag) {
         if (ec != sym_EMPTY)
           sym = sym_stag;

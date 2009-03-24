@@ -47,7 +47,7 @@ module Hpricot
             children.each {|elt| q.breakable; q.pp elt }
           end
           if etag
-            q.breakable; q.pp etag
+            q.breakable; q.text etag
           end
         }
       end
