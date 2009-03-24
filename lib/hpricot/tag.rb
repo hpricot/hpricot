@@ -134,6 +134,7 @@ module Hpricot
     def initialize content; self.content = content end
     alias_method :to_s, :content
     alias_method :to_plain_text, :content
+    alias_method :inner_text, :content
     def raw_string; "<![CDATA[#{content}]]>" end
     def output(out, opts = {})
       out <<
