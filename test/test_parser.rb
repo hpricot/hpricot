@@ -406,4 +406,15 @@ class TestParser < Test::Unit::TestCase
       assert_equal "\303\251", Hpricot.uxs('&eacute;')
     end
   end
+
+  def test_cdata_inner_text
+    xml = Hpricot.XML(%{
+      <peon>
+        <id>96586</id>
+        <stdout><![CDATA[This is STDOUT]]></stdout>
+        <stderr><!-- IGNORE --><![CDATA[This is]]> STDERR</stderr>
+      </peon>})
+      assert_equal "This is STDOUT", (xml/:peon/:stdout).inner_text
+      assert_equal "This is STDERR", (xml/:peon/:stderr).inner_text
+  end
 end
