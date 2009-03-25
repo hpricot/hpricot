@@ -11,7 +11,7 @@ module Hpricot
 
   class Doc
     def pretty_print(q)
-      q.object_group(self) { children.each {|elt| q.breakable; q.pp elt } }
+      q.object_group(self) { children.each {|elt| q.breakable; q.pp elt } if children }
     end
     alias inspect pretty_print_inspect
   end
