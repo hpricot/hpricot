@@ -1,3 +1,10 @@
+= 0.8
+=== 31st March, 2009
+* Saving memory and speed by using RStruct-based elements in the C extension.
+* Bug in tag parsing, causing runaway <script> and <style> tags in HTML.
+* Problem compiling under Ruby 1.9, due to our_rb_hash_lookup function meant for Ruby 1.8.
+* CData was missing inner_text method.
+
 = 0.7
 === 17th March, 2009
 * Rewritten parser routine, much lighter on memory, quite a bit faster.

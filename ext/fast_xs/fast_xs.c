@@ -6,6 +6,7 @@
 
 #ifndef RARRAY_LEN
 #define RARRAY_LEN(arr)  RARRAY(arr)->len
+#define RARRAY_PTR(arr)  RARRAY(arr)->ptr
 #define RSTRING_LEN(str) RSTRING(str)->len
 #define RSTRING_PTR(str) RSTRING(str)->ptr
 #endif

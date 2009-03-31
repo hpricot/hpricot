@@ -10,7 +10,7 @@ RbConfig = Config unless defined?(RbConfig)
 
 NAME = "hpricot"
 REV = (`#{ENV['GIT'] || "git"} rev-list HEAD`.split.length + 1).to_s
-VERS = ENV['VERSION'] || "0.7" + (REV ? ".#{REV}" : "")
+VERS = ENV['VERSION'] || "0.8" + (REV ? ".#{REV}" : "")
 PKG = "#{NAME}-#{VERS}"
 BIN = "*.{bundle,jar,so,o,obj,pdb,lib,def,exp,class}"
 CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}",
