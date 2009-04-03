@@ -247,7 +247,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
 
     if (H_ELE_GET(S->focus, H_ELE_EC) == sym_CDATA &&
        (sym != sym_procins && sym != sym_comment && sym != sym_cdata && sym != sym_text) &&
-      !(sym == sym_etag && INT2NUM(rb_str_hash(tag)) == H_ELE_GET(S->focus, H_ELE_HASH)))
+      !(sym == sym_etag && INT2FIX(rb_str_hash(tag)) == H_ELE_GET(S->focus, H_ELE_HASH)))
     {
       sym = sym_text;
       tag = rb_str_new(raw, rawlen);
@@ -265,7 +265,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
   }
 
   if (sym == sym_emptytag || sym == sym_stag) {
-    VALUE name = INT2NUM(rb_str_hash(tag));
+    VALUE name = INT2FIX(rb_str_hash(tag));
     H_ELE(cElem);
     H_ELE_SET(ele, H_ELE_HASH, name);
 
@@ -325,7 +325,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     //
     // (see also: the search above for fixups)
     //
-    name = INT2NUM(rb_str_hash(tag));
+    name = INT2FIX(rb_str_hash(tag));
     while (e != S->doc)
     {
       if (H_ELE_GET(e, H_ELE_HASH) == name)
