@@ -132,6 +132,8 @@ static VALUE reProcInsParse;
   }
 
   action save_attr {
+    if (!S->xml)
+      akey = rb_funcall(akey, s_downcase, 0);
     ATTR(akey, aval);
   }
 
