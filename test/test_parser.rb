@@ -227,6 +227,14 @@ class TestParser < Test::Unit::TestCase
     assert_kind_of Hpricot::Elements, @boingboing.search('//div/p').search('a img')
   end
 
+  def test_attr_casing
+    doc = Hpricot("<a HREF='a'>A simple <b>test</b> string.</a>")
+    assert_equal (doc % :a)[:href], "a"
+    assert_equal (doc % :a)[:HREF], nil
+    assert_equal (doc % :a)['href'], "a"
+    assert_equal (doc % :a)['HREF'], nil
+  end
+
   def test_class_search
     # test case sent by Chih-Chao Lam
     doc = Hpricot("<div class=xyz'>abc</div>")
