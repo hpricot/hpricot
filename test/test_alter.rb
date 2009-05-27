@@ -35,12 +35,20 @@ class TestAlter < Test::Unit::TestCase
   end
   
   def test_change_attributes
-    all_ps = (@basic/"p").attr("title", "Some Title")
+    all_ps = (@basic/"p").attr("title", "Some Title & Etc…")
     all_as = (@basic/"a").attr("href", "http://my_new_href.com")
     all_lb = (@basic/"link").attr("href") { |e| e.name }
-    assert_changed(@basic, "p", all_ps) {|p| p.attributes["title"] == "Some Title"}
+    assert_changed(@basic, "p", all_ps) {|p| p.raw_attributes["title"] == "Some Title &amp; Etc&#8230;"}
     assert_changed(@basic, "a", all_as) {|a| a.attributes["href"] == "http://my_new_href.com"}
     assert_changed(@basic, "link", all_lb) {|a| a.attributes["href"] == "link" }
+  end
+  
+  def test_change_attributes2
+    all_as = (@basic%"a").attributes["href"] = "http://my_new_href.com"
+    all_ps = (@basic%"p").attributes["title"] = "Some Title & Etc…"
+    assert_equal (@basic%"a").raw_attributes["href"], "http://my_new_href.com"
+    assert_equal (@basic%"p").raw_attributes["title"], "Some Title &amp; Etc&#8230;"
+    assert_equal (@basic%"p").attributes["title"], "Some Title & Etc…"
   end
   
   def test_remove_attr
@@ -76,6 +84,8 @@ class TestAlter < Test::Unit::TestCase
     assert_equal doc.root.inner_html, "foo"
     doc.root.inner_html = ""
     assert_equal doc.root.inner_html, ""
+    doc.root.swap { b "test" }
+    assert_equal doc.root.inner_html, "test"
   end
 
   def assert_changed original, selector, set, &block

@@ -38,6 +38,35 @@ module Hpricot
     end
   end
 
+  class Attributes
+    attr_accessor :element
+    def initialize e
+      @element = e
+    end
+    def [] k 
+      Hpricot.uxs((@element.raw_attributes || {})[k])
+    end
+    def []= k, v
+      (@element.raw_attributes ||= {})[k] = v.fast_xs
+    end
+    def to_hash
+      if @element.raw_attributes
+        @element.raw_attributes.inject({}) do |hsh, (k, v)|
+          hsh[k] = Hpricot.uxs(v)
+          hsh
+        end
+      else
+        {}
+      end
+    end
+    def to_s
+      to_hash.to_s
+    end
+    def inspect
+      to_hash.inspect
+    end
+  end
+
   class Elem
     def initialize tag, attrs = nil, children = nil, etag = nil
       self.name, self.raw_attributes, self.children, self.etag =
@@ -45,14 +74,7 @@ module Hpricot
     end
     def empty?; children.nil? or children.empty? end
     def attributes
-      if raw_attributes
-        raw_attributes.inject({}) do |hsh, (k, v)|
-          hsh[k] = Hpricot.uxs(v)
-          hsh
-        end
-      else
-        {}
-      end
+      Attributes.new self
     end
     def to_plain_text
       if self.name == 'br'
