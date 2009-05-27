@@ -102,10 +102,7 @@ module Hpricot
   class BogusETag
     def initialize name; self.name = name end
     def output(out, opts = {})
-      out <<
-        if_output(opts) do
-          "</#{name}>"
-        end
+      out << if_output(opts) { "" }
     end
   end
 

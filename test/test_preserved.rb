@@ -53,6 +53,15 @@ class TestPreserved < Test::Unit::TestCase
     assert_roundtrip TestFiles::CY0
   end
 
+  def test_fixup_link
+    doc = %{<?xml version="1.0" encoding="UTF-8"?><rss><channel><link>ht</link></channel></rss>}
+    assert_roundtrip doc
+    assert_equal Hpricot(doc).to_s,
+      %{<?xml version="1.0" encoding="UTF-8"?><rss><channel><link />ht</channel></rss>}
+    assert_equal Hpricot.XML(doc).to_s,
+      %{<?xml version="1.0" encoding="UTF-8"?><rss><channel><link>ht</link></channel></rss>}
+  end
+
   def test_escaping_of_attrs
     # ampersands in URLs
     str = %{<a href="http://google.com/search?q=hpricot&amp;l=en">Google</a>}
