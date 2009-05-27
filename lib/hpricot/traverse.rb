@@ -194,6 +194,7 @@ module Hpricot
     alias_method :innerHTML=, :inner_html=
 
     def reparent(nodes)
+      return unless nodes
       altered!
       [*nodes].each { |e| e.parent = self }
     end

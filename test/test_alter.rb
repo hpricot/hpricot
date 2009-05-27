@@ -70,6 +70,14 @@ class TestAlter < Test::Unit::TestCase
     assert_equal frag.to_s, "<b><i>A bit of HTML</i></b><beanPole>gravity</beanPole>"
   end
 
+  def test_reparent_empty_nodes
+    doc = Hpricot("<div/>")
+    doc.root.inner_html = "foo"
+    assert_equal doc.root.inner_html, "foo"
+    doc.root.inner_html = ""
+    assert_equal doc.root.inner_html, ""
+  end
+
   def assert_changed original, selector, set, &block
     assert set.all?(&block)
     assert Hpricot(original.to_html).search(selector).all?(&block)
