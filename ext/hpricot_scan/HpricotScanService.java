@@ -3,12 +3,14 @@
 import java.io.IOException;
 
 import org.jruby.Ruby;
+import org.jruby.RubyArray;
 import org.jruby.RubyClass;
 import org.jruby.RubyHash;
 import org.jruby.RubyModule;
 import org.jruby.RubyNumeric;
 import org.jruby.RubyObjectAdapter;
 import org.jruby.RubyString;
+import org.jruby.anno.JRubyMethod;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.CallbackFactory;
@@ -142,11 +144,11 @@ public class HpricotScanService implements BasicLibraryService {
               return runtime.newString(s);
        }
 
-// line 189 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 191 "ext/hpricot_scan/hpricot_scan.java.rl"
 
 
 
-// line 150 "ext/hpricot_scan/HpricotScanService.java"
+// line 152 "ext/hpricot_scan/HpricotScanService.java"
 private static byte[] init__hpricot_scan_actions_0()
 {
 	return new byte [] {
@@ -752,7 +754,7 @@ static final int hpricot_scan_en_html_cdata = 216;
 static final int hpricot_scan_en_html_procins = 218;
 static final int hpricot_scan_en_main = 204;
 
-// line 192 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 194 "ext/hpricot_scan/hpricot_scan.java.rl"
 
 public final static int BUFSIZE=16384;
 
@@ -786,9 +788,12 @@ int buffer_size = 0;
 boolean taint = false;
 Block block = null;
 
-
-IRubyObject xmldecl, doctype, procins, stag, etag, emptytag, comment,
-      cdata, sym_text;
+IRubyObject symAllow, symDeny, sym_xmldecl, sym_doctype, 
+            sym_procins, sym_stag, sym_etag, sym_emptytag, 
+            sym_allowed, sym_children, sym_comment, 
+            sym_cdata, sym_name, sym_parent, 
+            sym_raw_attributes, sym_raw_string, sym_tagno, 
+            sym_text, sym_EMPTY, sym_CDATA;
 
 IRubyObject hpricot_scan(IRubyObject recv, IRubyObject port) {
   attr = bufsize = runtime.getNil();
@@ -817,14 +822,14 @@ IRubyObject hpricot_scan(IRubyObject recv, IRubyObject port) {
   buf = new char[buffer_size];
 
   
-// line 821 "ext/hpricot_scan/HpricotScanService.java"
+// line 826 "ext/hpricot_scan/HpricotScanService.java"
 	{
 	cs = hpricot_scan_start;
 	ts = -1;
 	te = -1;
 	act = 0;
 	}
-// line 256 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 261 "ext/hpricot_scan/hpricot_scan.java.rl"
 
   while( !done ) {
     IRubyObject str;
@@ -866,7 +871,7 @@ IRubyObject hpricot_scan(IRubyObject recv, IRubyObject port) {
     char[] data = buf;
 
     
-// line 870 "ext/hpricot_scan/HpricotScanService.java"
+// line 875 "ext/hpricot_scan/HpricotScanService.java"
 	{
 	int _klen;
 	int _trans = 0;
@@ -891,7 +896,7 @@ case 1:
 // line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ts = p;}
 	break;
-// line 895 "ext/hpricot_scan/HpricotScanService.java"
+// line 900 "ext/hpricot_scan/HpricotScanService.java"
 		}
 	}
 
@@ -956,7 +961,7 @@ case 3:
 			switch ( _hpricot_scan_actions[_acts++] )
 			{
 	case 0:
-// line 147 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 149 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{
     if (text) {
       CAT(tag, p);
@@ -970,58 +975,58 @@ case 3:
   }
 	break;
 	case 1:
-// line 159 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 161 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ mark_tag = p; }
 	break;
 	case 2:
-// line 160 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 162 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ mark_aval = p; }
 	break;
 	case 3:
-// line 161 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 163 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ mark_akey = p; }
 	break;
 	case 4:
-// line 162 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 164 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ SET(tag, p); }
 	break;
 	case 5:
-// line 164 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 166 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ SET(aval, p); }
 	break;
 	case 6:
-// line 165 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 167 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ 
     if (buf[p-1] == '"' || buf[p-1] == '\'') { SET(aval, p-1); }
     else { SET(aval, p); }
   }
 	break;
 	case 7:
-// line 169 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 171 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ SET(akey, p); }
 	break;
 	case 8:
-// line 170 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 172 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ SET(aval, p); ATTR(rb_str_new2("version"), aval); }
 	break;
 	case 9:
-// line 171 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 173 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ SET(aval, p); ATTR(rb_str_new2("encoding"), aval); }
 	break;
 	case 10:
-// line 172 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 174 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ SET(aval, p); ATTR(rb_str_new2("standalone"), aval); }
 	break;
 	case 11:
-// line 173 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 175 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ SET(aval, p); ATTR(rb_str_new2("public_id"), aval); }
 	break;
 	case 12:
-// line 174 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 176 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ SET(aval, p); ATTR(rb_str_new2("system_id"), aval); }
 	break;
 	case 13:
-// line 176 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 178 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ 
     akey[0] = runtime.getNil();
     aval[0] = runtime.getNil();
@@ -1030,7 +1035,7 @@ case 3:
   }
 	break;
 	case 14:
-// line 183 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 185 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ 
     ATTR(akey, aval);
   }
@@ -1189,7 +1194,7 @@ case 3:
 	}
 	}
 	break;
-// line 1193 "ext/hpricot_scan/HpricotScanService.java"
+// line 1198 "ext/hpricot_scan/HpricotScanService.java"
 			}
 		}
 	}
@@ -1203,7 +1208,7 @@ case 2:
 // line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ts = -1;}
 	break;
-// line 1207 "ext/hpricot_scan/HpricotScanService.java"
+// line 1212 "ext/hpricot_scan/HpricotScanService.java"
 		}
 	}
 
@@ -1225,7 +1230,7 @@ case 5:
 	}
 	break; }
 	}
-// line 297 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 302 "ext/hpricot_scan/hpricot_scan.java.rl"
     
     if ( cs == hpricot_scan_error ) {
       if(!tag[0].isNil()) {
@@ -1274,16 +1279,29 @@ case 5:
 public static IRubyObject __hpricot_scan(IRubyObject recv, IRubyObject port, Block block) {
   Ruby runtime = recv.getRuntime();
   HpricotScanService service = new HpricotScanService();
-  service.runtime = runtime;
-  service.xmldecl = runtime.newSymbol("xmldecl");
-  service.doctype = runtime.newSymbol("doctype");
-  service.procins = runtime.newSymbol("procins");
-  service.stag = runtime.newSymbol("stag");
-  service.etag = runtime.newSymbol("etag");
-  service.emptytag = runtime.newSymbol("emptytag");
-  service.comment = runtime.newSymbol("comment");
-  service.cdata = runtime.newSymbol("cdata");
+  service.runtime =  runtime;
+
+  service.symAllow = runtime.newSymbol("allow");
+  service.symDeny = runtime.newSymbol("deny");
+  service.sym_xmldecl = runtime.newSymbol("xmldecl");
+  service.sym_doctype = runtime.newSymbol("doctype");
+  service.sym_procins = runtime.newSymbol("procins");
+  service.sym_stag = runtime.newSymbol("stag");
+  service.sym_etag = runtime.newSymbol("etag");
+  service.sym_emptytag = runtime.newSymbol("emptytag");
+  service.sym_allowed = runtime.newSymbol("allowed");
+  service.sym_children = runtime.newSymbol("children");
+  service.sym_comment = runtime.newSymbol("comment");
+  service.sym_cdata = runtime.newSymbol("cdata");
+  service.sym_name = runtime.newSymbol("name");
+  service.sym_parent = runtime.newSymbol("parent");
+  service.sym_raw_attributes = runtime.newSymbol("raw_attributes");
+  service.sym_raw_string = runtime.newSymbol("raw_string");
+  service.sym_tagno = runtime.newSymbol("tagno");
   service.sym_text = runtime.newSymbol("text");
+  service.sym_EMPTY = runtime.newSymbol("EMPTY");
+  service.sym_CDATA = runtime.newSymbol("CDATA");
+
   service.block = block;
   return service.hpricot_scan(recv, port);
 }
@@ -1294,12 +1312,265 @@ public boolean basicLoad(final Ruby runtime) throws IOException {
        return true;
 }
 
+public static class Extra {
+  IRubyObject symAllow, symDeny, sym_xmldecl, sym_doctype, 
+              sym_procins, sym_stag, sym_etag, sym_emptytag, 
+              sym_allowed, sym_children, sym_comment, 
+              sym_cdata, sym_name, sym_parent, 
+              sym_raw_attributes, sym_raw_string, sym_tagno, 
+              sym_text, sym_EMPTY, sym_CDATA;
+  public Extra(Ruby runtime) {
+      symAllow = runtime.newSymbol("allow");
+      symDeny = runtime.newSymbol("deny");
+      sym_xmldecl = runtime.newSymbol("xmldecl");
+      sym_doctype = runtime.newSymbol("doctype");
+      sym_procins = runtime.newSymbol("procins");
+      sym_stag = runtime.newSymbol("stag");
+      sym_etag = runtime.newSymbol("etag");
+      sym_emptytag = runtime.newSymbol("emptytag");
+      sym_allowed = runtime.newSymbol("allowed");
+      sym_children = runtime.newSymbol("children");
+      sym_comment = runtime.newSymbol("comment");
+      sym_cdata = runtime.newSymbol("cdata");
+      sym_name = runtime.newSymbol("name");
+      sym_parent = runtime.newSymbol("parent");
+      sym_raw_attributes = runtime.newSymbol("raw_attributes");
+      sym_raw_string = runtime.newSymbol("raw_string");
+      sym_tagno = runtime.newSymbol("tagno");
+      sym_text = runtime.newSymbol("text");
+      sym_EMPTY = runtime.newSymbol("EMPTY");
+      sym_CDATA = runtime.newSymbol("CDATA");
+  }
+}
+
+public static class HpricotModule {
+    // hpricot_scan
+    @JRubyMethod(module = true)
+    public static IRubyObject scan(IRubyObject self, IRubyObject[] args) {
+        // TODO: implement
+        return null;
+    }
+
+    // hpricot_css
+    @JRubyMethod(module = true)
+    public static IRubyObject css(IRubyObject self, IRubyObject one, IRubyObject two, IRubyObject three) {
+        // TODO: implement
+        return null;
+    }
+}
+
+public static class CData {
+    @JRubyMethod
+    public static IRubyObject content(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod(name = "content=")
+    public static IRubyObject content_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_name(self, value);
+    }
+}
+
+public static class Comment {
+    @JRubyMethod
+    public static IRubyObject content(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod(name = "content=")
+    public static IRubyObject content_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_name(self, value);
+    }
+}
+
+public static class DocType {
+    @JRubyMethod
+    public static IRubyObject raw_string(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject target(IRubyObject self) {
+        return hpricot_ele_get_target(self);
+    }
+
+    @JRubyMethod(name = "target=")
+    public static IRubyObject target_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_target(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject public_id(IRubyObject self) {
+        return hpricot_ele_get_public_id(self);
+    }
+
+    @JRubyMethod(name = "public_id=")
+    public static IRubyObject public_id_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_public_id(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject system_id(IRubyObject self) {
+        return hpricot_ele_get_system_id(self);
+    }
+
+    @JRubyMethod(name = "system_id=")
+    public static IRubyObject system_id_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_system_id(self, value);
+    }
+}
+
+public static class Elem {
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_raw(self);
+    }
+}
+
+public static class BogusETag {
+    @JRubyMethod
+    public static IRubyObject raw_string(IRubyObject self) {
+        return hpricot_ele_get_attr(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_attr(self);
+    }
+}
+
+public static class Text {
+    @JRubyMethod
+    public static IRubyObject raw_string(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject content(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod(name = "content=")
+    public static IRubyObject content_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_name(self, value);
+    }
+}
+
+public static class XMLDecl {
+    @JRubyMethod
+    public static IRubyObject raw_string(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject encoding(IRubyObject self) {
+        return hpricot_ele_get_encoding(self);
+    }
+
+    @JRubyMethod(name = "encoding=")
+    public static IRubyObject encoding_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_encoding(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject standalone(IRubyObject self) {
+        return hpricot_ele_get_standalone(self);
+    }
+
+    @JRubyMethod(name = "standalone=")
+    public static IRubyObject standalone_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_standalone(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject version(IRubyObject self) {
+        return hpricot_ele_get_version(self);
+    }
+
+    @JRubyMethod(name = "version=")
+    public static IRubyObject version_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_version(self, value);
+    }
+}
+
+public static class ProcIns {
+    @JRubyMethod
+    public static IRubyObject target(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod(name = "target=")
+    public static IRubyObject target_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_name(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject content(IRubyObject self) {
+        return hpricot_ele_get_attr(self);
+    }
+
+    @JRubyMethod(name = "content=")
+    public static IRubyObject content_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_attr(self, value);
+    }
+}
+
 public static void Init_hpricot_scan(Ruby runtime) {
+  Extra x = new Extra(runtime);
+
   RubyModule mHpricot = runtime.defineModule("Hpricot");
-  mHpricot.getMetaClass().attr_accessor(runtime.getCurrentContext(),new IRubyObject[]{runtime.newSymbol("buffer_size")});
-  CallbackFactory fact = runtime.callbackFactory(HpricotScanService.class);
-  mHpricot.getMetaClass().defineMethod("scan",fact.getSingletonMethod("__hpricot_scan",IRubyObject.class));
+
+  mHpricot.getSingletonClass().attr_accessor(runtime.getCurrentContext(),new  IRubyObject[]{runtime.newSymbol("buffer_size")});
+  mHpricot.defineAnnotatedMethods(HpricotModule.class);
+
   mHpricot.defineClassUnder("ParseError",runtime.getClass("StandardError"),runtime.getClass("StandardError").getAllocator());
-  rubyApi = JavaEmbedUtils.newObjectAdapter();
+
+  RubyClass structElem = makeHpricotStruct(RubyArray.newArrayNoCopy(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes, x.sym_etag, x.sym_raw_string, x.sym_allowed, x.sym_tagno, x.sym_children}));
+  RubyClass structAttr = makeHpricotStruct(RubyArray.newArrayNoCopy(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes}));
+  RubyClass structBasic= makeHpricotStruct(RubyArray.newArrayNoCopy(runtime, new IRubyObject[] {x.sym_name, x.sym_parent}));
+
+  RubyClass cDoc = mHpricot.defineClassUnder("Doc", structElem, structElem.getAllocator());
+
+  RubyClass cCData = mHpricot.defineClassUnder("CData", structBasic, structBasic.getAllocator());
+  cCData.defineAnnotatedMethods(CData.class);
+
+  RubyClass cComment = mHpricot.defineClassUnder("Comment", structBasic, structBasic.getAllocator());
+  cComment.defineAnnotatedMethods(Comment.class);
+
+  RubyClass cDocType = mHpricot.defineClassUnder("DocType", structAttr, structAttr.getAllocator());
+  cDocType.defineAnnotatedMethods(DocType.class);
+
+  RubyClass cElem = mHpricot.defineClassUnder("Elem", structElem, structElem.getAllocator());
+  cElem.defineAnnotatedMethods(Elem.class);
+
+  RubyClass cBogusETag = mHpricot.defineClassUnder("BogusETag", structAttr, structAttr.getAllocator());
+  cBogusETag.defineAnnotatedMethods(BogusETag.class);
+
+  RubyClass cText = mHpricot.defineClassUnder("Text", structBasic, structBasic.getAllocator());
+  cText.defineAnnotatedMethods(Text.class);
+
+  RubyClass cXMLDecl = mHpricot.defineClassUnder("XMLDecl", structAttr, structAttr.getAllocator());
+  cXMLDecl.defineAnnotatedMethods(XMLDecl.class);
+
+  RubyClass cProcIns = mHpricot.defineClassUnder("ProcIns", structAttr, structAttr.getAllocator());
+  cProcIns.defineAnnotatedMethods(ProcIns.class);
+
+  IRubyObject reProcInsParse = runtime.evalScriptlet("/\\A<\\?(\\S+)\\s+(.+)/m");
+  mHpricot.setConstant("ProcInsParse", reProcInsParse);
 }
 }

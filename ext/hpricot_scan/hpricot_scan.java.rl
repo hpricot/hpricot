@@ -2,12 +2,14 @@
 import java.io.IOException;
 
 import org.jruby.Ruby;
+import org.jruby.RubyArray;
 import org.jruby.RubyClass;
 import org.jruby.RubyHash;
 import org.jruby.RubyModule;
 import org.jruby.RubyNumeric;
 import org.jruby.RubyObjectAdapter;
 import org.jruby.RubyString;
+import org.jruby.anno.JRubyMethod;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.runtime.Block;
 import org.jruby.runtime.CallbackFactory;
@@ -449,6 +451,170 @@ public static class Comment {
     }
 }
 
+public static class DocType {
+    @JRubyMethod
+    public static IRubyObject raw_string(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject target(IRubyObject self) {
+        return hpricot_ele_get_target(self);
+    }
+
+    @JRubyMethod(name = "target=")
+    public static IRubyObject target_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_target(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject public_id(IRubyObject self) {
+        return hpricot_ele_get_public_id(self);
+    }
+
+    @JRubyMethod(name = "public_id=")
+    public static IRubyObject public_id_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_public_id(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject system_id(IRubyObject self) {
+        return hpricot_ele_get_system_id(self);
+    }
+
+    @JRubyMethod(name = "system_id=")
+    public static IRubyObject system_id_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_system_id(self, value);
+    }
+}
+
+public static class Elem {
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_raw(self);
+    }
+}
+
+public static class BogusETag {
+    @JRubyMethod
+    public static IRubyObject raw_string(IRubyObject self) {
+        return hpricot_ele_get_attr(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_attr(self);
+    }
+}
+
+public static class Text {
+    @JRubyMethod
+    public static IRubyObject raw_string(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject content(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod(name = "content=")
+    public static IRubyObject content_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_name(self, value);
+    }
+}
+
+public static class XMLDecl {
+    @JRubyMethod
+    public static IRubyObject raw_string(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject clear_raw(IRubyObject self) {
+        return hpricot_ele_clear_name(self);
+    }
+
+    @JRubyMethod
+    public static IRubyObject encoding(IRubyObject self) {
+        return hpricot_ele_get_encoding(self);
+    }
+
+    @JRubyMethod(name = "encoding=")
+    public static IRubyObject encoding_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_encoding(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject standalone(IRubyObject self) {
+        return hpricot_ele_get_standalone(self);
+    }
+
+    @JRubyMethod(name = "standalone=")
+    public static IRubyObject standalone_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_standalone(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject version(IRubyObject self) {
+        return hpricot_ele_get_version(self);
+    }
+
+    @JRubyMethod(name = "version=")
+    public static IRubyObject version_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_version(self, value);
+    }
+}
+
+public static class ProcIns {
+    @JRubyMethod
+    public static IRubyObject target(IRubyObject self) {
+        return hpricot_ele_get_name(self);
+    }
+
+    @JRubyMethod(name = "target=")
+    public static IRubyObject target_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_name(self, value);
+    }
+
+    @JRubyMethod
+    public static IRubyObject content(IRubyObject self) {
+        return hpricot_ele_get_attr(self);
+    }
+
+    @JRubyMethod(name = "content=")
+    public static IRubyObject content_set(IRubyObject self, IRubyObject value) {
+        return hpricot_ele_set_attr(self, value);
+    }
+}
+
+public final static ObjectAllocator alloc_hpricot_struct = new ObjectAllocator() {};
+
+public static RubyClass makeHpricotStruct(Ruby runtime, IRubyObject[] members) {
+    RubyClass klass = RubyClass.newClass(runtime, runtime.getObject());
+    klass.fastSetInstanceVariable("__size__", runtime.newFixnum(members.length));
+    klass.setAllocator(alloc_hpricot_struct);
+
+    for(int i = 0; i < members.length; i++) {
+        String id = members[i].toString();
+        
+        rb_define_method_id(klass, id, ref_func[i], 0);
+        rb_define_method_id(klass, rb_id_attrset(id), set_func[i], 1);
+    }
+    
+    return klass;
+}
+
 public static void Init_hpricot_scan(Ruby runtime) {
   Extra x = new Extra(runtime);
 
@@ -459,9 +625,9 @@ public static void Init_hpricot_scan(Ruby runtime) {
 
   mHpricot.defineClassUnder("ParseError",runtime.getClass("StandardError"),runtime.getClass("StandardError").getAllocator());
 
-  RubyClass structElem = makeHpricotStruct(RubyArray.newArrayNoCopy(runtime, x.sym_name, x.sym_parent, x.sym_raw_attributes, x.sym_etag, x.sym_raw_string, x.sym_allowed, x.sym_tagno, x.sym_children));
-  RubyClass structAttr = makeHpricotStruct(RubyArray.newArrayNoCopy(runtime, x.sym_name, x.sym_parent, x.sym_raw_attributes));
-  RubyClass structBasic= makeHpricotStruct(RubyArray.newArrayNoCopy(runtime, x.sym_name, x.sym_parent));
+  RubyClass structElem = makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes, x.sym_etag, x.sym_raw_string, x.sym_allowed, x.sym_tagno, x.sym_children});
+  RubyClass structAttr = makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes});
+  RubyClass structBasic= makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent});
 
   RubyClass cDoc = mHpricot.defineClassUnder("Doc", structElem, structElem.getAllocator());
 
@@ -471,79 +637,25 @@ public static void Init_hpricot_scan(Ruby runtime) {
   RubyClass cComment = mHpricot.defineClassUnder("Comment", structBasic, structBasic.getAllocator());
   cComment.defineAnnotatedMethods(Comment.class);
 
+  RubyClass cDocType = mHpricot.defineClassUnder("DocType", structAttr, structAttr.getAllocator());
+  cDocType.defineAnnotatedMethods(DocType.class);
 
-  cDocType = rb_define_class_under(mHpricot, "DocType", structAttr);
-  rb_define_method(cDocType, "raw_string", hpricot_ele_get_name, 0);
-  rb_define_method(cDocType, "clear_raw", hpricot_ele_clear_name, 0);
-  rb_define_method(cDocType, "target", hpricot_ele_get_target, 0);
-  rb_define_method(cDocType, "target=", hpricot_ele_set_target, 1);
-  rb_define_method(cDocType, "public_id", hpricot_ele_get_public_id, 0);
-  rb_define_method(cDocType, "public_id=", hpricot_ele_set_public_id, 1);
-  rb_define_method(cDocType, "system_id", hpricot_ele_get_system_id, 0);
-  rb_define_method(cDocType, "system_id=", hpricot_ele_set_system_id, 1);
-  cElem = rb_define_class_under(mHpricot, "Elem", structElem);
-  rb_define_method(cElem, "clear_raw", hpricot_ele_clear_raw, 0);
-  cBogusETag = rb_define_class_under(mHpricot, "BogusETag", structAttr);
-  rb_define_method(cBogusETag, "raw_string", hpricot_ele_get_attr, 0);
-  rb_define_method(cBogusETag, "clear_raw", hpricot_ele_clear_attr, 0);
-  cText = rb_define_class_under(mHpricot, "Text", structBasic);
-  rb_define_method(cText, "raw_string", hpricot_ele_get_name, 0);
-  rb_define_method(cText, "clear_raw", hpricot_ele_clear_name, 0);
-  rb_define_method(cText, "content", hpricot_ele_get_name, 0);
-  rb_define_method(cText, "content=", hpricot_ele_set_name, 1);
-  cXMLDecl = rb_define_class_under(mHpricot, "XMLDecl", structAttr);
-  rb_define_method(cXMLDecl, "raw_string", hpricot_ele_get_name, 0);
-  rb_define_method(cXMLDecl, "clear_raw", hpricot_ele_clear_name, 0);
-  rb_define_method(cXMLDecl, "encoding", hpricot_ele_get_encoding, 0);
-  rb_define_method(cXMLDecl, "encoding=", hpricot_ele_set_encoding, 1);
-  rb_define_method(cXMLDecl, "standalone", hpricot_ele_get_standalone, 0);
-  rb_define_method(cXMLDecl, "standalone=", hpricot_ele_set_standalone, 1);
-  rb_define_method(cXMLDecl, "version", hpricot_ele_get_version, 0);
-  rb_define_method(cXMLDecl, "version=", hpricot_ele_set_version, 1);
-  cProcIns = rb_define_class_under(mHpricot, "ProcIns", structAttr);
-  rb_define_method(cProcIns, "target", hpricot_ele_get_name, 0);
-  rb_define_method(cProcIns, "target=", hpricot_ele_set_name, 1);
-  rb_define_method(cProcIns, "content", hpricot_ele_get_attr, 0);
-  rb_define_method(cProcIns, "content=", hpricot_ele_set_attr, 1);
+  RubyClass cElem = mHpricot.defineClassUnder("Elem", structElem, structElem.getAllocator());
+  cElem.defineAnnotatedMethods(Elem.class);
 
-  rb_const_set(mHpricot, rb_intern("ProcInsParse"),
-    reProcInsParse = rb_eval_string("/\\A<\\?(\\S+)\\s+(.+)/m"));
+  RubyClass cBogusETag = mHpricot.defineClassUnder("BogusETag", structAttr, structAttr.getAllocator());
+  cBogusETag.defineAnnotatedMethods(BogusETag.class);
 
+  RubyClass cText = mHpricot.defineClassUnder("Text", structBasic, structBasic.getAllocator());
+  cText.defineAnnotatedMethods(Text.class);
 
+  RubyClass cXMLDecl = mHpricot.defineClassUnder("XMLDecl", structAttr, structAttr.getAllocator());
+  cXMLDecl.defineAnnotatedMethods(XMLDecl.class);
 
+  RubyClass cProcIns = mHpricot.defineClassUnder("ProcIns", structAttr, structAttr.getAllocator());
+  cProcIns.defineAnnotatedMethods(ProcIns.class);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  mHpricot.getMetaClass().attr_accessor(runtime.getCurrentContext(),new IRubyObject[]{runtime.newSymbol("buffer_size")});
-  CallbackFactory fact = runtime.callbackFactory(HpricotScanService.class);
-  mHpricot.getMetaClass().defineMethod("scan",fact.getSingletonMethod("__hpricot_scan",IRubyObject.class));
-  mHpricot.defineClassUnder("ParseError",runtime.getClass("StandardError"),runtime.getClass("StandardError").getAllocator());
-  rubyApi = JavaEmbedUtils.newObjectAdapter();
-
-
-
+  IRubyObject reProcInsParse = runtime.evalScriptlet("/\\A<\\?(\\S+)\\s+(.+)/m");
+  mHpricot.setConstant("ProcInsParse", reProcInsParse);
 }
 }

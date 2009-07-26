@@ -206,7 +206,7 @@ def java_classpath_arg
 end
 
 def compile_java(filename, jarname)
-  sh %{javac -source 1.4 -target 1.4 #{java_classpath_arg} #{filename}}
+  sh %{javac -source 1.5 -target 1.5 #{java_classpath_arg} #{filename}}
   sh %{jar cf #{jarname} *.class}
 end
 
