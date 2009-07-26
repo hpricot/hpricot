@@ -1,0 +1,6 @@
+*.class
+mkmf.log
+conftest.dSYM
+/lib/*.jar
+/hpricot-0.8.240-jruby
+/pkg

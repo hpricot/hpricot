@@ -68,12 +68,15 @@ task :package => [:clean, :ragel]
 desc "Releases packages for all Hpricot packages and platforms."
 task :release => [:package, :package_win32, :package_jruby]
 
+
 desc "Run all the tests"
 Rake::TestTask.new do |t|
     t.libs << "test"
     t.test_files = FileList['test/test_*.rb']
     t.verbose = true
 end
+
+task :test => [:hpricot_java] if defined?(JRUBY_VERSION)
 
 Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_dir = 'doc/rdoc'
