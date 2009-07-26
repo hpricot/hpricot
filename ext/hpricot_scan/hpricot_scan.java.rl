@@ -598,6 +598,56 @@ public static class ProcIns {
     }
 }
 
+private static class RefCallback implements Callback {
+   private final int n;
+   public RefCallback(int n) { this.n = n; }
+
+   public IRubyObject execute(IRubyObject recv, IRubyObject[] args, Block block) {
+       return H_ELE_GET(recv, n);
+   }
+
+   public Arity getArity() {
+       return Arity.NO_ARGUMENTS;
+   }
+}
+
+private static class SetCallback implements Callback {
+   private final int n;
+   public SetCallback(int n) { this.n = n; }
+
+   public IRubyObject execute(IRubyObject recv, IRubyObject[] args, Block block) {
+       return H_ELE_SET(recv, n, args[0]);
+   }
+
+   public Arity getArity() {
+       return Arity.ONE_ARGUMENT;
+   }
+}
+
+private final static Callback[] ref_func = new Callback[]{
+            new RefCallback(0),
+            new RefCallback(1),
+            new RefCallback(2),
+            new RefCallback(3),
+            new RefCallback(4),
+            new RefCallback(5),
+            new RefCallback(6),
+            new RefCallback(7),
+            new RefCallback(8),
+            new RefCallback(9)};
+
+private final static Callback[] set_func = new Callback[]{
+            new SetCallback(0),
+            new SetCallback(1),
+            new SetCallback(2),
+            new SetCallback(3),
+            new SetCallback(4),
+            new SetCallback(5),
+            new SetCallback(6),
+            new SetCallback(7),
+            new SetCallback(8),
+            new SetCallback(9)};
+
 public final static ObjectAllocator alloc_hpricot_struct = new ObjectAllocator() {};
 
 public static RubyClass makeHpricotStruct(Ruby runtime, IRubyObject[] members) {
@@ -607,9 +657,8 @@ public static RubyClass makeHpricotStruct(Ruby runtime, IRubyObject[] members) {
 
     for(int i = 0; i < members.length; i++) {
         String id = members[i].toString();
-        
-        rb_define_method_id(klass, id, ref_func[i], 0);
-        rb_define_method_id(klass, rb_id_attrset(id), set_func[i], 1);
+        klass.defineMethod(id, ref_func[i]);
+        klass.defineMethod(id + "=", set_func[i]);
     }
     
     return klass;
