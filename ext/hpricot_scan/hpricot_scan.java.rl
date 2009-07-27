@@ -7,17 +7,28 @@ import org.jruby.RubyClass;
 import org.jruby.RubyHash;
 import org.jruby.RubyModule;
 import org.jruby.RubyNumeric;
+import org.jruby.RubyObject;
 import org.jruby.RubyObjectAdapter;
 import org.jruby.RubyString;
 import org.jruby.anno.JRubyMethod;
 import org.jruby.javasupport.JavaEmbedUtils;
+import org.jruby.runtime.Arity;
 import org.jruby.runtime.Block;
-import org.jruby.runtime.CallbackFactory;
+import org.jruby.runtime.ObjectAllocator;
+import org.jruby.runtime.ThreadContext;
 import org.jruby.runtime.builtin.IRubyObject;
+import org.jruby.runtime.callback.Callback;
 import org.jruby.exceptions.RaiseException;
 import org.jruby.runtime.load.BasicLibraryService;
+import org.jruby.util.ByteList;
 
 public class HpricotScanService implements BasicLibraryService {
+    public static byte[] realloc(byte[] input, int size) {
+        byte[] newArray = new byte[size];
+        System.arraycopy(input, 0, newArray, 0, input.length);
+        return newArray;
+    }
+
     // hpricot_state
     public static class State {
         public IRubyObject doc;
@@ -33,53 +44,83 @@ public class HpricotScanService implements BasicLibraryService {
     }
 
     public static class Scanner {
+        public IRubyObject SET(int mark, int E, IRubyObject org) {
+            if(mark == -1 || E == mark) {
+                return runtime.newString("");
+            } else if(E > mark) {
+                return RubyString.newString(runtime, data, mark, E-mark);
+            } else {
+                return org;
+            }
+        }
+
+        public int SLIDE(int N) {
+            if(N > ts) {
+                return N - ts;
+            } else {
+                return N;
+            }
+        }
+
+        public IRubyObject CAT(IRubyObject N, int mark, int E) {
+            if(N.isNil()) {
+                return SET(mark, E, N);
+            } else {
+                N.cat(data, mark, E-mark);
+                return N;
+            }
+        }
+
 %%{
   machine hpricot_scan;
 
   action newEle {
-    if (text == 1) {
-      CAT(tag, p);
-      ELE(text);
-      text = 0;
+    if(text) {
+        tag = CAT(tag, mark_tag, p);
+        ELE(x.sym_text);
+        text = false;
     }
-    attr = Qnil;
-    tag = Qnil;
-    mark_tag = NULL;
-    ele_open = 1;
+    attr = runtime.getNil();
+    tag = runtime.getNil();
+    mark_tag = -1;
+    ele_open = true;
   }
 
-  action _tag { mark_tag = p; }
+  action _tag  { mark_tag = p; }
   action _aval { mark_aval = p; }
   action _akey { mark_akey = p; }
-  action tag { SET(tag, p); }
-  action tagc { SET(tag, p-1); }
-  action aval { SET(aval, p); }
+  action tag   { tag = SET(mark_tag, p, tag); }
+  action tagc  { tag = SET(mark_tag, p-1, tag); }
+  action aval  { aval = SET(mark_aval, p, aval); }
   action aunq {
-    if (*(p-1) == '"' || *(p-1) == '\'') { SET(aval, p-1); }
-    else { SET(aval, p); }
+      if(data[p-1] == '"' || data[p-1] == '\'') {
+          aval = SET(mark_aval, p-1, aval);
+      } else {
+          aval = SET(mark_aval, p, aval);
+      }
   }
-  action akey { SET(akey, p); }
-  action xmlver { SET(aval, p); ATTR(ID2SYM(rb_intern("version")), aval); }
-  action xmlenc { SET(aval, p); ATTR(ID2SYM(rb_intern("encoding")), aval); }
-  action xmlsd  { SET(aval, p); ATTR(ID2SYM(rb_intern("standalone")), aval); }
-  action pubid  { SET(aval, p); ATTR(ID2SYM(rb_intern("public_id")), aval); }
-  action sysid  { SET(aval, p); ATTR(ID2SYM(rb_intern("system_id")), aval); }
+  action akey {   akey = SET(mark_akey, p, akey); }
+  action xmlver { aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("version"), aval); }
+  action xmlenc { aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("encoding"), aval); }
+  action xmlsd  { aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("standalone"), aval); }
+  action pubid  { aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("public_id"), aval); }
+  action sysid  { aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("system_id"), aval); }
 
   action new_attr {
-    akey = Qnil;
-    aval = Qnil;
-    mark_akey = NULL;
-    mark_aval = NULL;
+      akey = runtime.getNil();
+      aval = runtime.getNil();
+      mark_akey = -1;
+      mark_aval = -1;
   }
 
   action save_attr {
-    if (!S->xml)
-      akey = rb_funcall(akey, s_downcase, 0);
-    ATTR(akey, aval);
+      if(S.xml) {
+          akey = akey.callMethod(runtime.getCurrentContext(), "downcase");
+      }
+      ATTR(akey, aval);
   }
 
   include hpricot_common "hpricot_common.rl";
-
 }%%
 
 %% write data nofinal;
@@ -87,22 +128,22 @@ public class HpricotScanService implements BasicLibraryService {
         public final static int BUFSIZE = 16384;
 
 
-        private int cs, act, have = 0, nread = 0, curline = 1, text = 0;
-        private int ts = 0, te = 0, eof = -1, p = -1;
-        private byte[] buf;
+        private int cs, act, have = 0, nread = 0, curline = 1;
+        private int ts = 0, te = 0, eof = -1, p = -1, pe = -1, buf = 0;
+        private byte[] data;
         private State S = null;
         private IRubyObject port, opts, attr, tag, akey, aval, bufsize;
-        private int mark_tag = 0, mark_akey = 0, mark_aval = 0;
-        private boolean done = false, ele_open = false, taint = false, io = false;
+        private int mark_tag = -1, mark_akey = -1, mark_aval = -1;
+        private boolean done = false, ele_open = false, taint = false, io = false, text = false;
         private int buffer_size = 0;
 
         private Extra x;
-
 
         private IRubyObject self;
         private Ruby runtime;
         private ThreadContext ctx;
         private Block block;
+
         public Scanner(IRubyObject self, IRubyObject[] args, Block block) {
             this.self = self;
             this.runtime = self.getRuntime();
@@ -114,7 +155,7 @@ public class HpricotScanService implements BasicLibraryService {
             aval = runtime.getNil();
             bufsize = runtime.getNil();
 
-            this.x = (Extra)this.runtime.getModule("Hpricot").dataWrapStruct();
+            this.x = (Extra)this.runtime.getModule("Hpricot").dataGetStruct();
 
             port = args[0];
             if(args.length == 2) {
@@ -162,149 +203,107 @@ public class HpricotScanService implements BasicLibraryService {
             }
 
             if(io) {
-                buf = new byte[bufer_size];
+                buf = 0;
+                data = new byte[buffer_size];
             }
         }
         
+        private int len, space;
         // hpricot_scan
         public IRubyObject scan() {
 %% write init;
+            while(!done) {
+                p = pe = len = buf;
+                space = buffer_size - have;
+                
+                if(io) {
+                    if(space == 0) {
+                        /* We've used up the entire buffer storing an already-parsed token
+                         * prefix that must be preserved.  Likely caused by super-long attributes.
+                         * Increase buffer size and continue  */
+                        buffer_size += BUFSIZE;
+                        data = realloc(data, buffer_size);
+                        space = buffer_size - have;
+                    }
 
+                    p = have;
+                    IRubyObject str = port.callMethod(ctx, "read", runtime.newFixnum(space));
+                    ByteList bl = str.convertToString().getByteList();
+                    len = bl.realSize;
+                    System.arraycopy(bl.bytes, bl.begin, data, p, len);
+                } else {
+                    ByteList bl = port.convertToString().getByteList();
+                    data = bl.bytes;
+                    buf = bl.begin;
+                    p = bl.begin;
+                    len = bl.realSize + 1;
+                    done = true;
+                }
 
-            
+                nread += len;
 
+                /* If this is the last buffer, tack on an EOF. */
+                if(io && len < space) {
+                    data[p + len++] = 0;
+                    done = true;
+                }
+
+                pe = p + len;
+
+                %% write exec;
+
+                if(cs == hpricot_scan_error) {
+                    if(!tag.isNil()) {
+                        throw runtime.newRaiseException(x.rb_eHpricotParseError, "parse error on element <" + tag + ">, starting on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
+                    } else {
+                        throw runtime.newRaiseException(x.rb_eHpricotParseError, "parse error on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
+                    }
+                }
+
+                if(done && ele_open) {
+                    ele_open = false;
+                    if(ts > 0) {
+                        mark_tag = ts;
+                        ts = 0;
+                        text = true;
+                    }
+                }
+
+                if(ts == 0) {
+                    have = 0;
+                    if(mark_tag != -1 && text) {
+                        if(done) {
+                            if(mark_tag < p - 1) {
+                                tag = CAT(tag, mark_tag, p-1);
+                                ELE(x.sym_text);
+                            }
+                        } else {
+                            tag = CAT(tag, mark_tag, p);
+                        }
+                    }
+                    if(io) {
+                        mark_tag = 0;
+                    } else {
+                        mark_tag = ((RubyString)port).getByteList().begin;
+                    }
+                } else if(io) {
+                    have = pe - ts;
+                    System.arraycopy(data, ts, data, buf, have);
+                    mark_tag = SLIDE(mark_tag);
+                    mark_akey = SLIDE(mark_akey);
+                    mark_aval = SLIDE(mark_aval);
+                    te -= ts;
+                    ts = 0;
+                }
+            }
+
+            if(S != null) {
+                return S.doc;
+            }
+
+            return runtime.getNil();;
         }
-
-
-
-
-
-
-  while (!done) {
-    VALUE str;
-    char *p, *pe;
-    int len, space = buffer_size - have, tokstart_diff, tokend_diff, mark_tag_diff, mark_akey_diff, mark_aval_diff;
-
-    if (io)
-    {
-      if (space == 0) {
-        /* We've used up the entire buffer storing an already-parsed token
-         * prefix that must be preserved.  Likely caused by super-long attributes.
-         * Increase buffer size and continue  */
-         tokstart_diff = ts - buf;
-         tokend_diff = te - buf;
-         mark_tag_diff = mark_tag - buf;
-         mark_akey_diff = mark_akey - buf;
-         mark_aval_diff = mark_aval - buf;
-
-         buffer_size += BUFSIZE;
-         REALLOC_N(buf, char, buffer_size);
-
-         space = buffer_size - have;
-
-         ts = buf + tokstart_diff;
-         te = buf + tokend_diff;
-         mark_tag = buf + mark_tag_diff;
-         mark_akey = buf + mark_akey_diff;
-         mark_aval = buf + mark_aval_diff;
-      }
-      p = buf + have;
-
-      str = rb_funcall(port, s_read, 1, INT2FIX(space));
-      len = RSTRING_LEN(str);
-      memcpy(p, StringValuePtr(str), len);
     }
-    else
-    {
-      p = RSTRING_PTR(port);
-      len = RSTRING_LEN(port) + 1;
-      done = 1;
-    }
-
-    nread += len;
-
-    /* If this is the last buffer, tack on an EOF. */
-    if (io && len < space) {
-      p[len++] = 0;
-      done = 1;
-    }
-
-    pe = p + len;
-    %% write exec;
-
-    if (cs == hpricot_scan_error) {
-      if (buf != NULL)
-        free(buf);
-      if (!NIL_P(tag))
-      {
-        rb_raise(rb_eHpricotParseError, "parse error on element <%s>, starting on line %d.\n" NO_WAY_SERIOUSLY, RSTRING_PTR(tag), curline);
-      }
-      else
-      {
-        rb_raise(rb_eHpricotParseError, "parse error on line %d.\n" NO_WAY_SERIOUSLY, curline);
-      }
-    }
-
-    if (done && ele_open)
-    {
-      ele_open = 0;
-      if (ts > 0) {
-        mark_tag = ts;
-        ts = 0;
-        text = 1;
-      }
-    }
-
-    if (ts == 0)
-    {
-      have = 0;
-      /* text nodes have no ts because each byte is parsed alone */
-      if (mark_tag != NULL && text == 1)
-      {
-        if (done)
-        {
-          if (mark_tag < p-1)
-          {
-            CAT(tag, p-1);
-            ELE(text);
-          }
-        }
-        else
-        {
-          CAT(tag, p);
-        }
-      }
-      if (io)
-        mark_tag = buf;
-      else
-        mark_tag = RSTRING_PTR(port);
-    }
-    else if (io)
-    {
-      have = pe - ts;
-      memmove(buf, ts, have);
-      SLIDE(tag);
-      SLIDE(akey);
-      SLIDE(aval);
-      te = buf + (te - ts);
-      ts = buf;
-    }
-  }
-
-  if (buf != NULL)
-    free(buf);
-
-  if (S != NULL)
-  {
-    VALUE doc = S->doc;
-    rb_gc_unregister_address(&S->doc);
-    free(S);
-    return doc;
-  }
-
-  return Qnil;
-}
-
 
     public static class HpricotModule {
         // hpricot_scan
@@ -566,7 +565,7 @@ public class HpricotScanService implements BasicLibraryService {
     public final static ObjectAllocator alloc_hpricot_struct = new ObjectAllocator() {
             // alloc_hpricot_struct
             public IRubyObject allocate(Ruby runtime, RubyClass klass) {
-                int size = RubyNumeric.fix2int(klass.fastGetInternalVariable("__size__"));
+                int size = RubyNumeric.fix2int((RubyObject)klass.fastGetInternalVariable("__size__"));
                 RubyObject obj = new RubyObject(runtime, klass);
                 obj.dataWrapStruct(new IRubyObject[size]);
                 return obj;
@@ -614,6 +613,7 @@ public class HpricotScanService implements BasicLibraryService {
         public RubyClass cXMLDecl;
         public RubyClass cProcIns;
         public IRubyObject reProcInsParse;
+        public IRubyObject rb_eHpricotParseError;
 
         public Extra(Ruby runtime) {
             symAllow = runtime.newSymbol("allow");
@@ -643,12 +643,12 @@ public class HpricotScanService implements BasicLibraryService {
         Extra x = new Extra(runtime);
 
         x.mHpricot = runtime.defineModule("Hpricot");
-        x.mHpricot.dataSetStruct(x);
+        x.mHpricot.dataWrapStruct(x);
 
         x.mHpricot.getSingletonClass().attr_accessor(runtime.getCurrentContext(),new  IRubyObject[]{runtime.newSymbol("buffer_size")});
         x.mHpricot.defineAnnotatedMethods(HpricotModule.class);
 
-        x.mHpricot.defineClassUnder("ParseError",runtime.getClass("StandardError"),runtime.getClass("StandardError").getAllocator());
+        x.rb_eHpricotParseError = x.mHpricot.defineClassUnder("ParseError",runtime.getClass("StandardError"),runtime.getClass("StandardError").getAllocator());
 
         x.structElem = makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes, x.sym_etag, x.sym_raw_string, x.sym_allowed, x.sym_tagno, x.sym_children});
         x.structAttr = makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes});
@@ -665,7 +665,7 @@ public class HpricotScanService implements BasicLibraryService {
         x.cDocType = x.mHpricot.defineClassUnder("DocType", x.structAttr, x.structAttr.getAllocator());
         x.cDocType.defineAnnotatedMethods(DocType.class);
 
-        x.cElem = mHpricot.defineClassUnder("Elem", x.structElem, x.structElem.getAllocator());
+        x.cElem = x.mHpricot.defineClassUnder("Elem", x.structElem, x.structElem.getAllocator());
         x.cElem.defineAnnotatedMethods(Elem.class);
 
         x.cBogusETag = x.mHpricot.defineClassUnder("BogusETag", x.structAttr, x.structAttr.getAllocator());
