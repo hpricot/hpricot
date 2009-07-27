@@ -1,5 +1,5 @@
 
-- Port hpricot_css
 - Update hpricot_scan
+- Port hpricot_css
 - Check fast_xs
 - Make tests work

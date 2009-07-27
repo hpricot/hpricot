@@ -18,37 +18,293 @@ import org.jruby.exceptions.RaiseException;
 import org.jruby.runtime.load.BasicLibraryService;
 
 public class HpricotScanService implements BasicLibraryService {
-    public static class Extra {
-        IRubyObject symAllow, symDeny, sym_xmldecl, sym_doctype, 
-            sym_procins, sym_stag, sym_etag, sym_emptytag, 
-            sym_allowed, sym_children, sym_comment, 
-            sym_cdata, sym_name, sym_parent, 
-            sym_raw_attributes, sym_raw_string, sym_tagno, 
-            sym_text, sym_EMPTY, sym_CDATA;
-
-        public Extra(Ruby runtime) {
-            symAllow = runtime.newSymbol("allow");
-            symDeny = runtime.newSymbol("deny");
-            sym_xmldecl = runtime.newSymbol("xmldecl");
-            sym_doctype = runtime.newSymbol("doctype");
-            sym_procins = runtime.newSymbol("procins");
-            sym_stag = runtime.newSymbol("stag");
-            sym_etag = runtime.newSymbol("etag");
-            sym_emptytag = runtime.newSymbol("emptytag");
-            sym_allowed = runtime.newSymbol("allowed");
-            sym_children = runtime.newSymbol("children");
-            sym_comment = runtime.newSymbol("comment");
-            sym_cdata = runtime.newSymbol("cdata");
-            sym_name = runtime.newSymbol("name");
-            sym_parent = runtime.newSymbol("parent");
-            sym_raw_attributes = runtime.newSymbol("raw_attributes");
-            sym_raw_string = runtime.newSymbol("raw_string");
-            sym_tagno = runtime.newSymbol("tagno");
-            sym_text = runtime.newSymbol("text");
-            sym_EMPTY = runtime.newSymbol("EMPTY");
-            sym_CDATA = runtime.newSymbol("CDATA");
-        }
+    // hpricot_state
+    public static class State {
+        public IRubyObject doc;
+        public IRubyObject focus;
+        public IRubyObject last;
+        public IRubyObject EC;
+        public boolean xml, strict, fixup;
     }
+
+    static boolean OPT(IRubyObject opts, String key) {
+        Ruby runtime = opts.getRuntime();
+        return !opts.isNil() && ((RubyHash)opts).op_aref(runtime.getCurrentContext(), runtime.newSymbol(key)).isTrue();
+    }
+
+    public static class Scanner {
+%%{
+  machine hpricot_scan;
+
+  action newEle {
+    if (text == 1) {
+      CAT(tag, p);
+      ELE(text);
+      text = 0;
+    }
+    attr = Qnil;
+    tag = Qnil;
+    mark_tag = NULL;
+    ele_open = 1;
+  }
+
+  action _tag { mark_tag = p; }
+  action _aval { mark_aval = p; }
+  action _akey { mark_akey = p; }
+  action tag { SET(tag, p); }
+  action tagc { SET(tag, p-1); }
+  action aval { SET(aval, p); }
+  action aunq {
+    if (*(p-1) == '"' || *(p-1) == '\'') { SET(aval, p-1); }
+    else { SET(aval, p); }
+  }
+  action akey { SET(akey, p); }
+  action xmlver { SET(aval, p); ATTR(ID2SYM(rb_intern("version")), aval); }
+  action xmlenc { SET(aval, p); ATTR(ID2SYM(rb_intern("encoding")), aval); }
+  action xmlsd  { SET(aval, p); ATTR(ID2SYM(rb_intern("standalone")), aval); }
+  action pubid  { SET(aval, p); ATTR(ID2SYM(rb_intern("public_id")), aval); }
+  action sysid  { SET(aval, p); ATTR(ID2SYM(rb_intern("system_id")), aval); }
+
+  action new_attr {
+    akey = Qnil;
+    aval = Qnil;
+    mark_akey = NULL;
+    mark_aval = NULL;
+  }
+
+  action save_attr {
+    if (!S->xml)
+      akey = rb_funcall(akey, s_downcase, 0);
+    ATTR(akey, aval);
+  }
+
+  include hpricot_common "hpricot_common.rl";
+
+}%%
+
+%% write data nofinal;
+
+        public final static int BUFSIZE = 16384;
+
+
+        private int cs, act, have = 0, nread = 0, curline = 1, text = 0;
+        private int ts = 0, te = 0, eof = -1, p = -1;
+        private byte[] buf;
+        private State S = null;
+        private IRubyObject port, opts, attr, tag, akey, aval, bufsize;
+        private int mark_tag = 0, mark_akey = 0, mark_aval = 0;
+        private boolean done = false, ele_open = false, taint = false, io = false;
+        private int buffer_size = 0;
+
+        private Extra x;
+
+
+        private IRubyObject self;
+        private Ruby runtime;
+        private ThreadContext ctx;
+        private Block block;
+        public Scanner(IRubyObject self, IRubyObject[] args, Block block) {
+            this.self = self;
+            this.runtime = self.getRuntime();
+            this.ctx = runtime.getCurrentContext();
+            this.block = block;
+            attr = runtime.getNil();
+            tag = runtime.getNil();
+            akey = runtime.getNil();
+            aval = runtime.getNil();
+            bufsize = runtime.getNil();
+
+            this.x = (Extra)this.runtime.getModule("Hpricot").dataWrapStruct();
+
+            port = args[0];
+            if(args.length == 2) {
+                opts = args[1];
+            } else {
+                opts = runtime.getNil();
+            }
+
+            taint = port.isTaint();
+            io = port.respondsTo("read");
+            if(!io) {
+                if(port.respondsTo("to_str")) {
+                    port = port.callMethod(ctx, "to_str");
+                    port = port.convertToString();
+                } else {
+                    throw runtime.newArgumentError("an Hpricot document must be built from an input source (a String or IO object.)");
+                }
+            }
+
+            if(!(opts instanceof RubyHash)) {
+                opts = runtime.getNil();
+            }
+
+            if(!block.isGiven()) {
+                S = new State();
+                S.doc = x.cDoc.allocate();
+                S.focus = S.doc;
+                S.last = runtime.getNil();
+                S.xml = OPT(opts, "xml");
+                S.strict = OPT(opts, "xhtml_strict");
+                S.fixup = OPT(opts, "fixup_tags");
+                if(S.strict) {
+                    S.fixup = true;
+                }
+                S.doc.getInstanceVariables().fastSetInstanceVariable("@options", opts);
+                S.EC = x.mHpricot.getConstant("ElementContent");
+            }
+
+            buffer_size = BUFSIZE;
+            if(self.getInstanceVariables().fastHasInstanceVariable("@buffer_size")) {
+                bufsize = self.getInstanceVariables().fastGetInstanceVariable("@buffer_size");
+                if(!bufsize.isNil()) {
+                    buffer_size = RubyNumeric.fix2int(bufsize);
+                }
+            }
+
+            if(io) {
+                buf = new byte[bufer_size];
+            }
+        }
+        
+        // hpricot_scan
+        public IRubyObject scan() {
+%% write init;
+
+
+            
+
+        }
+
+
+
+
+
+
+  while (!done) {
+    VALUE str;
+    char *p, *pe;
+    int len, space = buffer_size - have, tokstart_diff, tokend_diff, mark_tag_diff, mark_akey_diff, mark_aval_diff;
+
+    if (io)
+    {
+      if (space == 0) {
+        /* We've used up the entire buffer storing an already-parsed token
+         * prefix that must be preserved.  Likely caused by super-long attributes.
+         * Increase buffer size and continue  */
+         tokstart_diff = ts - buf;
+         tokend_diff = te - buf;
+         mark_tag_diff = mark_tag - buf;
+         mark_akey_diff = mark_akey - buf;
+         mark_aval_diff = mark_aval - buf;
+
+         buffer_size += BUFSIZE;
+         REALLOC_N(buf, char, buffer_size);
+
+         space = buffer_size - have;
+
+         ts = buf + tokstart_diff;
+         te = buf + tokend_diff;
+         mark_tag = buf + mark_tag_diff;
+         mark_akey = buf + mark_akey_diff;
+         mark_aval = buf + mark_aval_diff;
+      }
+      p = buf + have;
+
+      str = rb_funcall(port, s_read, 1, INT2FIX(space));
+      len = RSTRING_LEN(str);
+      memcpy(p, StringValuePtr(str), len);
+    }
+    else
+    {
+      p = RSTRING_PTR(port);
+      len = RSTRING_LEN(port) + 1;
+      done = 1;
+    }
+
+    nread += len;
+
+    /* If this is the last buffer, tack on an EOF. */
+    if (io && len < space) {
+      p[len++] = 0;
+      done = 1;
+    }
+
+    pe = p + len;
+    %% write exec;
+
+    if (cs == hpricot_scan_error) {
+      if (buf != NULL)
+        free(buf);
+      if (!NIL_P(tag))
+      {
+        rb_raise(rb_eHpricotParseError, "parse error on element <%s>, starting on line %d.\n" NO_WAY_SERIOUSLY, RSTRING_PTR(tag), curline);
+      }
+      else
+      {
+        rb_raise(rb_eHpricotParseError, "parse error on line %d.\n" NO_WAY_SERIOUSLY, curline);
+      }
+    }
+
+    if (done && ele_open)
+    {
+      ele_open = 0;
+      if (ts > 0) {
+        mark_tag = ts;
+        ts = 0;
+        text = 1;
+      }
+    }
+
+    if (ts == 0)
+    {
+      have = 0;
+      /* text nodes have no ts because each byte is parsed alone */
+      if (mark_tag != NULL && text == 1)
+      {
+        if (done)
+        {
+          if (mark_tag < p-1)
+          {
+            CAT(tag, p-1);
+            ELE(text);
+          }
+        }
+        else
+        {
+          CAT(tag, p);
+        }
+      }
+      if (io)
+        mark_tag = buf;
+      else
+        mark_tag = RSTRING_PTR(port);
+    }
+    else if (io)
+    {
+      have = pe - ts;
+      memmove(buf, ts, have);
+      SLIDE(tag);
+      SLIDE(akey);
+      SLIDE(aval);
+      te = buf + (te - ts);
+      ts = buf;
+    }
+  }
+
+  if (buf != NULL)
+    free(buf);
+
+  if (S != NULL)
+  {
+    VALUE doc = S->doc;
+    rb_gc_unregister_address(&S->doc);
+    free(S);
+    return doc;
+  }
+
+  return Qnil;
+}
+
 
     public static class HpricotModule {
         // hpricot_scan
@@ -237,6 +493,26 @@ public class HpricotScanService implements BasicLibraryService {
         }
     }
 
+    public final static String NO_WAY_SERIOUSLY = "*** This should not happen, please send a bug report with the HTML you're parsing to why@whytheluckystiff.net.  So sorry!";
+
+    public final static int H_ELE_TAG = 0;
+    public final static int H_ELE_PARENT = 1;
+    public final static int H_ELE_ATTR = 2;
+    public final static int H_ELE_ETAG = 3;
+    public final static int H_ELE_RAW = 4;
+    public final static int H_ELE_EC = 5;
+    public final static int H_ELE_HASH = 6;
+    public final static int H_ELE_CHILDREN = 7;
+
+    public static IRubyObject H_ELE_GET(IRubyObject recv, int n) {
+        return ((IRubyObject[])recv.dataGetStruct())[n];
+    }
+
+    public static IRubyObject H_ELE_SET(IRubyObject recv, int n, IRubyObject value) {
+        ((IRubyObject[])recv.dataGetStruct())[n] = value;
+        return value;
+    }
+
     private static class RefCallback implements Callback {
         private final int n;
         public RefCallback(int n) { this.n = n; }
@@ -287,11 +563,19 @@ public class HpricotScanService implements BasicLibraryService {
         new SetCallback(8),
         new SetCallback(9)};
 
-    public final static ObjectAllocator alloc_hpricot_struct = new ObjectAllocator() {};
+    public final static ObjectAllocator alloc_hpricot_struct = new ObjectAllocator() {
+            // alloc_hpricot_struct
+            public IRubyObject allocate(Ruby runtime, RubyClass klass) {
+                int size = RubyNumeric.fix2int(klass.fastGetInternalVariable("__size__"));
+                RubyObject obj = new RubyObject(runtime, klass);
+                obj.dataWrapStruct(new IRubyObject[size]);
+                return obj;
+            }
+        };
 
     public static RubyClass makeHpricotStruct(Ruby runtime, IRubyObject[] members) {
         RubyClass klass = RubyClass.newClass(runtime, runtime.getObject());
-        klass.fastSetInstanceVariable("__size__", runtime.newFixnum(members.length));
+        klass.fastSetInternalVariable("__size__", runtime.newFixnum(members.length));
         klass.setAllocator(alloc_hpricot_struct);
 
         for(int i = 0; i < members.length; i++) {
@@ -308,47 +592,95 @@ public class HpricotScanService implements BasicLibraryService {
         return true;
     }
 
+    public static class Extra {
+        IRubyObject symAllow, symDeny, sym_xmldecl, sym_doctype, 
+            sym_procins, sym_stag, sym_etag, sym_emptytag, 
+            sym_allowed, sym_children, sym_comment, 
+            sym_cdata, sym_name, sym_parent, 
+            sym_raw_attributes, sym_raw_string, sym_tagno, 
+            sym_text, sym_EMPTY, sym_CDATA;
+
+        public RubyModule mHpricot;
+        public RubyClass structElem;
+        public RubyClass structAttr;
+        public RubyClass structBasic;
+        public RubyClass cDoc;
+        public RubyClass cCData;
+        public RubyClass cComment;
+        public RubyClass cDocType;
+        public RubyClass cElem;
+        public RubyClass cBogusETag;
+        public RubyClass cText;
+        public RubyClass cXMLDecl;
+        public RubyClass cProcIns;
+        public IRubyObject reProcInsParse;
+
+        public Extra(Ruby runtime) {
+            symAllow = runtime.newSymbol("allow");
+            symDeny = runtime.newSymbol("deny");
+            sym_xmldecl = runtime.newSymbol("xmldecl");
+            sym_doctype = runtime.newSymbol("doctype");
+            sym_procins = runtime.newSymbol("procins");
+            sym_stag = runtime.newSymbol("stag");
+            sym_etag = runtime.newSymbol("etag");
+            sym_emptytag = runtime.newSymbol("emptytag");
+            sym_allowed = runtime.newSymbol("allowed");
+            sym_children = runtime.newSymbol("children");
+            sym_comment = runtime.newSymbol("comment");
+            sym_cdata = runtime.newSymbol("cdata");
+            sym_name = runtime.newSymbol("name");
+            sym_parent = runtime.newSymbol("parent");
+            sym_raw_attributes = runtime.newSymbol("raw_attributes");
+            sym_raw_string = runtime.newSymbol("raw_string");
+            sym_tagno = runtime.newSymbol("tagno");
+            sym_text = runtime.newSymbol("text");
+            sym_EMPTY = runtime.newSymbol("EMPTY");
+            sym_CDATA = runtime.newSymbol("CDATA");
+        }
+    }
+
     public static void Init_hpricot_scan(Ruby runtime) {
         Extra x = new Extra(runtime);
 
-        RubyModule mHpricot = runtime.defineModule("Hpricot");
+        x.mHpricot = runtime.defineModule("Hpricot");
+        x.mHpricot.dataSetStruct(x);
 
-        mHpricot.getSingletonClass().attr_accessor(runtime.getCurrentContext(),new  IRubyObject[]{runtime.newSymbol("buffer_size")});
-        mHpricot.defineAnnotatedMethods(HpricotModule.class);
+        x.mHpricot.getSingletonClass().attr_accessor(runtime.getCurrentContext(),new  IRubyObject[]{runtime.newSymbol("buffer_size")});
+        x.mHpricot.defineAnnotatedMethods(HpricotModule.class);
 
-        mHpricot.defineClassUnder("ParseError",runtime.getClass("StandardError"),runtime.getClass("StandardError").getAllocator());
+        x.mHpricot.defineClassUnder("ParseError",runtime.getClass("StandardError"),runtime.getClass("StandardError").getAllocator());
 
-        RubyClass structElem = makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes, x.sym_etag, x.sym_raw_string, x.sym_allowed, x.sym_tagno, x.sym_children});
-        RubyClass structAttr = makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes});
-        RubyClass structBasic= makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent});
+        x.structElem = makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes, x.sym_etag, x.sym_raw_string, x.sym_allowed, x.sym_tagno, x.sym_children});
+        x.structAttr = makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent, x.sym_raw_attributes});
+        x.structBasic= makeHpricotStruct(runtime, new IRubyObject[] {x.sym_name, x.sym_parent});
 
-        RubyClass cDoc = mHpricot.defineClassUnder("Doc", structElem, structElem.getAllocator());
+        x.cDoc = x.mHpricot.defineClassUnder("Doc", x.structElem, x.structElem.getAllocator());
 
-        RubyClass cCData = mHpricot.defineClassUnder("CData", structBasic, structBasic.getAllocator());
-        cCData.defineAnnotatedMethods(CData.class);
+        x.cCData = x.mHpricot.defineClassUnder("CData", x.structBasic, x.structBasic.getAllocator());
+        x.cCData.defineAnnotatedMethods(CData.class);
 
-        RubyClass cComment = mHpricot.defineClassUnder("Comment", structBasic, structBasic.getAllocator());
-        cComment.defineAnnotatedMethods(Comment.class);
+        x.cComment = x.mHpricot.defineClassUnder("Comment", x.structBasic, x.structBasic.getAllocator());
+        x.cComment.defineAnnotatedMethods(Comment.class);
 
-        RubyClass cDocType = mHpricot.defineClassUnder("DocType", structAttr, structAttr.getAllocator());
-        cDocType.defineAnnotatedMethods(DocType.class);
+        x.cDocType = x.mHpricot.defineClassUnder("DocType", x.structAttr, x.structAttr.getAllocator());
+        x.cDocType.defineAnnotatedMethods(DocType.class);
 
-        RubyClass cElem = mHpricot.defineClassUnder("Elem", structElem, structElem.getAllocator());
-        cElem.defineAnnotatedMethods(Elem.class);
+        x.cElem = mHpricot.defineClassUnder("Elem", x.structElem, x.structElem.getAllocator());
+        x.cElem.defineAnnotatedMethods(Elem.class);
 
-        RubyClass cBogusETag = mHpricot.defineClassUnder("BogusETag", structAttr, structAttr.getAllocator());
-        cBogusETag.defineAnnotatedMethods(BogusETag.class);
+        x.cBogusETag = x.mHpricot.defineClassUnder("BogusETag", x.structAttr, x.structAttr.getAllocator());
+        x.cBogusETag.defineAnnotatedMethods(BogusETag.class);
 
-        RubyClass cText = mHpricot.defineClassUnder("Text", structBasic, structBasic.getAllocator());
-        cText.defineAnnotatedMethods(Text.class);
+        x.cText = x.mHpricot.defineClassUnder("Text", x.structBasic, x.structBasic.getAllocator());
+        x.cText.defineAnnotatedMethods(Text.class);
 
-        RubyClass cXMLDecl = mHpricot.defineClassUnder("XMLDecl", structAttr, structAttr.getAllocator());
-        cXMLDecl.defineAnnotatedMethods(XMLDecl.class);
+        x.cXMLDecl = x.mHpricot.defineClassUnder("XMLDecl", x.structAttr, x.structAttr.getAllocator());
+        x.cXMLDecl.defineAnnotatedMethods(XMLDecl.class);
 
-        RubyClass cProcIns = mHpricot.defineClassUnder("ProcIns", structAttr, structAttr.getAllocator());
-        cProcIns.defineAnnotatedMethods(ProcIns.class);
+        x.cProcIns = x.mHpricot.defineClassUnder("ProcIns", x.structAttr, x.structAttr.getAllocator());
+        x.cProcIns.defineAnnotatedMethods(ProcIns.class);
 
-        IRubyObject reProcInsParse = runtime.evalScriptlet("/\\A<\\?(\\S+)\\s+(.+)/m");
-        mHpricot.setConstant("ProcInsParse", reProcInsParse);
+        x.reProcInsParse = runtime.evalScriptlet("/\\A<\\?(\\S+)\\s+(.+)/m");
+        x.mHpricot.setConstant("ProcInsParse", x.reProcInsParse);
     }
 }
