@@ -12,6 +12,7 @@ import org.jruby.RubyObject;
 import org.jruby.RubyObjectAdapter;
 import org.jruby.RubyString;
 import org.jruby.anno.JRubyMethod;
+import org.jruby.exceptions.RaiseException;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.runtime.Arity;
 import org.jruby.runtime.Block;
@@ -67,16 +68,85 @@ public class HpricotScanService implements BasicLibraryService {
             if(N.isNil()) {
                 return SET(mark, E, N);
             } else {
-                N.cat(data, mark, E-mark);
+                ((RubyString)N).cat(data, mark, E-mark);
                 return N;
             }
         }
 
-// line 124 "ext/hpricot_scan/hpricot_scan.java.rl"
+        public void ATTR(IRubyObject K, IRubyObject V) {
+            if(!K.isNil()) {
+                if(attr.isNil()) {
+                    attr = RubyHash.newHash(runtime);
+                }
+                ((RubyHash)attr).fastASet(K, V);
+            }
+        }
+
+        public void TEXT_PASS() {
+            if(!text) {
+                if(ele_open) {
+                    ele_open = false;
+                    if(ts != -1) {
+                        mark_tag = ts;
+                    }
+                } else {
+                    mark_tag = p;
+                }
+                attr = runtime.getNil();
+                tag = runtime.getNil();
+                text = true;
+            }
+        }
+
+        public void ELE(IRubyObject N) {
+            if(te > ts || text) {
+                int raw = -1;
+                int rawlen = 0;
+                ele_open = false; 
+                text = false;
+
+                if(ts != 0 && N != x.sym_cdata && N != x.sym_text && N != x.sym_procins && N != x.sym_comment) {
+                    raw = ts; 
+                    rawlen = te - ts;
+                }
+
+                if(block.isGiven()) {
+                    IRubyObject raw_string = runtime.getNil();
+                    if(raw != -1) {
+                        raw_string = RubyString.newString(runtime, data, raw, rawlen);
+                    }
+                    yieldTokens(N, tag, attr, runtime.getNil(), taint);
+                } else {
+                    hpricotToken(S, N, tag, attr, raw, rawlen, taint);
+                }
+            }
+        }
+
+        public void EBLK(IRubyObject N, int T) {
+            tag = CAT(tag, mark_tag, p - T + 1);
+            ELE(N);
+        }
+
+        public void yieldTokens(IRubyObject sym, IRubyObject tag, IRubyObject attr, IRubyObject raw, boolean taint) {
+            if(sym == x.sym_text) {
+                raw = tag;
+            }
+            IRubyObject ary = RubyArray.newArrayNoCopy(runtime, new IRubyObject[]{sym, tag, attr, raw});
+            if(taint) {
+                ary.setTaint(true);
+                tag.setTaint(true);
+                attr.setTaint(true);
+                raw.setTaint(true);
+            }
+
+            block.yield(ctx, ary);
+        }
+
+// line 194 "ext/hpricot_scan/hpricot_scan.java.rl"
 
 
 
-// line 80 "ext/hpricot_scan/HpricotScanService.java"
+// line 150 "ext/hpricot_scan/HpricotScanService.java"
 private static byte[] init__hpricot_scan_actions_0()
 {
 	return new byte [] {
@@ -682,7 +752,7 @@ static final int hpricot_scan_en_html_cdata = 216;
 static final int hpricot_scan_en_html_procins = 218;
 static final int hpricot_scan_en_main = 204;
 
-// line 127 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 197 "ext/hpricot_scan/hpricot_scan.java.rl"
 
         public final static int BUFSIZE = 16384;
 
@@ -703,6 +773,12 @@ static final int hpricot_scan_en_main = 204;
         private ThreadContext ctx;
         private Block block;
 
+        private IRubyObject xmldecl, doctype, stag, etag, emptytag, comment, cdata, procins;
+
+        private RaiseException newRaiseException(RubyClass exceptionClass, String message) {
+            return new RaiseException(runtime, exceptionClass, message, true);
+        }
+
         public Scanner(IRubyObject self, IRubyObject[] args, Block block) {
             this.self = self;
             this.runtime = self.getRuntime();
@@ -715,6 +791,15 @@ static final int hpricot_scan_en_main = 204;
             bufsize = runtime.getNil();
 
             this.x = (Extra)this.runtime.getModule("Hpricot").dataGetStruct();
+
+            this.xmldecl = x.sym_xmldecl;
+            this.doctype = x.sym_doctype;
+            this.stag = x.sym_stag;
+            this.etag = x.sym_etag;
+            this.emptytag = x.sym_emptytag;
+            this.comment = x.sym_comment;
+            this.cdata = x.sym_cdata;
+            this.procins = x.sym_procins;
 
             port = args[0];
             if(args.length == 2) {
@@ -771,14 +856,14 @@ static final int hpricot_scan_en_main = 204;
         // hpricot_scan
         public IRubyObject scan() {
 
-// line 775 "ext/hpricot_scan/HpricotScanService.java"
+// line 860 "ext/hpricot_scan/HpricotScanService.java"
 	{
 	cs = hpricot_scan_start;
 	ts = -1;
 	te = -1;
 	act = 0;
 	}
-// line 215 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 300 "ext/hpricot_scan/hpricot_scan.java.rl"
             while(!done) {
                 p = pe = len = buf;
                 space = buffer_size - have;
@@ -818,7 +903,7 @@ static final int hpricot_scan_en_main = 204;
                 pe = p + len;
 
                 
-// line 822 "ext/hpricot_scan/HpricotScanService.java"
+// line 907 "ext/hpricot_scan/HpricotScanService.java"
 	{
 	int _klen;
 	int _trans = 0;
@@ -843,7 +928,7 @@ case 1:
 // line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ts = p;}
 	break;
-// line 847 "ext/hpricot_scan/HpricotScanService.java"
+// line 932 "ext/hpricot_scan/HpricotScanService.java"
 		}
 	}
 
@@ -908,7 +993,7 @@ case 3:
 			switch ( _hpricot_scan_actions[_acts++] )
 			{
 	case 0:
-// line 77 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 147 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{
     if(text) {
         tag = CAT(tag, mark_tag, p);
@@ -922,27 +1007,27 @@ case 3:
   }
 	break;
 	case 1:
-// line 89 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 159 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ mark_tag = p; }
 	break;
 	case 2:
-// line 90 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 160 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ mark_aval = p; }
 	break;
 	case 3:
-// line 91 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 161 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ mark_akey = p; }
 	break;
 	case 4:
-// line 92 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 162 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ tag = SET(mark_tag, p, tag); }
 	break;
 	case 5:
-// line 94 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 164 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); }
 	break;
 	case 6:
-// line 95 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 165 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{
       if(data[p-1] == '"' || data[p-1] == '\'') {
           aval = SET(mark_aval, p-1, aval);
@@ -952,31 +1037,31 @@ case 3:
   }
 	break;
 	case 7:
-// line 102 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 172 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{   akey = SET(mark_akey, p, akey); }
 	break;
 	case 8:
-// line 103 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 173 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("version"), aval); }
 	break;
 	case 9:
-// line 104 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 174 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("encoding"), aval); }
 	break;
 	case 10:
-// line 105 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 175 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("standalone"), aval); }
 	break;
 	case 11:
-// line 106 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 176 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("public_id"), aval); }
 	break;
 	case 12:
-// line 107 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 177 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("system_id"), aval); }
 	break;
 	case 13:
-// line 109 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 179 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{
       akey = runtime.getNil();
       aval = runtime.getNil();
@@ -985,7 +1070,7 @@ case 3:
   }
 	break;
 	case 14:
-// line 116 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 186 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{
       if(S.xml) {
           akey = akey.callMethod(runtime.getCurrentContext(), "downcase");
@@ -1147,7 +1232,7 @@ case 3:
 	}
 	}
 	break;
-// line 1151 "ext/hpricot_scan/HpricotScanService.java"
+// line 1236 "ext/hpricot_scan/HpricotScanService.java"
 			}
 		}
 	}
@@ -1161,7 +1246,7 @@ case 2:
 // line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ts = -1;}
 	break;
-// line 1165 "ext/hpricot_scan/HpricotScanService.java"
+// line 1250 "ext/hpricot_scan/HpricotScanService.java"
 		}
 	}
 
@@ -1183,13 +1268,13 @@ case 5:
 	}
 	break; }
 	}
-// line 254 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 339 "ext/hpricot_scan/hpricot_scan.java.rl"
 
                 if(cs == hpricot_scan_error) {
                     if(!tag.isNil()) {
-                        throw runtime.newRaiseException(x.rb_eHpricotParseError, "parse error on element <" + tag + ">, starting on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
+                        throw newRaiseException(x.rb_eHpricotParseError, "parse error on element <" + tag + ">, starting on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
                     } else {
-                        throw runtime.newRaiseException(x.rb_eHpricotParseError, "parse error on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
+                        throw newRaiseException(x.rb_eHpricotParseError, "parse error on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
                     }
                 }
 
@@ -1545,8 +1630,8 @@ case 5:
         public RubyClass cText;
         public RubyClass cXMLDecl;
         public RubyClass cProcIns;
+        public RubyClass rb_eHpricotParseError;
         public IRubyObject reProcInsParse;
-        public IRubyObject rb_eHpricotParseError;
 
         public Extra(Ruby runtime) {
             symAllow = runtime.newSymbol("allow");

@@ -11,6 +11,7 @@ import org.jruby.RubyObject;
 import org.jruby.RubyObjectAdapter;
 import org.jruby.RubyString;
 import org.jruby.anno.JRubyMethod;
+import org.jruby.exceptions.RaiseException;
 import org.jruby.javasupport.JavaEmbedUtils;
 import org.jruby.runtime.Arity;
 import org.jruby.runtime.Block;
@@ -66,9 +67,78 @@ public class HpricotScanService implements BasicLibraryService {
             if(N.isNil()) {
                 return SET(mark, E, N);
             } else {
-                N.cat(data, mark, E-mark);
+                ((RubyString)N).cat(data, mark, E-mark);
                 return N;
             }
+        }
+
+        public void ATTR(IRubyObject K, IRubyObject V) {
+            if(!K.isNil()) {
+                if(attr.isNil()) {
+                    attr = RubyHash.newHash(runtime);
+                }
+                ((RubyHash)attr).fastASet(K, V);
+            }
+        }
+
+        public void TEXT_PASS() {
+            if(!text) {
+                if(ele_open) {
+                    ele_open = false;
+                    if(ts != -1) {
+                        mark_tag = ts;
+                    }
+                } else {
+                    mark_tag = p;
+                }
+                attr = runtime.getNil();
+                tag = runtime.getNil();
+                text = true;
+            }
+        }
+
+        public void ELE(IRubyObject N) {
+            if(te > ts || text) {
+                int raw = -1;
+                int rawlen = 0;
+                ele_open = false; 
+                text = false;
+
+                if(ts != 0 && N != x.sym_cdata && N != x.sym_text && N != x.sym_procins && N != x.sym_comment) {
+                    raw = ts; 
+                    rawlen = te - ts;
+                }
+
+                if(block.isGiven()) {
+                    IRubyObject raw_string = runtime.getNil();
+                    if(raw != -1) {
+                        raw_string = RubyString.newString(runtime, data, raw, rawlen);
+                    }
+                    yieldTokens(N, tag, attr, runtime.getNil(), taint);
+                } else {
+                    hpricotToken(S, N, tag, attr, raw, rawlen, taint);
+                }
+            }
+        }
+
+        public void EBLK(IRubyObject N, int T) {
+            tag = CAT(tag, mark_tag, p - T + 1);
+            ELE(N);
+        }
+
+        public void yieldTokens(IRubyObject sym, IRubyObject tag, IRubyObject attr, IRubyObject raw, boolean taint) {
+            if(sym == x.sym_text) {
+                raw = tag;
+            }
+            IRubyObject ary = RubyArray.newArrayNoCopy(runtime, new IRubyObject[]{sym, tag, attr, raw});
+            if(taint) {
+                ary.setTaint(true);
+                tag.setTaint(true);
+                attr.setTaint(true);
+                raw.setTaint(true);
+            }
+
+            block.yield(ctx, ary);
         }
 
 %%{
@@ -144,6 +214,12 @@ public class HpricotScanService implements BasicLibraryService {
         private ThreadContext ctx;
         private Block block;
 
+        private IRubyObject xmldecl, doctype, stag, etag, emptytag, comment, cdata, procins;
+
+        private RaiseException newRaiseException(RubyClass exceptionClass, String message) {
+            return new RaiseException(runtime, exceptionClass, message, true);
+        }
+
         public Scanner(IRubyObject self, IRubyObject[] args, Block block) {
             this.self = self;
             this.runtime = self.getRuntime();
@@ -156,6 +232,15 @@ public class HpricotScanService implements BasicLibraryService {
             bufsize = runtime.getNil();
 
             this.x = (Extra)this.runtime.getModule("Hpricot").dataGetStruct();
+
+            this.xmldecl = x.sym_xmldecl;
+            this.doctype = x.sym_doctype;
+            this.stag = x.sym_stag;
+            this.etag = x.sym_etag;
+            this.emptytag = x.sym_emptytag;
+            this.comment = x.sym_comment;
+            this.cdata = x.sym_cdata;
+            this.procins = x.sym_procins;
 
             port = args[0];
             if(args.length == 2) {
@@ -254,9 +339,9 @@ public class HpricotScanService implements BasicLibraryService {
 
                 if(cs == hpricot_scan_error) {
                     if(!tag.isNil()) {
-                        throw runtime.newRaiseException(x.rb_eHpricotParseError, "parse error on element <" + tag + ">, starting on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
+                        throw newRaiseException(x.rb_eHpricotParseError, "parse error on element <" + tag + ">, starting on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
                     } else {
-                        throw runtime.newRaiseException(x.rb_eHpricotParseError, "parse error on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
+                        throw newRaiseException(x.rb_eHpricotParseError, "parse error on line " + curline + ".\n" + NO_WAY_SERIOUSLY);
                     }
                 }
 
@@ -612,8 +697,8 @@ public class HpricotScanService implements BasicLibraryService {
         public RubyClass cText;
         public RubyClass cXMLDecl;
         public RubyClass cProcIns;
+        public RubyClass rb_eHpricotParseError;
         public IRubyObject reProcInsParse;
-        public IRubyObject rb_eHpricotParseError;
 
         public Extra(Ruby runtime) {
             symAllow = runtime.newSymbol("allow");
