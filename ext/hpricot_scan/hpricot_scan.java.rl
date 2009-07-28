@@ -255,7 +255,7 @@ public class HpricotScanService implements BasicLibraryService {
                 ele_open = false; 
                 text = false;
 
-                if(ts != 0 && N != x.sym_cdata && N != x.sym_text && N != x.sym_procins && N != x.sym_comment) {
+                if(ts != -1 && N != x.sym_cdata && N != x.sym_text && N != x.sym_procins && N != x.sym_comment) {
                     raw = ts; 
                     rawlen = te - ts;
                 }
@@ -551,7 +551,7 @@ public class HpricotScanService implements BasicLibraryService {
   }
 
   action save_attr {
-      if(S.xml) {
+      if(!S.xml) {
           akey = akey.callMethod(runtime.getCurrentContext(), "downcase");
       }
       ATTR(akey, aval);
