@@ -9,6 +9,7 @@ import org.jruby.RubyModule;
 import org.jruby.RubyNumeric;
 import org.jruby.RubyObject;
 import org.jruby.RubyObjectAdapter;
+import org.jruby.RubyRegexp;
 import org.jruby.RubyString;
 import org.jruby.anno.JRubyMethod;
 import org.jruby.exceptions.RaiseException;
@@ -270,10 +271,226 @@ public class HpricotScanService implements BasicLibraryService {
                 }
             }
         }
+        
 
         public void EBLK(IRubyObject N, int T) {
             tag = CAT(tag, mark_tag, p - T + 1);
             ELE(N);
+        }
+
+        public void hpricotAdd(IRubyObject focus, IRubyObject ele) {
+            IRubyObject children = H_ELE_GET(focus, H_ELE_CHILDREN);
+            if(children.isNil()) {
+                H_ELE_SET(focus, H_ELE_CHILDREN, children = RubyArray.newArray(runtime, 1));
+            }
+            ((RubyArray)children).append(ele);
+            H_ELE_SET(ele, H_ELE_PARENT, focus);
+        }
+
+        private static class TokenInfo {
+            public IRubyObject sym;
+            public IRubyObject tag;
+            public IRubyObject attr;
+            public int raw;
+            public int rawlen;
+            public IRubyObject ec;
+            public IRubyObject ele;
+            public Extra x;
+            public Ruby runtime;
+            public Scanner scanner;
+            public State S;
+
+            public void H_ELE(RubyClass klass) {
+                ele = klass.allocate();
+                if(klass == x.cElem) {
+                    H_ELE_SET(ele, H_ELE_TAG, tag);
+                    H_ELE_SET(ele, H_ELE_ATTR, attr);
+                    H_ELE_SET(ele, H_ELE_EC, ec);
+                    if(raw != -1 && (sym == x.sym_emptytag || sym == x.sym_stag || sym == x.sym_doctype)) {
+                        H_ELE_SET(ele, H_ELE_RAW, RubyString.newString(runtime, scanner.data, raw, rawlen));
+                    }
+                } else if(klass == x.cDocType || klass == x.cProcIns || klass == x.cXMLDecl || klass == x.cBogusETag) {
+                    if(klass == x.cBogusETag) {
+                        H_ELE_SET(ele, H_ELE_TAG, tag);
+                        if(raw != -1) {
+                            H_ELE_SET(ele, H_ELE_ATTR, RubyString.newString(runtime, scanner.data, raw, rawlen));
+                        }
+                    } else {
+                        if(klass == x.cDocType) {
+                            scanner.ATTR(runtime.newSymbol("target"), tag);
+                        }
+                        H_ELE_SET(ele, H_ELE_ATTR, attr);
+                        if(klass != x.cProcIns) {
+                            tag = runtime.getNil();
+                            if(raw != -1) {
+                                tag = RubyString.newString(runtime, scanner.data, raw, rawlen);
+                            }
+                        }
+                        H_ELE_SET(ele, H_ELE_TAG, tag);
+                    }
+                } else {
+                    H_ELE_SET(ele, H_ELE_TAG, tag);
+                }
+                S.last = ele;
+            }
+
+            public void hpricotToken(boolean taint) {
+                //
+                // in html mode, fix up start tags incorrectly formed as empty tags
+                //
+                if(!S.xml) {
+                    if(sym == x.sym_emptytag || sym == x.sym_stag || sym == x.sym_etag) {
+                        ec = ((RubyHash)S.EC).op_aref(scanner.ctx, tag);
+                        if(ec.isNil()) {
+                            tag = tag.callMethod(scanner.ctx, "downcase");
+                            ec = ((RubyHash)S.EC).op_aref(scanner.ctx, tag);
+                        }
+                    }
+
+                    if(H_ELE_GET(S.focus, H_ELE_EC) == x.sym_CDATA && 
+                       (sym != x.sym_procins && sym != x.sym_comment && sym != x.sym_cdata && sym != x.sym_text) && 
+                       !(sym == x.sym_etag && runtime.newFixnum(tag.hashCode()).equals(H_ELE_GET(S.focus, H_ELE_HASH)))) {
+                        sym = x.sym_text;
+                        tag = RubyString.newString(runtime, scanner.data, raw, rawlen);
+                    }
+
+                    if(!ec.isNil()) {
+                        if(sym == x.sym_emptytag) {
+                            if(ec != x.sym_EMPTY) {
+                                sym = x.sym_stag;
+                            }
+                        } else if(sym == x.sym_stag) {
+                            if(ec == x.sym_EMPTY) {
+                                sym = x.sym_emptytag;
+                            }
+                        }
+                    }
+                }
+
+                if(sym == x.sym_emptytag || sym == x.sym_stag) {
+                    IRubyObject name = runtime.newFixnum(tag.hashCode());
+                    H_ELE(x.cElem);
+                    H_ELE_SET(ele, H_ELE_HASH, name);
+
+                    if(!S.xml) {
+                        IRubyObject match = runtime.getNil(), e = S.focus;
+                        while(e != S.doc) {
+                            IRubyObject hEC = H_ELE_GET(e, H_ELE_EC);
+                            if(hEC instanceof RubyHash) {
+                                IRubyObject has = ((RubyHash)hEC).op_aref(scanner.ctx, name);
+                                if(!has.isNil()) {
+                                    if(has == runtime.getTrue()) {
+                                        if(match.isNil()) {
+                                            match = e;
+                                        }
+                                    } else if(has == x.symAllow) {
+                                        match = S.focus;
+                                    } else if(has == x.symDeny) {
+                                        match = runtime.getNil();
+                                    }
+                                }
+                            }
+                            e = H_ELE_GET(e, H_ELE_PARENT);
+                        }
+                    
+                        if(match.isNil()) {
+                            match = S.focus;
+                        }
+                        S.focus = match;
+                    }
+
+                    scanner.hpricotAdd(S.focus, ele);
+
+                    //
+                    // in the case of a start tag that should be empty, just
+                    // skip the step that focuses the element.  focusing moves
+                    // us deeper into the document.
+                    //
+                    if(sym == x.sym_stag) {
+                        if(S.xml || ec != x.sym_EMPTY) {
+                            S.focus = ele;
+                            S.last = runtime.getNil();
+                        }
+                    }
+                } else if(sym == x.sym_etag) {
+                    IRubyObject name, match = runtime.getNil(), e = S.focus;
+                    if(S.strict) {
+                        if(((RubyHash)S.EC).op_aref(scanner.ctx, tag).isNil()) {
+                            tag = runtime.newString("div");
+                        }
+                    }
+
+                    name = runtime.newFixnum(tag.hashCode());
+                    while(e != S.doc) {
+                        if(H_ELE_GET(e, H_ELE_HASH).equals(name)) {
+                            match = e;
+                            break;
+                        }
+                        e = H_ELE_GET(e, H_ELE_PARENT);
+
+                    }
+                    if(match.isNil()) {
+                        H_ELE(x.cBogusETag);
+                        scanner.hpricotAdd(S.focus, ele);
+                    } else {
+                        ele = runtime.getNil();
+                        if(raw != -1) {
+                            ele = RubyString.newString(runtime, scanner.data, raw, rawlen);
+                        }
+                        H_ELE_SET(match, H_ELE_ETAG, ele);
+                        S.focus = H_ELE_GET(match, H_ELE_PARENT);
+                        S.last = runtime.getNil();
+
+                    }
+                } else if(sym == x.sym_cdata) {
+                    H_ELE(x.cCData);
+                    scanner.hpricotAdd(S.focus, ele);
+                } else if(sym == x.sym_comment) {
+                    H_ELE(x.cComment);
+                    scanner.hpricotAdd(S.focus, ele);
+                } else if(sym == x.sym_doctype) {
+                    H_ELE(x.cDocType);
+                    if(S.strict) {
+                        RubyHash h = (RubyHash)attr;
+                        h.fastASet(runtime.newSymbol("system_id"), runtime.newString("http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"));
+                        h.fastASet(runtime.newSymbol("public_id"), runtime.newString("-//W3C//DTD XHTML 1.0 Strict//EN"));
+                    }
+                    scanner.hpricotAdd(S.focus, ele);
+                } else if(sym == x.sym_procins) {
+                    IRubyObject match = tag.callMethod(scanner.ctx, "match", x.reProcInsParse);
+                    tag = RubyRegexp.nth_match(1, match);
+                    attr = RubyRegexp.nth_match(2, match);
+                    H_ELE(x.cProcIns);
+                    scanner.hpricotAdd(S.focus, ele);
+                } else if(sym == x.sym_text) {
+                    if(!S.last.isNil() && S.last.getType() == x.cText) {
+                        ((RubyString)H_ELE_GET(S.last, H_ELE_TAG)).append(tag);
+                    } else {
+                        H_ELE(x.cText);
+                        scanner.hpricotAdd(S.focus, ele);
+                    }
+                } else if(sym == x.sym_xmldecl) {
+                    H_ELE(x.cXMLDecl);
+                    scanner.hpricotAdd(S.focus, ele);
+                }
+            }
+        }
+
+        public void hpricotToken(State S, IRubyObject _sym, IRubyObject _tag, IRubyObject _attr, int _raw, int _rawlen, boolean taint) {
+            TokenInfo t = new TokenInfo();
+            t.sym = _sym;
+            t.tag = _tag;
+            t.attr = _attr;
+            t.raw = _raw;
+            t.rawlen = _rawlen;
+            t.ec = runtime.getNil();
+            t.ele = runtime.getNil();
+            t.x = x;
+            t.runtime = runtime;
+            t.scanner = this;
+            t.S = S;
+
+            t.hpricotToken(taint);
         }
 
         public void yieldTokens(IRubyObject sym, IRubyObject tag, IRubyObject attr, IRubyObject raw, boolean taint) {
@@ -536,21 +753,21 @@ public class HpricotScanService implements BasicLibraryService {
                 return S.doc;
             }
 
-            return runtime.getNil();;
+            return runtime.getNil();
         }
     }
 
     public static class HpricotModule {
         // hpricot_scan
-        @JRubyMethod(module = true)
-        public static IRubyObject scan(IRubyObject self, IRubyObject[] args) {
+        @JRubyMethod(module = true, optional = 1, required = 1, frame = true)
+        public static IRubyObject scan(IRubyObject self, IRubyObject[] args, Block block) {
             // TODO: implement
             return null;
         }
 
         // hpricot_css
         @JRubyMethod(module = true)
-        public static IRubyObject css(IRubyObject self, IRubyObject one, IRubyObject two, IRubyObject three) {
+        public static IRubyObject css(IRubyObject self, IRubyObject mod, IRubyObject str, IRubyObject node) {
             // TODO: implement
             return null;
         }
