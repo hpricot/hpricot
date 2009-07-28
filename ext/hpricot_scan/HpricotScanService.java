@@ -45,6 +45,156 @@ public class HpricotScanService implements BasicLibraryService {
         return !opts.isNil() && ((RubyHash)opts).op_aref(runtime.getCurrentContext(), runtime.newSymbol(key)).isTrue();
     }
 
+    // H_PROP(name, H_ELE_TAG)
+    public static IRubyObject hpricot_ele_set_name(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_TAG, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_name(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_TAG, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_name(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_TAG);
+    }
+
+    // H_PROP(raw, H_ELE_RAW)
+    public static IRubyObject hpricot_ele_set_raw(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_RAW, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_raw(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_RAW, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_raw(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_RAW);
+    }
+
+    // H_PROP(parent, H_ELE_PARENT)
+    public static IRubyObject hpricot_ele_set_parent(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_PARENT, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_parent(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_PARENT, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_parent(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_PARENT);
+    }
+
+    // H_PROP(attr, H_ELE_ATTR)
+    public static IRubyObject hpricot_ele_set_attr(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_ATTR, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_attr(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_ATTR, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_attr(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_ATTR);
+    }
+
+    // H_PROP(etag, H_ELE_ETAG)
+    public static IRubyObject hpricot_ele_set_etag(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_ETAG, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_etag(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_ETAG, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_etag(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_ETAG);
+    }
+
+    // H_PROP(children, H_ELE_CHILDREN)
+    public static IRubyObject hpricot_ele_set_children(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_CHILDREN, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_children(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_CHILDREN, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_children(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_CHILDREN);
+    }
+
+    // H_ATTR(target)
+    public static IRubyObject hpricot_ele_set_target(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("target"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_target(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("target"));
+    }
+
+    // H_ATTR(encoding)
+    public static IRubyObject hpricot_ele_set_encoding(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("encoding"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_encoding(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("encoding"));
+    }
+
+    // H_ATTR(version)
+    public static IRubyObject hpricot_ele_set_version(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("version"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_version(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("version"));
+    }
+
+    // H_ATTR(standalone)
+    public static IRubyObject hpricot_ele_set_standalone(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("standalone"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_standalone(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("standalone"));
+    }
+
+    // H_ATTR(system_id)
+    public static IRubyObject hpricot_ele_set_system_id(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("system_id"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_system_id(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("system_id"));
+    }
+
+    // H_ATTR(public_id)
+    public static IRubyObject hpricot_ele_set_public_id(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("public_id"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_public_id(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("public_id"));
+    }
+
     public static class Scanner {
         public IRubyObject SET(int mark, int E, IRubyObject org) {
             if(mark == -1 || E == mark) {
@@ -142,11 +292,11 @@ public class HpricotScanService implements BasicLibraryService {
             block.yield(ctx, ary);
         }
 
-// line 194 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 344 "ext/hpricot_scan/hpricot_scan.java.rl"
 
 
 
-// line 150 "ext/hpricot_scan/HpricotScanService.java"
+// line 300 "ext/hpricot_scan/HpricotScanService.java"
 private static byte[] init__hpricot_scan_actions_0()
 {
 	return new byte [] {
@@ -752,7 +902,7 @@ static final int hpricot_scan_en_html_cdata = 216;
 static final int hpricot_scan_en_html_procins = 218;
 static final int hpricot_scan_en_main = 204;
 
-// line 197 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 347 "ext/hpricot_scan/hpricot_scan.java.rl"
 
         public final static int BUFSIZE = 16384;
 
@@ -856,14 +1006,14 @@ static final int hpricot_scan_en_main = 204;
         // hpricot_scan
         public IRubyObject scan() {
 
-// line 860 "ext/hpricot_scan/HpricotScanService.java"
+// line 1010 "ext/hpricot_scan/HpricotScanService.java"
 	{
 	cs = hpricot_scan_start;
 	ts = -1;
 	te = -1;
 	act = 0;
 	}
-// line 300 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 450 "ext/hpricot_scan/hpricot_scan.java.rl"
             while(!done) {
                 p = pe = len = buf;
                 space = buffer_size - have;
@@ -903,7 +1053,7 @@ static final int hpricot_scan_en_main = 204;
                 pe = p + len;
 
                 
-// line 907 "ext/hpricot_scan/HpricotScanService.java"
+// line 1057 "ext/hpricot_scan/HpricotScanService.java"
 	{
 	int _klen;
 	int _trans = 0;
@@ -928,7 +1078,7 @@ case 1:
 // line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ts = p;}
 	break;
-// line 932 "ext/hpricot_scan/HpricotScanService.java"
+// line 1082 "ext/hpricot_scan/HpricotScanService.java"
 		}
 	}
 
@@ -993,7 +1143,7 @@ case 3:
 			switch ( _hpricot_scan_actions[_acts++] )
 			{
 	case 0:
-// line 147 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 297 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{
     if(text) {
         tag = CAT(tag, mark_tag, p);
@@ -1007,27 +1157,27 @@ case 3:
   }
 	break;
 	case 1:
-// line 159 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 309 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ mark_tag = p; }
 	break;
 	case 2:
-// line 160 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 310 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ mark_aval = p; }
 	break;
 	case 3:
-// line 161 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 311 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ mark_akey = p; }
 	break;
 	case 4:
-// line 162 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 312 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ tag = SET(mark_tag, p, tag); }
 	break;
 	case 5:
-// line 164 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 314 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); }
 	break;
 	case 6:
-// line 165 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 315 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{
       if(data[p-1] == '"' || data[p-1] == '\'') {
           aval = SET(mark_aval, p-1, aval);
@@ -1037,31 +1187,31 @@ case 3:
   }
 	break;
 	case 7:
-// line 172 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 322 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{   akey = SET(mark_akey, p, akey); }
 	break;
 	case 8:
-// line 173 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 323 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("version"), aval); }
 	break;
 	case 9:
-// line 174 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 324 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("encoding"), aval); }
 	break;
 	case 10:
-// line 175 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 325 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("standalone"), aval); }
 	break;
 	case 11:
-// line 176 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 326 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("public_id"), aval); }
 	break;
 	case 12:
-// line 177 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 327 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("system_id"), aval); }
 	break;
 	case 13:
-// line 179 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 329 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{
       akey = runtime.getNil();
       aval = runtime.getNil();
@@ -1070,7 +1220,7 @@ case 3:
   }
 	break;
 	case 14:
-// line 186 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 336 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{
       if(S.xml) {
           akey = akey.callMethod(runtime.getCurrentContext(), "downcase");
@@ -1232,7 +1382,7 @@ case 3:
 	}
 	}
 	break;
-// line 1236 "ext/hpricot_scan/HpricotScanService.java"
+// line 1386 "ext/hpricot_scan/HpricotScanService.java"
 			}
 		}
 	}
@@ -1246,7 +1396,7 @@ case 2:
 // line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ts = -1;}
 	break;
-// line 1250 "ext/hpricot_scan/HpricotScanService.java"
+// line 1400 "ext/hpricot_scan/HpricotScanService.java"
 		}
 	}
 
@@ -1268,7 +1418,7 @@ case 5:
 	}
 	break; }
 	}
-// line 339 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 489 "ext/hpricot_scan/hpricot_scan.java.rl"
 
                 if(cs == hpricot_scan_error) {
                     if(!tag.isNil()) {

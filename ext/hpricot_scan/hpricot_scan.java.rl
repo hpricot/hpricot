@@ -44,6 +44,156 @@ public class HpricotScanService implements BasicLibraryService {
         return !opts.isNil() && ((RubyHash)opts).op_aref(runtime.getCurrentContext(), runtime.newSymbol(key)).isTrue();
     }
 
+    // H_PROP(name, H_ELE_TAG)
+    public static IRubyObject hpricot_ele_set_name(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_TAG, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_name(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_TAG, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_name(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_TAG);
+    }
+
+    // H_PROP(raw, H_ELE_RAW)
+    public static IRubyObject hpricot_ele_set_raw(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_RAW, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_raw(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_RAW, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_raw(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_RAW);
+    }
+
+    // H_PROP(parent, H_ELE_PARENT)
+    public static IRubyObject hpricot_ele_set_parent(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_PARENT, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_parent(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_PARENT, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_parent(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_PARENT);
+    }
+
+    // H_PROP(attr, H_ELE_ATTR)
+    public static IRubyObject hpricot_ele_set_attr(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_ATTR, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_attr(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_ATTR, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_attr(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_ATTR);
+    }
+
+    // H_PROP(etag, H_ELE_ETAG)
+    public static IRubyObject hpricot_ele_set_etag(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_ETAG, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_etag(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_ETAG, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_etag(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_ETAG);
+    }
+
+    // H_PROP(children, H_ELE_CHILDREN)
+    public static IRubyObject hpricot_ele_set_children(IRubyObject self, IRubyObject x) {
+        H_ELE_SET(self, H_ELE_CHILDREN, x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_clear_children(IRubyObject self) {
+        H_ELE_SET(self, H_ELE_CHILDREN, self.getRuntime().getNil());
+        return self.getRuntime().getTrue();
+    }
+
+    public static IRubyObject hpricot_ele_get_children(IRubyObject self) {
+        return H_ELE_GET(self, H_ELE_CHILDREN);
+    }
+
+    // H_ATTR(target)
+    public static IRubyObject hpricot_ele_set_target(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("target"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_target(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("target"));
+    }
+
+    // H_ATTR(encoding)
+    public static IRubyObject hpricot_ele_set_encoding(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("encoding"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_encoding(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("encoding"));
+    }
+
+    // H_ATTR(version)
+    public static IRubyObject hpricot_ele_set_version(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("version"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_version(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("version"));
+    }
+
+    // H_ATTR(standalone)
+    public static IRubyObject hpricot_ele_set_standalone(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("standalone"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_standalone(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("standalone"));
+    }
+
+    // H_ATTR(system_id)
+    public static IRubyObject hpricot_ele_set_system_id(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("system_id"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_system_id(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("system_id"));
+    }
+
+    // H_ATTR(public_id)
+    public static IRubyObject hpricot_ele_set_public_id(IRubyObject self, IRubyObject x) {
+        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("public_id"), x);
+        return self;
+    }
+
+    public static IRubyObject hpricot_ele_get_public_id(IRubyObject self) {
+        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("public_id"));
+    }
+
     public static class Scanner {
         public IRubyObject SET(int mark, int E, IRubyObject org) {
             if(mark == -1 || E == mark) {
