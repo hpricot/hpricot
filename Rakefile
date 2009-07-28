@@ -164,6 +164,7 @@ desc "Generates the Java scanner code using the Ragel table-driven code generati
 task :ragel_java => [:ragel_version] do
   if @ragel_v >= 6.1
     puts "compiling with ragel version #{@ragel_v}"
+    sh %{ragel -J -o ext/hpricot_scan/HpricotCss.java ext/hpricot_scan/hpricot_css.java.rl}    
     sh %{ragel -J -o ext/hpricot_scan/HpricotScanService.java ext/hpricot_scan/hpricot_scan.java.rl}    
   else
     STDERR.puts "Ragel 6.1 or greater is required."
@@ -205,20 +206,20 @@ def java_classpath_arg
   classpath ? "-cp #{classpath}" : ""
 end
 
-def compile_java(filename, jarname)
-  sh %{javac -source 1.5 -target 1.5 #{java_classpath_arg} #{filename}}
+def compile_java(filenames, jarname)
+  sh %{javac -source 1.5 -target 1.5 #{java_classpath_arg} #{filenames.join(" ")}}
   sh %{jar cf #{jarname} *.class}
 end
 
 task :hpricot_scan_java => [:ragel_java] do
   Dir.chdir "ext/hpricot_scan" do
-    compile_java("HpricotScanService.java", "hpricot_scan.jar")
+    compile_java(["HpricotScanService.java", "HpricotCss.java"], "hpricot_scan.jar")
   end
 end
 
 task :fast_xs_java do
   Dir.chdir "ext/fast_xs" do
-    compile_java("FastXsService.java", "fast_xs.jar")
+    compile_java(["FastXsService.java"], "fast_xs.jar")
   end
 end
 

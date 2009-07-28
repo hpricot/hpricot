@@ -1708,9 +1708,7 @@ case 5:
         // hpricot_css
         @JRubyMethod(module = true)
         public static IRubyObject css(IRubyObject self, IRubyObject mod, IRubyObject str, IRubyObject node) {
-            System.out.println("CALLING CSS");
-            // TODO: implement
-            return null;
+            return new HpricotCss(self, mod, str, node).scan();
         }
     }
 
