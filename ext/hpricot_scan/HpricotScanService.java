@@ -1255,7 +1255,7 @@ static final int hpricot_scan_en_main = 204;
                     data = bl.bytes;
                     buf = bl.begin;
                     p = bl.begin;
-                    len = bl.realSize + 1;
+                    len = bl.realSize;
                     done = true;
                 }
 
@@ -1694,13 +1694,13 @@ case 5:
         // hpricot_scan
         @JRubyMethod(module = true, optional = 1, required = 1, frame = true)
         public static IRubyObject scan(IRubyObject self, IRubyObject[] args, Block block) {
-            // TODO: implement
-            return null;
+            return new Scanner(self, args, block).scan();
         }
 
         // hpricot_css
         @JRubyMethod(module = true)
         public static IRubyObject css(IRubyObject self, IRubyObject mod, IRubyObject str, IRubyObject node) {
+            System.err.println("CALLING CSS");
             // TODO: implement
             return null;
         }
@@ -1950,9 +1950,17 @@ case 5:
     public final static ObjectAllocator alloc_hpricot_struct = new ObjectAllocator() {
             // alloc_hpricot_struct
             public IRubyObject allocate(Ruby runtime, RubyClass klass) {
-                int size = RubyNumeric.fix2int((RubyObject)klass.fastGetInternalVariable("__size__"));
+                RubyClass kurrent = klass;
+                Object sz = kurrent.fastGetInternalVariable("__size__");
+                while(sz == null && kurrent != null) {
+                    kurrent = kurrent.getSuperClass();
+                    sz = kurrent.fastGetInternalVariable("__size__");
+                }
+                int size = RubyNumeric.fix2int((RubyObject)sz);
                 RubyObject obj = new RubyObject(runtime, klass);
-                obj.dataWrapStruct(new IRubyObject[size]);
+                IRubyObject[] all = new IRubyObject[size];
+                java.util.Arrays.fill(all, runtime.getNil());
+                obj.dataWrapStruct(all);
                 return obj;
             }
         };
