@@ -1255,8 +1255,15 @@ static final int hpricot_scan_en_main = 204;
                     data = bl.bytes;
                     buf = bl.begin;
                     p = bl.begin;
-                    len = bl.realSize;
+                    len = bl.realSize + 1;
+                    if(p + len >= data.length) {
+                        data = new byte[len];
+                        System.arraycopy(bl.bytes, bl.begin, data, 0, bl.realSize);
+                        p = 0;
+                        buf = 0;
+                    }
                     done = true;
+                    eof = p + len;
                 }
 
                 nread += len;
@@ -1264,13 +1271,14 @@ static final int hpricot_scan_en_main = 204;
                 /* If this is the last buffer, tack on an EOF. */
                 if(io && len < space) {
                     data[p + len++] = 0;
+                    eof = p + len;
                     done = true;
                 }
 
                 pe = p + len;
 
                 
-// line 1274 "ext/hpricot_scan/HpricotScanService.java"
+// line 1282 "ext/hpricot_scan/HpricotScanService.java"
 	{
 	int _klen;
 	int _trans = 0;
@@ -1295,7 +1303,7 @@ case 1:
 // line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ts = p;}
 	break;
-// line 1299 "ext/hpricot_scan/HpricotScanService.java"
+// line 1307 "ext/hpricot_scan/HpricotScanService.java"
 		}
 	}
 
@@ -1599,7 +1607,7 @@ case 3:
 	}
 	}
 	break;
-// line 1603 "ext/hpricot_scan/HpricotScanService.java"
+// line 1611 "ext/hpricot_scan/HpricotScanService.java"
 			}
 		}
 	}
@@ -1613,7 +1621,7 @@ case 2:
 // line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
 	{ts = -1;}
 	break;
-// line 1617 "ext/hpricot_scan/HpricotScanService.java"
+// line 1625 "ext/hpricot_scan/HpricotScanService.java"
 		}
 	}
 
@@ -1635,7 +1643,7 @@ case 5:
 	}
 	break; }
 	}
-// line 706 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 714 "ext/hpricot_scan/hpricot_scan.java.rl"
 
                 if(cs == hpricot_scan_error) {
                     if(!tag.isNil()) {
@@ -1654,7 +1662,7 @@ case 5:
                     }
                 }
 
-                if(ts == 0) {
+                if(ts == -1) {
                     have = 0;
                     if(mark_tag != -1 && text) {
                         if(done) {
@@ -1700,7 +1708,7 @@ case 5:
         // hpricot_css
         @JRubyMethod(module = true)
         public static IRubyObject css(IRubyObject self, IRubyObject mod, IRubyObject str, IRubyObject node) {
-            System.err.println("CALLING CSS");
+            System.out.println("CALLING CSS");
             // TODO: implement
             return null;
         }

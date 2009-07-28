@@ -688,8 +688,15 @@ public class HpricotScanService implements BasicLibraryService {
                     data = bl.bytes;
                     buf = bl.begin;
                     p = bl.begin;
-                    len = bl.realSize;
+                    len = bl.realSize + 1;
+                    if(p + len >= data.length) {
+                        data = new byte[len];
+                        System.arraycopy(bl.bytes, bl.begin, data, 0, bl.realSize);
+                        p = 0;
+                        buf = 0;
+                    }
                     done = true;
+                    eof = p + len;
                 }
 
                 nread += len;
@@ -697,6 +704,7 @@ public class HpricotScanService implements BasicLibraryService {
                 /* If this is the last buffer, tack on an EOF. */
                 if(io && len < space) {
                     data[p + len++] = 0;
+                    eof = p + len;
                     done = true;
                 }
 
@@ -721,7 +729,7 @@ public class HpricotScanService implements BasicLibraryService {
                     }
                 }
 
-                if(ts == 0) {
+                if(ts == -1) {
                     have = 0;
                     if(mark_tag != -1 && text) {
                         if(done) {
@@ -767,7 +775,7 @@ public class HpricotScanService implements BasicLibraryService {
         // hpricot_css
         @JRubyMethod(module = true)
         public static IRubyObject css(IRubyObject self, IRubyObject mod, IRubyObject str, IRubyObject node) {
-            System.err.println("CALLING CSS");
+            System.out.println("CALLING CSS");
             // TODO: implement
             return null;
         }

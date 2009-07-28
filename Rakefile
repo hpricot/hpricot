@@ -76,7 +76,7 @@ Rake::TestTask.new do |t|
     t.verbose = true
 end
 
-task :test => [:hpricot_java] if defined?(JRUBY_VERSION)
+#task :test => [:hpricot_java] if defined?(JRUBY_VERSION)
 
 Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_dir = 'doc/rdoc'
