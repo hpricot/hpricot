@@ -60,7 +60,11 @@ Win32Spec.extensions = []
 WIN32_PKG_DIR = "#{PKG}-mswin32"
 
 desc "Does a full compile, test run"
+if defined?(JRUBY_VERSION)
+task :default => [:compile_java, :test]
+else
 task :default => [:compile, :test]
+end
 
 desc "Packages up Hpricot."
 task :package => [:clean, :ragel]
@@ -150,8 +154,10 @@ desc "Generates the C scanner code with Ragel."
 task :ragel => [:ragel_version] do
   if @ragel_v >= 6.1
     @ragel_c_code_generation_style = RAGEL_C_CODE_GENERATION_STYLES[DEFAULT_RAGEL_C_CODE_GENERATION]
-    console_sep = (ENV['COMSPEC'] =~ /cmd\.exe/) ? '&' : ';'
-    sh %{cd ext/hpricot_scan #{console_sep} ragel hpricot_scan.rl -#{@ragel_c_code_generation_style} -o hpricot_scan.c && ragel hpricot_css.rl -#{@ragel_c_code_generation_style} -o hpricot_css.c}
+    Dir.chdir("ext/hpricot_scan") do
+      sh %{ragel hpricot_scan.rl -#{@ragel_c_code_generation_style} -o hpricot_scan.c}
+      sh %{ragel hpricot_css.rl -#{@ragel_c_code_generation_style} -o hpricot_css.c}
+    end
   else
     STDERR.puts "Ragel 6.1 or greater is required."
     exit(1)
@@ -164,8 +170,10 @@ desc "Generates the Java scanner code using the Ragel table-driven code generati
 task :ragel_java => [:ragel_version] do
   if @ragel_v >= 6.1
     puts "compiling with ragel version #{@ragel_v}"
-    sh %{ragel -J -o ext/hpricot_scan/HpricotCss.java ext/hpricot_scan/hpricot_css.java.rl}    
-    sh %{ragel -J -o ext/hpricot_scan/HpricotScanService.java ext/hpricot_scan/hpricot_scan.java.rl}    
+    Dir.chdir("ext/hpricot_scan") do
+      sh %{ragel -J -o HpricotCss.java hpricot_css.java.rl}
+      sh %{ragel -J -o HpricotScanService.java hpricot_scan.java.rl}
+    end
   else
     STDERR.puts "Ragel 6.1 or greater is required."
     exit(1)
@@ -194,16 +202,18 @@ CLEAN.include WIN32_PKG_DIR
 
 ### JRuby Packages ###
 
-def java_classpath_arg 
-  # A myriad of ways to discover the JRuby classpath
-  classpath = begin
-    require 'java' 
-    # Already running in a JRuby JVM
-    Java::java.lang.System.getProperty('java.class.path')
-  rescue LoadError
-    ENV['JRUBY_PARENT_CLASSPATH'] || ENV['JRUBY_HOME'] && FileList["#{ENV['JRUBY_HOME']}/lib/*.jar"].join(File::PATH_SEPARATOR)
+def java_classpath_arg # myriad of ways to discover JRuby classpath
+  begin
+    cpath  = Java::java.lang.System.getProperty('java.class.path').split(File::PATH_SEPARATOR)
+    cpath += Java::java.lang.System.getProperty('sun.boot.class.path').split(File::PATH_SEPARATOR)
+    jruby_cpath = cpath.compact.join(File::PATH_SEPARATOR)
+  rescue => e
   end
-  classpath ? "-cp #{classpath}" : ""
+  unless jruby_cpath
+    jruby_cpath = ENV['JRUBY_PARENT_CLASSPATH'] || ENV['JRUBY_HOME'] &&
+      FileList["#{ENV['JRUBY_HOME']}/lib/*.jar"].join(File::PATH_SEPARATOR)
+  end
+  jruby_cpath ? "-cp \"#{jruby_cpath}\"" : ""
 end
 
 def compile_java(filenames, jarname)
@@ -224,7 +234,7 @@ task :fast_xs_java do
 end
 
 desc "Compiles the JRuby extensions"
-task :hpricot_java => [:hpricot_scan_java, :fast_xs_java] do
+task :compile_java => [:hpricot_scan_java, :fast_xs_java] do
   %w(hpricot_scan fast_xs).each {|ext| mv "ext/#{ext}/#{ext}.jar", "lib"}
 end
 

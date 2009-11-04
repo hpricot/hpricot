@@ -5,6 +5,15 @@ require 'test/unit'
 require 'hpricot'
 require 'load_files'
 
+unless "".respond_to?(:lines)
+  require 'enumerator'
+  class String
+    def lines
+      Enumerable::Enumerator.new(self, :each_line)
+    end
+  end
+end
+
 class TestPreserved < Test::Unit::TestCase
   def assert_roundtrip str
     doc = Hpricot(str)

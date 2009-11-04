@@ -1,4 +1,4 @@
-// line 1 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 1 "hpricot_css.java.rl"
 import java.io.IOException;
 
 import org.jruby.Ruby;
@@ -81,7 +81,7 @@ public class HpricotCss {
     }
     
 
-// line 85 "ext/hpricot_scan/HpricotCss.java"
+// line 85 "HpricotCss.java"
 private static byte[] init__hpricot_css_actions_0()
 {
 	return new byte [] {
@@ -279,7 +279,7 @@ private static short[] init__hpricot_css_index_offsets_0()
 private static final short _hpricot_css_index_offsets[] = init__hpricot_css_index_offsets_0();
 
 
-private static byte[] init__hpricot_css_trans_targs_0()
+private static byte[] init__hpricot_css_trans_targs_wi_0()
 {
 	return new byte [] {
 	    1,   89,    1,   87,   90,    3,   90,    4,   90,   90,   90,    5,
@@ -353,22 +353,14 @@ private static byte[] init__hpricot_css_trans_targs_0()
 	   93,  124,    9,   93,   93,   93,   10,   11,   12,   87,   93,    8,
 	   93,    9,   93,   93,   93,   10,   11,   12,   87,   93,    8,   93,
 	  126,    9,   93,   93,   93,   10,   11,   12,   87,   93,    8,   93,
-	    9,   93,   93,   93,   10,   11,   12,   87,   87,   87,   87,   87,
-	   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
-	   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
-	   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
-	   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
-	   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
-	   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
-	   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,   87,
-	   87,   87,    0
+	    9,   93,   93,   93,   10,   11,   12,   87,    0
 	};
 }
 
-private static final byte _hpricot_css_trans_targs[] = init__hpricot_css_trans_targs_0();
+private static final byte _hpricot_css_trans_targs_wi[] = init__hpricot_css_trans_targs_wi_0();
 
 
-private static byte[] init__hpricot_css_trans_actions_0()
+private static byte[] init__hpricot_css_trans_actions_wi_0()
 {
 	return new byte [] {
 	    0,    0,    0,   33,   99,    1,   99,    1,   99,   99,   99,    1,
@@ -442,19 +434,11 @@ private static byte[] init__hpricot_css_trans_actions_0()
 	   79,   79,    0,   79,   79,   79,    0,    0,    0,   58,   79,    0,
 	   79,    0,   79,   79,   79,    0,    0,    0,   58,   79,    0,   79,
 	   79,    0,   79,   79,   79,    0,    0,    0,   58,   79,    0,   79,
-	    0,   79,   79,   79,    0,    0,    0,   58,   33,   35,   35,   35,
-	   35,   35,   35,   35,   35,   35,   35,   35,   35,   35,   35,   35,
-	   31,   35,   35,   35,   35,   35,   35,   35,   35,   35,   35,   35,
-	   35,   35,   35,   35,   35,   35,   35,   35,   35,   35,   29,   29,
-	   27,   27,   27,   27,   27,   27,   27,   27,   25,   25,   25,   23,
-	   21,   52,   19,   58,   58,   55,   67,   67,   64,   67,   67,   67,
-	   67,   67,   67,   64,   67,   67,   67,   67,   67,   61,   67,   67,
-	   67,   67,   67,   67,   67,   67,   67,   17,   17,   58,   58,   58,
-	   58,   58,    0
+	    0,   79,   79,   79,    0,    0,    0,   58,    0
 	};
 }
 
-private static final byte _hpricot_css_trans_actions[] = init__hpricot_css_trans_actions_0();
+private static final byte _hpricot_css_trans_actions_wi[] = init__hpricot_css_trans_actions_wi_0();
 
 
 private static byte[] init__hpricot_css_to_state_actions_0()
@@ -500,17 +484,17 @@ private static final byte _hpricot_css_from_state_actions[] = init__hpricot_css_
 private static short[] init__hpricot_css_eof_trans_0()
 {
 	return new short [] {
-	    0,  861,    0,  898,  898,  898,  898,  898,  898,  898,  898,  898,
-	  898,    0,  898,  898,  898,  898,  898,    0,  877,  898,  898,  898,
-	  898,  898,  898,  898,  898,  898,  898,  898,  898,  898,  898,  898,
-	  898,  898,  898,  898,  898,  898,  900,  900,  908,  908,  908,  908,
-	  908,  908,  908,  908,    0,    0,    0,    0,    0,    0,    0,  911,
-	  911,    0,  911,    0,    0,    0,    0,    0,    0,    0,    0,    0,
+	    0,    1,    0,   11,   11,   11,   11,   11,   11,   11,   11,   11,
+	   11,    0,   11,   11,   11,   11,   11,    0,   39,   11,   11,   11,
+	   11,   11,   11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
+	   11,   11,   11,   11,   11,   11,   63,   63,   67,   67,   67,   67,
+	   67,   67,   67,   67,    0,    0,    0,    0,    0,    0,    0,  105,
+	  105,    0,  105,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 	    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-	    0,    0,    0,    0,  912,  913,  914,  915,  950,  950,  918,  943,
-	  943,  928,  943,  943,  943,  943,  943,  943,  928,  943,  943,  943,
-	  943,  943,  934,  943,  943,  943,  943,  943,  943,  943,  943,  943,
-	  945,  945,  950,  950,  950,  950,  950
+	    0,    0,    0,    0,  150,  151,  152,  156,  157,  157,  163,  167,
+	  167,  174,  167,  167,  167,  167,  167,  167,  174,  167,  167,  167,
+	  167,  167,  193,  167,  167,  167,  167,  167,  167,  167,  167,  167,
+	  201,  201,  157,  157,  157,  157,  157
 	};
 }
 
@@ -522,21 +506,21 @@ static final int hpricot_css_error = 0;
 
 static final int hpricot_css_en_main = 87;
 
-// line 147 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 147 "hpricot_css.java.rl"
 
 
     public IRubyObject scan() {
 
-// line 531 "ext/hpricot_scan/HpricotCss.java"
+// line 515 "HpricotCss.java"
 	{
 	cs = hpricot_css_start;
 	ts = -1;
 	te = -1;
 	act = 0;
 	}
-// line 151 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 151 "hpricot_css.java.rl"
 
-// line 540 "ext/hpricot_scan/HpricotCss.java"
+// line 524 "HpricotCss.java"
 	{
 	int _klen;
 	int _trans = 0;
@@ -562,10 +546,10 @@ case 1:
 	while ( _nacts-- > 0 ) {
 		switch ( _hpricot_css_actions[_acts++] ) {
 	case 6:
-// line 1 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 1 "hpricot_css.java.rl"
 	{ts = p;}
 	break;
-// line 569 "ext/hpricot_scan/HpricotCss.java"
+// line 553 "HpricotCss.java"
 		}
 	}
 
@@ -619,37 +603,37 @@ case 1:
 	} while (false);
 
 case 3:
-	cs = _hpricot_css_trans_targs[_trans];
+	cs = _hpricot_css_trans_targs_wi[_trans];
 
-	if ( _hpricot_css_trans_actions[_trans] != 0 ) {
-		_acts = _hpricot_css_trans_actions[_trans];
+	if ( _hpricot_css_trans_actions_wi[_trans] != 0 ) {
+		_acts = _hpricot_css_trans_actions_wi[_trans];
 		_nacts = (int) _hpricot_css_actions[_acts++];
 		while ( _nacts-- > 0 )
 	{
 			switch ( _hpricot_css_actions[_acts++] )
 			{
 	case 0:
-// line 85 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 85 "hpricot_css.java.rl"
 	{
     aps = p;
   }
 	break;
 	case 1:
-// line 89 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 89 "hpricot_css.java.rl"
 	{
     ape = p;
     PUSH(aps, ape); 
   }
 	break;
 	case 2:
-// line 94 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 94 "hpricot_css.java.rl"
 	{
     ape = p;
     aps2 = p;
   }
 	break;
 	case 3:
-// line 99 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 99 "hpricot_css.java.rl"
 	{
     ape2 = p;
     PUSH(aps, ape);
@@ -657,119 +641,119 @@ case 3:
   }
 	break;
 	case 7:
-// line 1 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 1 "hpricot_css.java.rl"
 	{te = p+1;}
 	break;
 	case 8:
-// line 132 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 132 "hpricot_css.java.rl"
 	{act = 1;}
 	break;
 	case 9:
-// line 133 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 133 "hpricot_css.java.rl"
 	{act = 2;}
 	break;
 	case 10:
-// line 136 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 136 "hpricot_css.java.rl"
 	{act = 5;}
 	break;
 	case 11:
-// line 138 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 138 "hpricot_css.java.rl"
 	{act = 7;}
 	break;
 	case 12:
-// line 139 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 139 "hpricot_css.java.rl"
 	{act = 8;}
 	break;
 	case 13:
-// line 140 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 140 "hpricot_css.java.rl"
 	{act = 9;}
 	break;
 	case 14:
-// line 134 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 134 "hpricot_css.java.rl"
 	{te = p+1;{ FILTER("NAME"); }}
 	break;
 	case 15:
-// line 135 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 135 "hpricot_css.java.rl"
 	{te = p+1;{ FILTER("ATTR"); }}
 	break;
 	case 16:
-// line 138 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 138 "hpricot_css.java.rl"
 	{te = p+1;{ FILTER("CHILD"); }}
 	break;
 	case 17:
-// line 139 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 139 "hpricot_css.java.rl"
 	{te = p+1;{ FILTER("POS"); }}
 	break;
 	case 18:
-// line 140 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 140 "hpricot_css.java.rl"
 	{te = p+1;{ FILTER("PSUEDO"); }}
 	break;
 	case 19:
-// line 142 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 142 "hpricot_css.java.rl"
 	{te = p+1;{ FILTERAUTO(); }}
 	break;
 	case 20:
-// line 132 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 132 "hpricot_css.java.rl"
 	{te = p;p--;{ FILTER("ID"); }}
 	break;
 	case 21:
-// line 133 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 133 "hpricot_css.java.rl"
 	{te = p;p--;{ FILTER("CLASS"); }}
 	break;
 	case 22:
-// line 135 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 135 "hpricot_css.java.rl"
 	{te = p;p--;{ FILTER("ATTR"); }}
 	break;
 	case 23:
-// line 136 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 136 "hpricot_css.java.rl"
 	{te = p;p--;{ FILTER("TAG"); }}
 	break;
 	case 24:
-// line 137 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 137 "hpricot_css.java.rl"
 	{te = p;p--;{ FILTER("MOD"); }}
 	break;
 	case 25:
-// line 138 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 138 "hpricot_css.java.rl"
 	{te = p;p--;{ FILTER("CHILD"); }}
 	break;
 	case 26:
-// line 139 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 139 "hpricot_css.java.rl"
 	{te = p;p--;{ FILTER("POS"); }}
 	break;
 	case 27:
-// line 140 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 140 "hpricot_css.java.rl"
 	{te = p;p--;{ FILTER("PSUEDO"); }}
 	break;
 	case 28:
-// line 141 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 141 "hpricot_css.java.rl"
 	{te = p;p--;{ focus = RubyArray.newArray(runtime, node); }}
 	break;
 	case 29:
-// line 143 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 143 "hpricot_css.java.rl"
 	{te = p;p--;}
 	break;
 	case 30:
-// line 135 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 135 "hpricot_css.java.rl"
 	{{p = ((te))-1;}{ FILTER("ATTR"); }}
 	break;
 	case 31:
-// line 138 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 138 "hpricot_css.java.rl"
 	{{p = ((te))-1;}{ FILTER("CHILD"); }}
 	break;
 	case 32:
-// line 139 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 139 "hpricot_css.java.rl"
 	{{p = ((te))-1;}{ FILTER("POS"); }}
 	break;
 	case 33:
-// line 140 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 140 "hpricot_css.java.rl"
 	{{p = ((te))-1;}{ FILTER("PSUEDO"); }}
 	break;
 	case 34:
-// line 143 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 143 "hpricot_css.java.rl"
 	{{p = ((te))-1;}}
 	break;
 	case 35:
-// line 1 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 1 "hpricot_css.java.rl"
 	{	switch( act ) {
 	case 0:
 	{{cs = 0; _goto_targ = 2; if (true) continue _goto;}}
@@ -792,10 +776,11 @@ case 3:
 	case 9:
 	{{p = ((te))-1;} FILTER("PSUEDO"); }
 	break;
+	default: break;
 	}
 	}
 	break;
-// line 799 "ext/hpricot_scan/HpricotCss.java"
+// line 784 "HpricotCss.java"
 			}
 		}
 	}
@@ -806,14 +791,14 @@ case 2:
 	while ( _nacts-- > 0 ) {
 		switch ( _hpricot_css_actions[_acts++] ) {
 	case 4:
-// line 1 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 1 "hpricot_css.java.rl"
 	{ts = -1;}
 	break;
 	case 5:
-// line 1 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 1 "hpricot_css.java.rl"
 	{act = 0;}
 	break;
-// line 817 "ext/hpricot_scan/HpricotCss.java"
+// line 802 "HpricotCss.java"
 		}
 	}
 
@@ -839,7 +824,7 @@ case 5:
 	}
 	break; }
 	}
-// line 152 "ext/hpricot_scan/hpricot_css.java.rl"
+// line 152 "hpricot_css.java.rl"
 
         return focus;
     }

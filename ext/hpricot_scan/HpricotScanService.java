@@ -1,4 +1,4 @@
-// line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 1 "hpricot_scan.java.rl"
 
 import java.io.IOException;
 
@@ -509,11 +509,11 @@ public class HpricotScanService implements BasicLibraryService {
             block.yield(ctx, ary);
         }
 
-// line 561 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 561 "hpricot_scan.java.rl"
 
 
 
-// line 517 "ext/hpricot_scan/HpricotScanService.java"
+// line 517 "HpricotScanService.java"
 private static byte[] init__hpricot_scan_actions_0()
 {
 	return new byte [] {
@@ -935,7 +935,7 @@ private static short[] init__hpricot_scan_indicies_0()
 private static final short _hpricot_scan_indicies[] = init__hpricot_scan_indicies_0();
 
 
-private static short[] init__hpricot_scan_trans_targs_0()
+private static short[] init__hpricot_scan_trans_targs_wi_0()
 {
 	return new short [] {
 	  204,    1,    2,   53,  204,    3,    4,    5,    6,    7,    8,    9,
@@ -978,10 +978,10 @@ private static short[] init__hpricot_scan_trans_targs_0()
 	};
 }
 
-private static final short _hpricot_scan_trans_targs[] = init__hpricot_scan_trans_targs_0();
+private static final short _hpricot_scan_trans_targs_wi[] = init__hpricot_scan_trans_targs_wi_0();
 
 
-private static short[] init__hpricot_scan_trans_actions_0()
+private static short[] init__hpricot_scan_trans_actions_wi_0()
 {
 	return new short [] {
 	   73,    0,    0,    0,   59,    0,    0,    0,    0,    0,    0,    0,
@@ -1024,7 +1024,7 @@ private static short[] init__hpricot_scan_trans_actions_0()
 	};
 }
 
-private static final short _hpricot_scan_trans_actions[] = init__hpricot_scan_trans_actions_0();
+private static final short _hpricot_scan_trans_actions_wi[] = init__hpricot_scan_trans_actions_wi_0();
 
 
 private static short[] init__hpricot_scan_to_state_actions_0()
@@ -1119,7 +1119,7 @@ static final int hpricot_scan_en_html_cdata = 216;
 static final int hpricot_scan_en_html_procins = 218;
 static final int hpricot_scan_en_main = 204;
 
-// line 564 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 564 "hpricot_scan.java.rl"
 
         public final static int BUFSIZE = 16384;
 
@@ -1223,14 +1223,14 @@ static final int hpricot_scan_en_main = 204;
         // hpricot_scan
         public IRubyObject scan() {
 
-// line 1227 "ext/hpricot_scan/HpricotScanService.java"
+// line 1227 "HpricotScanService.java"
 	{
 	cs = hpricot_scan_start;
 	ts = -1;
 	te = -1;
 	act = 0;
 	}
-// line 667 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 667 "hpricot_scan.java.rl"
             while(!done) {
                 p = pe = len = buf;
                 space = buffer_size - have;
@@ -1278,7 +1278,7 @@ static final int hpricot_scan_en_main = 204;
                 pe = p + len;
 
                 
-// line 1282 "ext/hpricot_scan/HpricotScanService.java"
+// line 1282 "HpricotScanService.java"
 	{
 	int _klen;
 	int _trans = 0;
@@ -1300,10 +1300,10 @@ case 1:
 	while ( _nacts-- > 0 ) {
 		switch ( _hpricot_scan_actions[_acts++] ) {
 	case 21:
-// line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 1 "hpricot_scan.java.rl"
 	{ts = p;}
 	break;
-// line 1307 "ext/hpricot_scan/HpricotScanService.java"
+// line 1307 "HpricotScanService.java"
 		}
 	}
 
@@ -1358,17 +1358,17 @@ case 1:
 
 	_trans = _hpricot_scan_indicies[_trans];
 case 3:
-	cs = _hpricot_scan_trans_targs[_trans];
+	cs = _hpricot_scan_trans_targs_wi[_trans];
 
-	if ( _hpricot_scan_trans_actions[_trans] != 0 ) {
-		_acts = _hpricot_scan_trans_actions[_trans];
+	if ( _hpricot_scan_trans_actions_wi[_trans] != 0 ) {
+		_acts = _hpricot_scan_trans_actions_wi[_trans];
 		_nacts = (int) _hpricot_scan_actions[_acts++];
 		while ( _nacts-- > 0 )
 	{
 			switch ( _hpricot_scan_actions[_acts++] )
 			{
 	case 0:
-// line 514 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 514 "hpricot_scan.java.rl"
 	{
     if(text) {
         tag = CAT(tag, mark_tag, p);
@@ -1382,27 +1382,27 @@ case 3:
   }
 	break;
 	case 1:
-// line 526 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 526 "hpricot_scan.java.rl"
 	{ mark_tag = p; }
 	break;
 	case 2:
-// line 527 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 527 "hpricot_scan.java.rl"
 	{ mark_aval = p; }
 	break;
 	case 3:
-// line 528 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 528 "hpricot_scan.java.rl"
 	{ mark_akey = p; }
 	break;
 	case 4:
-// line 529 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 529 "hpricot_scan.java.rl"
 	{ tag = SET(mark_tag, p, tag); }
 	break;
 	case 5:
-// line 531 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 531 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); }
 	break;
 	case 6:
-// line 532 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 532 "hpricot_scan.java.rl"
 	{
       if(data[p-1] == '"' || data[p-1] == '\'') {
           aval = SET(mark_aval, p-1, aval);
@@ -1412,31 +1412,31 @@ case 3:
   }
 	break;
 	case 7:
-// line 539 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 539 "hpricot_scan.java.rl"
 	{   akey = SET(mark_akey, p, akey); }
 	break;
 	case 8:
-// line 540 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 540 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("version"), aval); }
 	break;
 	case 9:
-// line 541 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 541 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("encoding"), aval); }
 	break;
 	case 10:
-// line 542 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 542 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("standalone"), aval); }
 	break;
 	case 11:
-// line 543 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 543 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("public_id"), aval); }
 	break;
 	case 12:
-// line 544 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 544 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("system_id"), aval); }
 	break;
 	case 13:
-// line 546 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 546 "hpricot_scan.java.rl"
 	{
       akey = runtime.getNil();
       aval = runtime.getNil();
@@ -1445,7 +1445,7 @@ case 3:
   }
 	break;
 	case 14:
-// line 553 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 553 "hpricot_scan.java.rl"
 	{
       if(!S.xml) {
           akey = akey.callMethod(runtime.getCurrentContext(), "downcase");
@@ -1454,143 +1454,143 @@ case 3:
   }
 	break;
 	case 15:
-// line 9 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 9 "hpricot_scan.java.rl"
 	{curline += 1;}
 	break;
 	case 16:
-// line 46 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 46 "hpricot_scan.java.rl"
 	{ TEXT_PASS(); }
 	break;
 	case 17:
-// line 50 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 50 "hpricot_scan.java.rl"
 	{ EBLK(comment, 3); {cs = 204; _goto_targ = 2; if (true) continue _goto;} }
 	break;
 	case 18:
-// line 55 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 55 "hpricot_scan.java.rl"
 	{ EBLK(cdata, 3); {cs = 204; _goto_targ = 2; if (true) continue _goto;} }
 	break;
 	case 19:
-// line 60 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 60 "hpricot_scan.java.rl"
 	{ EBLK(procins, 2); {cs = 204; _goto_targ = 2; if (true) continue _goto;} }
 	break;
 	case 22:
-// line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 1 "hpricot_scan.java.rl"
 	{te = p+1;}
 	break;
 	case 23:
-// line 50 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 50 "hpricot_scan.java.rl"
 	{te = p+1;}
 	break;
 	case 24:
-// line 51 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 51 "hpricot_scan.java.rl"
 	{te = p+1;{ TEXT_PASS(); }}
 	break;
 	case 25:
-// line 51 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 51 "hpricot_scan.java.rl"
 	{te = p;p--;{ TEXT_PASS(); }}
 	break;
 	case 26:
-// line 51 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 51 "hpricot_scan.java.rl"
 	{{p = ((te))-1;}{ TEXT_PASS(); }}
 	break;
 	case 27:
-// line 55 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 55 "hpricot_scan.java.rl"
 	{te = p+1;}
 	break;
 	case 28:
-// line 56 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 56 "hpricot_scan.java.rl"
 	{te = p+1;{ TEXT_PASS(); }}
 	break;
 	case 29:
-// line 56 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 56 "hpricot_scan.java.rl"
 	{te = p;p--;{ TEXT_PASS(); }}
 	break;
 	case 30:
-// line 56 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 56 "hpricot_scan.java.rl"
 	{{p = ((te))-1;}{ TEXT_PASS(); }}
 	break;
 	case 31:
-// line 60 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 60 "hpricot_scan.java.rl"
 	{te = p+1;}
 	break;
 	case 32:
-// line 61 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 61 "hpricot_scan.java.rl"
 	{te = p+1;{ TEXT_PASS(); }}
 	break;
 	case 33:
-// line 61 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 61 "hpricot_scan.java.rl"
 	{te = p;p--;{ TEXT_PASS(); }}
 	break;
 	case 34:
-// line 66 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 66 "hpricot_scan.java.rl"
 	{act = 8;}
 	break;
 	case 35:
-// line 68 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 68 "hpricot_scan.java.rl"
 	{act = 10;}
 	break;
 	case 36:
-// line 70 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 70 "hpricot_scan.java.rl"
 	{act = 12;}
 	break;
 	case 37:
-// line 73 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 73 "hpricot_scan.java.rl"
 	{act = 15;}
 	break;
 	case 38:
-// line 65 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 65 "hpricot_scan.java.rl"
 	{te = p+1;{ ELE(xmldecl); }}
 	break;
 	case 39:
-// line 66 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 66 "hpricot_scan.java.rl"
 	{te = p+1;{ ELE(doctype); }}
 	break;
 	case 40:
-// line 68 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 68 "hpricot_scan.java.rl"
 	{te = p+1;{ ELE(stag); }}
 	break;
 	case 41:
-// line 69 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 69 "hpricot_scan.java.rl"
 	{te = p+1;{ ELE(etag); }}
 	break;
 	case 42:
-// line 70 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 70 "hpricot_scan.java.rl"
 	{te = p+1;{ ELE(emptytag); }}
 	break;
 	case 43:
-// line 71 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 71 "hpricot_scan.java.rl"
 	{te = p+1;{ {cs = 214; _goto_targ = 2; if (true) continue _goto;} }}
 	break;
 	case 44:
-// line 72 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 72 "hpricot_scan.java.rl"
 	{te = p+1;{ {cs = 216; _goto_targ = 2; if (true) continue _goto;} }}
 	break;
 	case 45:
-// line 73 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 73 "hpricot_scan.java.rl"
 	{te = p+1;{ TEXT_PASS(); }}
 	break;
 	case 46:
-// line 66 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 66 "hpricot_scan.java.rl"
 	{te = p;p--;{ ELE(doctype); }}
 	break;
 	case 47:
-// line 67 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 67 "hpricot_scan.java.rl"
 	{te = p;p--;{ {cs = 218; _goto_targ = 2; if (true) continue _goto;} }}
 	break;
 	case 48:
-// line 73 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 73 "hpricot_scan.java.rl"
 	{te = p;p--;{ TEXT_PASS(); }}
 	break;
 	case 49:
-// line 67 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 67 "hpricot_scan.java.rl"
 	{{p = ((te))-1;}{ {cs = 218; _goto_targ = 2; if (true) continue _goto;} }}
 	break;
 	case 50:
-// line 73 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 73 "hpricot_scan.java.rl"
 	{{p = ((te))-1;}{ TEXT_PASS(); }}
 	break;
 	case 51:
-// line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 1 "hpricot_scan.java.rl"
 	{	switch( act ) {
 	case 8:
 	{{p = ((te))-1;} ELE(doctype); }
@@ -1604,10 +1604,11 @@ case 3:
 	case 15:
 	{{p = ((te))-1;} TEXT_PASS(); }
 	break;
+	default: break;
 	}
 	}
 	break;
-// line 1611 "ext/hpricot_scan/HpricotScanService.java"
+// line 1612 "HpricotScanService.java"
 			}
 		}
 	}
@@ -1618,10 +1619,10 @@ case 2:
 	while ( _nacts-- > 0 ) {
 		switch ( _hpricot_scan_actions[_acts++] ) {
 	case 20:
-// line 1 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 1 "hpricot_scan.java.rl"
 	{ts = -1;}
 	break;
-// line 1625 "ext/hpricot_scan/HpricotScanService.java"
+// line 1626 "HpricotScanService.java"
 		}
 	}
 
@@ -1643,7 +1644,7 @@ case 5:
 	}
 	break; }
 	}
-// line 714 "ext/hpricot_scan/hpricot_scan.java.rl"
+// line 714 "hpricot_scan.java.rl"
 
                 if(cs == hpricot_scan_error) {
                     if(!tag.isNil()) {

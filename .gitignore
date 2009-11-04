@@ -1,6 +1,11 @@
 *.class
+*.o
+*.bundle
+*.so
 mkmf.log
 conftest.dSYM
-/lib/*.jar
-/hpricot-0.8.240-jruby
-/pkg
+lib/*.jar
+hpricot-*-jruby
+pkg
+ext/fast_xs/Makefile
+ext/hpricot_scan/Makefile
