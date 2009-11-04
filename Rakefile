@@ -14,12 +14,12 @@ VERS = ENV['VERSION'] || "0.8" + (REV ? ".#{REV}" : "")
 PKG = "#{NAME}-#{VERS}"
 BIN = "*.{bundle,jar,so,o,obj,pdb,lib,def,exp,class}"
 CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}",
-               'ext/fast_xs/Makefile', 'ext/hpricot_scan/Makefile', 
+               'ext/fast_xs/Makefile', 'ext/hpricot_scan/Makefile',
                '**/.*.sw?', '*.gem', '.config', 'pkg']
 RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README', '--inline-source']
 PKG_FILES = %w(CHANGELOG COPYING README Rakefile) +
-      Dir.glob("{bin,doc,test,lib,extras}/**/*") + 
-      Dir.glob("ext/**/*.{h,java,c,rb,rl}") + 
+      Dir.glob("{bin,doc,test,lib,extras}/**/*") +
+      Dir.glob("ext/**/*.{h,java,c,rb,rl}") +
       %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/hpricot_css.c ext/hpricot_scan/HpricotScanService.java] # needed because they are generated later
 RAGEL_C_CODE_GENERATION_STYLES = {
   "table_driven" => 'T0',
@@ -47,7 +47,7 @@ SPEC =
     s.homepage = 'http://code.whytheluckystiff.net/hpricot/'
     s.rubyforge_project = 'hobix'
     s.files = PKG_FILES
-    s.require_paths = ["lib"] 
+    s.require_paths = ["lib"]
     s.extensions = FileList["ext/**/extconf.rb"].to_a
     s.bindir = "bin"
   end
@@ -56,7 +56,7 @@ Win32Spec = SPEC.dup
 Win32Spec.platform = 'x86-mswin32'
 Win32Spec.files = PKG_FILES + ["lib/hpricot_scan.so", "lib/fast_xs.so"]
 Win32Spec.extensions = []
-  
+
 WIN32_PKG_DIR = "#{PKG}-mswin32"
 
 desc "Does a full compile, test run"
@@ -80,8 +80,6 @@ Rake::TestTask.new do |t|
     t.verbose = true
 end
 
-#task :test => [:hpricot_java] if defined?(JRUBY_VERSION)
-
 Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_dir = 'doc/rdoc'
     rdoc.options += RDOC_OPTS
@@ -104,7 +102,7 @@ end
     "#{ext}/extconf.rb",
     "#{ext}/Makefile",
     "lib"
-  ] 
+  ]
 
   desc "Builds just the #{extension} extension"
   task extension.to_sym => [:ragel, "#{ext}/Makefile", ext_so ]
@@ -164,8 +162,8 @@ task :ragel => [:ragel_version] do
   end
 end
 
-# Java only supports the table-driven code 
-# generation style at this point. 
+# Java only supports the table-driven code
+# generation style at this point.
 desc "Generates the Java scanner code using the Ragel table-driven code generation style."
 task :ragel_java => [:ragel_version] do
   if @ragel_v >= 6.1
@@ -239,11 +237,11 @@ task :compile_java => [:hpricot_scan_java, :fast_xs_java] do
 end
 
 JRubySpec = SPEC.dup
-JRubySpec.platform = 'jruby'
+JRubySpec.platform = 'java'
 JRubySpec.files = PKG_FILES + ["lib/hpricot_scan.jar", "lib/fast_xs.jar"]
 JRubySpec.extensions = []
 
-JRUBY_PKG_DIR = "#{PKG}-jruby"
+JRUBY_PKG_DIR = "#{PKG}-java"
 
 desc "Package up the JRuby distribution."
 file JRUBY_PKG_DIR => [:ragel_java, :package] do
@@ -254,7 +252,7 @@ end
 desc "Build the RubyGems package for JRuby"
 task :package_jruby => JRUBY_PKG_DIR do
   Dir.chdir("#{JRUBY_PKG_DIR}") do
-    Rake::Task[:hpricot_java].invoke
+    Rake::Task[:compile_java].invoke
     Gem::Builder.new(JRubySpec).build
     verbose(true) {
       mv Dir["*.gem"].first, "../pkg/#{JRUBY_PKG_DIR}.gem"

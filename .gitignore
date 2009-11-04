@@ -5,7 +5,8 @@
 mkmf.log
 conftest.dSYM
 lib/*.jar
-hpricot-*-jruby
+hpricot-*-java
+hpricot-*-mswin32
 pkg
 ext/fast_xs/Makefile
 ext/hpricot_scan/Makefile
