@@ -1,3 +1,16 @@
+= 0.8.2
+=== 5 November, 2009
+* Bring JRuby support up to speed, including Java-based hpricot_css support
+* Change JRuby fast_xs to have same escaping behavior as C fast_xs
+
+= 0.8.1
+=== 3 April, 2009
+* fix for issue #2, downcasing of html attributes inside the parser.
+* solve issue #3 with bogus etags being preserved in `to_s` rather than just `to_original_html`.
+* fix error when attempting to reparent cleared node. (issue #5)
+* Hpricot::Attributes proxy object for using `ele.attributes[k] = v` directly.
+  however, it is preferred to use the jquery-like `elements.attr(k, v)`.
+
 = 0.8
 === 31st March, 2009
 * Saving memory and speed by using RStruct-based elements in the C extension.

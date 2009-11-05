@@ -25,7 +25,7 @@ public class FastXsService implements BasicLibraryService {
         String string = recv.convertToString().getUnicodeValue();
         StringWriter writer = new StringWriter ((int)(string.length() * 1.5));
         try {
-            Entities.XML.escape(writer, string);
+            Entities.FAST_XS.escape(writer, string);
             return recv.getRuntime().newString(writer.toString());
         } catch (IOException e) {
             throw recv.getRuntime().newIOErrorFromException(e);
@@ -398,6 +398,13 @@ class Entities {
      */
     public static final Entities HTML40;
 
+    /**
+     * <p>
+     * The set of entities supported by the Ruby fast_xs extension.
+     * </p>
+     */
+    public static final Entities FAST_XS;
+
     static {
         XML = new Entities();
         XML.addEntities(BASIC_ARRAY);
@@ -413,6 +420,11 @@ class Entities {
     static {
         HTML40 = new Entities();
         fillWithHtml40Entities(HTML40);
+    }
+
+    static {
+        FAST_XS = new Entities();
+        FAST_XS.addEntities(BASIC_ARRAY);
     }
 
     /**
