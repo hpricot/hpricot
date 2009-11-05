@@ -31,12 +31,11 @@ Let's clear up what Hpricot is.
 
 First, here are all the links you need to know:
 
-* http://code.whytheluckystiff.net/hpricot is the Hpricot wiki and bug tracker.
+* http://wiki.github.com/hpricot/hpricot is the Hpricot wiki and
+  http://github.com/hpricot/hpricot/issues is the bug tracker.
   Go there for news and recipes and patches.  It's the center of activity.
-* http://code.whytheluckystiff.net/svn/hpricot/trunk is the main Subversion
+* http://github.com/hpricot/hpricot is the main Git
   repository for Hpricot.  You can get the latest code there.
-* http://code.whytheluckystiff.net/doc/hpricot is the home for the latest copy of
-  this reference.
 * See COPYING for the terms of this software. (Spoiler: it's absolutely free.)
 
 If you have any trouble, don't hesitate to contact the author.  As always, I'm
@@ -46,24 +45,16 @@ as quickly as I can.  Your responsibility is to report the inadequacies.
 
 == Installing Hpricot
 
-You may get the latest stable version from Rubyforge. Win32 binaries and source 
-gems are available.
+You may get the latest stable version from Rubyforge. Win32 binaries,
+Java binaries (for JRuby), and source gems are available.
 
   $ gem install hpricot
-
-As Hpricot is still under active development, you can also try the most recent 
-candidate build here:
-
-  $ gem install hpricot --source http://code.whytheluckystiff.net
-
-The development gem is usually in pretty good shape actually.  You can also
-get the bleeding edge code or plain Ruby tarballs on the wiki.
 
 == An Hpricot Showcase
 
 We're going to run through a big pile of examples to get you jump-started.
 Many of these examples are also found at
-http://code.whytheluckystiff.net/hpricot/wiki/HpricotBasics, in case you
+http://wiki.github.com/hpricot/hpricot/hpricot-basics, in case you
 want to add some of your own.
 
 === Loading Hpricot Itself
