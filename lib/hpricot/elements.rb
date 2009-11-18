@@ -451,7 +451,7 @@ module Hpricot
     end
 
     filter :empty do |*a|
-      containers.length == 0
+      elem? && inner_html.length == 0
     end
 
     filter :root do |*a|

@@ -370,8 +370,8 @@ class TestParser < Test::Unit::TestCase
     @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 0, (@basic/"title:parent").size
     assert_equal 3, (@basic/"p:parent").size
-    assert_equal 1, (@basic/"title:empty").size
-    assert_equal 1, (@basic/"p:empty").size
+    assert_equal 3, (@basic/"link:empty").size
+    assert_equal 1, (@basic/"span:empty").size
   end
 
   def test_keep_cdata
