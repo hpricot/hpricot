@@ -1,3 +1,4 @@
+
 // line 1 "hpricot_scan.java.rl"
 
 import java.io.IOException;
@@ -509,11 +510,12 @@ public class HpricotScanService implements BasicLibraryService {
             block.yield(ctx, ary);
         }
 
+
 // line 561 "hpricot_scan.java.rl"
 
 
 
-// line 517 "HpricotScanService.java"
+// line 519 "HpricotScanService.java"
 private static byte[] init__hpricot_scan_actions_0()
 {
 	return new byte [] {
@@ -935,7 +937,7 @@ private static short[] init__hpricot_scan_indicies_0()
 private static final short _hpricot_scan_indicies[] = init__hpricot_scan_indicies_0();
 
 
-private static short[] init__hpricot_scan_trans_targs_wi_0()
+private static short[] init__hpricot_scan_trans_targs_0()
 {
 	return new short [] {
 	  204,    1,    2,   53,  204,    3,    4,    5,    6,    7,    8,    9,
@@ -978,10 +980,10 @@ private static short[] init__hpricot_scan_trans_targs_wi_0()
 	};
 }
 
-private static final short _hpricot_scan_trans_targs_wi[] = init__hpricot_scan_trans_targs_wi_0();
+private static final short _hpricot_scan_trans_targs[] = init__hpricot_scan_trans_targs_0();
 
 
-private static short[] init__hpricot_scan_trans_actions_wi_0()
+private static short[] init__hpricot_scan_trans_actions_0()
 {
 	return new short [] {
 	   73,    0,    0,    0,   59,    0,    0,    0,    0,    0,    0,    0,
@@ -1024,7 +1026,7 @@ private static short[] init__hpricot_scan_trans_actions_wi_0()
 	};
 }
 
-private static final short _hpricot_scan_trans_actions_wi[] = init__hpricot_scan_trans_actions_wi_0();
+private static final short _hpricot_scan_trans_actions[] = init__hpricot_scan_trans_actions_0();
 
 
 private static short[] init__hpricot_scan_to_state_actions_0()
@@ -1118,6 +1120,7 @@ static final int hpricot_scan_en_html_comment = 214;
 static final int hpricot_scan_en_html_cdata = 216;
 static final int hpricot_scan_en_html_procins = 218;
 static final int hpricot_scan_en_main = 204;
+
 
 // line 564 "hpricot_scan.java.rl"
 
@@ -1223,13 +1226,14 @@ static final int hpricot_scan_en_main = 204;
         // hpricot_scan
         public IRubyObject scan() {
 
-// line 1227 "HpricotScanService.java"
+// line 1230 "HpricotScanService.java"
 	{
 	cs = hpricot_scan_start;
 	ts = -1;
 	te = -1;
 	act = 0;
 	}
+
 // line 667 "hpricot_scan.java.rl"
             while(!done) {
                 p = pe = len = buf;
@@ -1278,7 +1282,7 @@ static final int hpricot_scan_en_main = 204;
                 pe = p + len;
 
                 
-// line 1282 "HpricotScanService.java"
+// line 1286 "HpricotScanService.java"
 	{
 	int _klen;
 	int _trans = 0;
@@ -1303,7 +1307,7 @@ case 1:
 // line 1 "hpricot_scan.java.rl"
 	{ts = p;}
 	break;
-// line 1307 "HpricotScanService.java"
+// line 1311 "HpricotScanService.java"
 		}
 	}
 
@@ -1358,10 +1362,10 @@ case 1:
 
 	_trans = _hpricot_scan_indicies[_trans];
 case 3:
-	cs = _hpricot_scan_trans_targs_wi[_trans];
+	cs = _hpricot_scan_trans_targs[_trans];
 
-	if ( _hpricot_scan_trans_actions_wi[_trans] != 0 ) {
-		_acts = _hpricot_scan_trans_actions_wi[_trans];
+	if ( _hpricot_scan_trans_actions[_trans] != 0 ) {
+		_acts = _hpricot_scan_trans_actions[_trans];
 		_nacts = (int) _hpricot_scan_actions[_acts++];
 		while ( _nacts-- > 0 )
 	{
@@ -1604,11 +1608,10 @@ case 3:
 	case 15:
 	{{p = ((te))-1;} TEXT_PASS(); }
 	break;
-	default: break;
 	}
 	}
 	break;
-// line 1612 "HpricotScanService.java"
+// line 1615 "HpricotScanService.java"
 			}
 		}
 	}
@@ -1622,7 +1625,7 @@ case 2:
 // line 1 "hpricot_scan.java.rl"
 	{ts = -1;}
 	break;
-// line 1626 "HpricotScanService.java"
+// line 1629 "HpricotScanService.java"
 		}
 	}
 
@@ -1644,6 +1647,7 @@ case 5:
 	}
 	break; }
 	}
+
 // line 714 "hpricot_scan.java.rl"
 
                 if(cs == hpricot_scan_error) {
