@@ -137,62 +137,62 @@ public class HpricotScanService implements BasicLibraryService {
 
     // H_ATTR(target)
     public static IRubyObject hpricot_ele_set_target(IRubyObject self, IRubyObject x) {
-        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("target"), x);
+        H_ELE_GET_asHash(self, H_ELE_ATTR).fastASet(self.getRuntime().newSymbol("target"), x);
         return self;
     }
 
     public static IRubyObject hpricot_ele_get_target(IRubyObject self) {
-        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("target"));
+        return H_ELE_GET_asHash(self, H_ELE_ATTR).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("target"));
     }
 
     // H_ATTR(encoding)
     public static IRubyObject hpricot_ele_set_encoding(IRubyObject self, IRubyObject x) {
-        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("encoding"), x);
+        ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("encoding"), x);
         return self;
     }
 
     public static IRubyObject hpricot_ele_get_encoding(IRubyObject self) {
-        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("encoding"));
+        return ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("encoding"));
     }
 
     // H_ATTR(version)
     public static IRubyObject hpricot_ele_set_version(IRubyObject self, IRubyObject x) {
-        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("version"), x);
+        ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("version"), x);
         return self;
     }
 
     public static IRubyObject hpricot_ele_get_version(IRubyObject self) {
-        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("version"));
+        return ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("version"));
     }
 
     // H_ATTR(standalone)
     public static IRubyObject hpricot_ele_set_standalone(IRubyObject self, IRubyObject x) {
-        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("standalone"), x);
+        ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("standalone"), x);
         return self;
     }
 
     public static IRubyObject hpricot_ele_get_standalone(IRubyObject self) {
-        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("standalone"));
+        return ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("standalone"));
     }
 
     // H_ATTR(system_id)
     public static IRubyObject hpricot_ele_set_system_id(IRubyObject self, IRubyObject x) {
-        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("system_id"), x);
+        ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("system_id"), x);
         return self;
     }
 
     public static IRubyObject hpricot_ele_get_system_id(IRubyObject self) {
-        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("system_id"));
+        return ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("system_id"));
     }
 
     // H_ATTR(public_id)
     public static IRubyObject hpricot_ele_set_public_id(IRubyObject self, IRubyObject x) {
-        ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("public_id"), x);
+        ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).fastASet(self.getRuntime().newSymbol("public_id"), x);
         return self;
     }
 
     public static IRubyObject hpricot_ele_get_public_id(IRubyObject self) {
-        return ((RubyHash)H_ELE_GET(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("public_id"));
+        return ((RubyHash)H_ELE_GET_asHash(self, H_ELE_ATTR)).op_aref(self.getRuntime().getCurrentContext(), self.getRuntime().newSymbol("public_id"));
     }
 
     public static class Scanner {
@@ -963,6 +963,15 @@ public class HpricotScanService implements BasicLibraryService {
 
     public static IRubyObject H_ELE_GET(IRubyObject recv, int n) {
         return ((IRubyObject[])recv.dataGetStruct())[n];
+    }
+
+    public static RubyHash H_ELE_GET_asHash(IRubyObject recv, int n) {
+        IRubyObject obj = ((IRubyObject[])recv.dataGetStruct())[n];
+        if(obj.isNil()) {
+            obj = RubyHash.newHash(recv.getRuntime());
+            ((IRubyObject[])recv.dataGetStruct())[n] = obj;
+        }
+        return (RubyHash)obj;
     }
 
     public static IRubyObject H_ELE_SET(IRubyObject recv, int n, IRubyObject value) {
