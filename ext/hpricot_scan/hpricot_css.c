@@ -70,7 +70,7 @@ VALUE hpricot_css(VALUE self, VALUE mod, VALUE str, VALUE node)
 	switch ( cs )
 	{
 tr0:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{	switch( act ) {
 	case 0:
 	{{goto st0;}}
@@ -257,14 +257,14 @@ tr200:
 	{te = p;p--;{ FILTER(ATTR); }}
 	goto st87;
 st87:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{ts = 0;}
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{act = 0;}
 	if ( ++p == pe )
 		goto _test_eof87;
 case 87:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{ts = p;}
 #line 270 "hpricot_css.c"
 	switch( (*p) ) {
@@ -324,13 +324,13 @@ case 1:
 		goto tr1;
 	goto tr0;
 tr1:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 76 "hpricot_css.rl"
 	{act = 5;}
 	goto st88;
 tr144:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -425,7 +425,7 @@ case 5:
 		goto tr1;
 	goto tr0;
 tr137:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 	goto st89;
 st89:
@@ -503,7 +503,7 @@ case 8:
 		goto tr14;
 	goto tr0;
 tr12:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -513,7 +513,7 @@ tr12:
 	{act = 1;}
 	goto st91;
 tr14:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 72 "hpricot_css.rl"
 	{act = 1;}
@@ -624,13 +624,13 @@ case 92:
 		goto st92;
 	goto tr159;
 tr161:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 76 "hpricot_css.rl"
 	{act = 5;}
 	goto st93;
 tr140:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -713,7 +713,7 @@ case 14:
 		goto tr23;
 	goto tr0;
 tr21:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -723,7 +723,7 @@ tr21:
 	{act = 2;}
 	goto st94;
 tr23:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 73 "hpricot_css.rl"
 	{act = 2;}
@@ -869,7 +869,7 @@ case 20:
 		goto tr38;
 	goto tr0;
 tr30:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -879,13 +879,13 @@ tr30:
 	{act = 9;}
 	goto st95;
 tr38:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
 	goto st95;
 tr179:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 29 "hpricot_css.rl"
 	{
@@ -1193,7 +1193,7 @@ case 41:
 		goto tr38;
 	goto tr0;
 tr32:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -1235,7 +1235,7 @@ case 96:
 		goto st23;
 	goto tr166;
 tr171:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 79 "hpricot_css.rl"
 	{act = 8;}
@@ -1311,7 +1311,7 @@ case 43:
 		goto st43;
 	goto st25;
 tr172:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -1348,7 +1348,7 @@ case 98:
 		goto st23;
 	goto tr166;
 tr181:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -1385,7 +1385,7 @@ case 99:
 		goto st23;
 	goto tr166;
 tr33:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -1426,7 +1426,7 @@ case 100:
 		goto st23;
 	goto tr166;
 tr182:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -1463,7 +1463,7 @@ case 101:
 		goto st23;
 	goto tr166;
 tr183:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -1500,7 +1500,7 @@ case 102:
 		goto st23;
 	goto tr166;
 tr184:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -1537,7 +1537,7 @@ case 103:
 		goto st23;
 	goto tr166;
 tr185:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 79 "hpricot_css.rl"
 	{act = 8;}
@@ -1573,13 +1573,13 @@ case 104:
 		goto tr177;
 	goto tr173;
 tr199:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
 	goto st105;
 tr186:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 29 "hpricot_css.rl"
 	{
@@ -1621,7 +1621,7 @@ case 105:
 		goto st23;
 	goto tr166;
 tr187:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -1658,7 +1658,7 @@ case 106:
 		goto st23;
 	goto tr166;
 tr188:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -1695,7 +1695,7 @@ case 107:
 		goto st23;
 	goto tr166;
 tr189:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -1732,7 +1732,7 @@ case 108:
 		goto st23;
 	goto tr166;
 tr190:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -1769,7 +1769,7 @@ case 109:
 		goto st23;
 	goto tr166;
 tr191:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 78 "hpricot_css.rl"
 	{act = 7;}
@@ -1932,7 +1932,7 @@ case 51:
 	}
 	goto st25;
 tr34:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -1973,7 +1973,7 @@ case 111:
 		goto st23;
 	goto tr166;
 tr35:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -2015,7 +2015,7 @@ case 112:
 		goto st23;
 	goto tr166;
 tr36:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -2056,7 +2056,7 @@ case 113:
 		goto st23;
 	goto tr166;
 tr194:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -2093,7 +2093,7 @@ case 114:
 		goto st23;
 	goto tr166;
 tr37:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -2135,7 +2135,7 @@ case 115:
 		goto st23;
 	goto tr166;
 tr195:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -2172,7 +2172,7 @@ case 116:
 		goto st23;
 	goto tr166;
 tr196:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -2209,7 +2209,7 @@ case 117:
 		goto st23;
 	goto tr166;
 tr197:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -2246,7 +2246,7 @@ case 118:
 		goto st23;
 	goto tr166;
 tr198:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 80 "hpricot_css.rl"
 	{act = 9;}
@@ -2456,7 +2456,7 @@ case 59:
 	}
 	goto st59;
 tr104:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 	goto st120;
 st120:
@@ -2500,7 +2500,7 @@ case 62:
 	}
 	goto st62;
 tr108:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 	goto st121;
 st121:
@@ -3085,7 +3085,7 @@ case 86:
 	}
 	goto st57;
 tr147:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -3125,7 +3125,7 @@ case 122:
 		goto st4;
 	goto tr149;
 tr201:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 76 "hpricot_css.rl"
 	{act = 5;}
@@ -3161,7 +3161,7 @@ case 123:
 		goto st4;
 	goto tr149;
 tr202:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 76 "hpricot_css.rl"
 	{act = 5;}
@@ -3196,7 +3196,7 @@ case 124:
 		goto st4;
 	goto tr149;
 tr148:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 25 "hpricot_css.rl"
 	{
@@ -3236,7 +3236,7 @@ case 125:
 		goto st4;
 	goto tr149;
 tr203:
-#line 1 "hpricot_css.rl"
+#line 1 "NONE"
 	{te = p+1;}
 #line 76 "hpricot_css.rl"
 	{act = 5;}
