@@ -425,4 +425,23 @@ class TestParser < Test::Unit::TestCase
       assert_equal "This is STDOUT", (xml/:peon/:stdout).inner_text
       assert_equal "This is STDERR", (xml/:peon/:stderr).inner_text
   end
+
+  def test_parsing_html_with_noscript
+   doc = Hpricot(<<-edoc)
+    <html>
+    <head>
+    <noscript>
+    <meta http-equiv="refresh" content="0; url=http://www.yoursite.com/noscripts.html"/>
+    </noscript>
+    <meta name="verification" content="7ff5e90iormq5niy6x98j75" />
+    </head>
+    <body>
+    <h1>Testing</h1>
+    </body>
+    </html>
+
+   edoc
+    assert_equal "7ff5e90iormq5niy6x98j75", doc.at("/html/head/meta[@name='verification']")['content']
+ end
+
 end

@@ -484,7 +484,7 @@ module Hpricot
   end
 
   ElementInclusions =
-{"head"=>["link", "meta", "object", "script", "style"], "body"=>["del", "ins"]}
+{"head"=>["link", "meta", "object", "script", "style" , "noscript"], "body"=>["del", "ins"]}
   ElementInclusions.each do |k, v|
     v.each do |name|
       ElementContent[k][name.hash] = :allow
