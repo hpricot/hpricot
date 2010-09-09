@@ -65,7 +65,11 @@ module Hpricot
     #
     # See Hpricot::Container::Trav.at for more.
     def at(expr, &blk)
-      search(expr, &blk).first
+      if expr.kind_of? Fixnum
+        super
+      else
+        search(expr, &blk)[0]
+      end
     end
     alias_method :%, :at
 

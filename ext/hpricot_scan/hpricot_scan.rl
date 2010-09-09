@@ -7,6 +7,12 @@
  * Copyright (C) 2006 why the lucky stiff
  */
 #include <ruby.h>
+#include <assert.h>
+
+struct hpricot_struct {
+  int len;
+  VALUE* ptr;
+};
 
 #ifndef RARRAY_LEN
 #define RARRAY_LEN(arr)  RARRAY(arr)->len
@@ -37,8 +43,10 @@ static VALUE reProcInsParse;
 #define H_ELE_HASH     6
 #define H_ELE_CHILDREN 7
 
-#define H_ELE_GET(ele, idx)      RSTRUCT_PTR(ele)[idx]
-#define H_ELE_SET(ele, idx, val) RSTRUCT_PTR(ele)[idx] = val
+#define HSTRUCT_PTR(ele) ((struct hpricot_struct*)DATA_PTR(ele))->ptr
+
+#define H_ELE_GET(ele, idx)      HSTRUCT_PTR(ele)[idx]
+#define H_ELE_SET(ele, idx, val) HSTRUCT_PTR(ele)[idx] = val
 
 #define OPT(opts, key) (!NIL_P(opts) && RTEST(rb_hash_aref(opts, ID2SYM(rb_intern("" # key)))))
 
@@ -409,7 +417,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     }
   } else if (sym == sym_text) {
     // TODO: add raw_string as well?
-    if (!NIL_P(S->last) && RBASIC(S->last)->klass == cText) {
+    if (!NIL_P(S->last) && RTEST(rb_obj_is_instance_of(S->last, cText))) {
       rb_str_append(H_ELE_GET(S->last, H_ELE_TAG), tag);
     } else {
       H_ELE(cText);
@@ -605,34 +613,68 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
   return Qnil;
 }
 
-static VALUE
-alloc_hpricot_struct(VALUE klass)
-{
-  VALUE size;
-  long n;
-  NEWOBJ(st, struct RStruct);
-  OBJSETUP(st, klass, T_STRUCT);
+void hstruct_mark(void* ptr) {
+  struct hpricot_struct* st = (struct hpricot_struct*)ptr;
+  int i;
 
-  size = rb_struct_iv_get(klass, "__size__");
-  n = FIX2LONG(size);
-
-#ifndef RSTRUCT_EMBED_LEN_MAX
-  st->ptr = ALLOC_N(VALUE, n);
-  rb_mem_clear(st->ptr, n);
-  st->len = n;
-#else
-  if (0 < n && n <= RSTRUCT_EMBED_LEN_MAX) {
-    RBASIC(st)->flags &= ~RSTRUCT_EMBED_LEN_MASK;
-    RBASIC(st)->flags |= n << RSTRUCT_EMBED_LEN_SHIFT;
-    rb_mem_clear(st->as.ary, n);
-  } else {
-    st->as.heap.ptr = ALLOC_N(VALUE, n);
-    rb_mem_clear(st->as.heap.ptr, n);
-    st->as.heap.len = n;
+  for(i = 0; i < st->len; i++) {
+    rb_gc_mark(st->ptr[i]);
   }
-#endif
+}
 
-  return (VALUE)st;
+void hstruct_free(void* ptr) {
+  struct hpricot_struct* st = (struct hpricot_struct*)ptr;
+
+  XFREE(st->ptr);
+  XFREE(st);
+}
+
+static VALUE
+alloc_hpricot_struct8(VALUE klass)
+{
+  VALUE obj;
+  struct hpricot_struct* st;
+
+  obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
+
+  st->len = 8;
+  st->ptr = ALLOC_N(VALUE, 8);
+
+  rb_mem_clear(st->ptr, 8);
+
+  return obj;
+}
+
+static VALUE
+alloc_hpricot_struct2(VALUE klass)
+{
+  VALUE obj;
+  struct hpricot_struct* st;
+
+  obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
+
+  st->len = 2;
+  st->ptr = ALLOC_N(VALUE, 2);
+
+  rb_mem_clear(st->ptr, 2);
+
+  return obj;
+}
+
+static VALUE
+alloc_hpricot_struct3(VALUE klass)
+{
+  VALUE obj;
+  struct hpricot_struct* st;
+
+  obj = Data_Make_Struct(klass, struct hpricot_struct, hstruct_mark, hstruct_free, st);
+
+  st->len = 3;
+  st->ptr = ALLOC_N(VALUE, 3);
+
+  rb_mem_clear(st->ptr, 3);
+
+  return obj;
 }
 
 static VALUE hpricot_struct_ref0(VALUE obj) {return H_ELE_GET(obj, 0);}
@@ -684,17 +726,28 @@ static VALUE (*set_func[10])() = {
 };
 
 static VALUE
-make_hpricot_struct(VALUE members)
+make_hpricot_struct(VALUE members, VALUE (*alloc)(VALUE klass))
 {
   int i = 0;
+  char attr_set[128];
+
   VALUE klass = rb_class_new(rb_cObject);
-  rb_iv_set(klass, "__size__", INT2NUM(RARRAY_LEN(members)));
-  rb_define_alloc_func(klass, alloc_hpricot_struct);
-  rb_define_singleton_method(klass, "new", rb_class_new_instance, -1);
-  for (i = 0; i < RARRAY_LEN(members); i++) {
-    ID id = SYM2ID(RARRAY_PTR(members)[i]);
-    rb_define_method_id(klass, id, ref_func[i], 0);
-    rb_define_method_id(klass, rb_id_attrset(id), set_func[i], 1);
+  rb_define_alloc_func(klass, alloc);
+
+  int len = RARRAY_LEN(members);
+  assert(len < 10);
+
+  for (i = 0; i < len; i++) {
+    ID id = SYM2ID(rb_ary_entry(members, i));
+    const char* name = rb_id2name(id);
+    int len = strlen(name);
+
+    memcpy(attr_set, name, strlen(name));
+    attr_set[len] = '=';
+    attr_set[len+1] = 0;
+
+    rb_define_method(klass, name, ref_func[i], 0);
+    rb_define_method(klass, attr_set, set_func[i], 1);
   }
   return klass;
 }
@@ -738,9 +791,13 @@ void Init_hpricot_scan()
 
   structElem = make_hpricot_struct(rb_ary_new3(8, sym_name, sym_parent,
     sym_raw_attributes, sym_etag, sym_raw_string, sym_allowed,
-    sym_tagno, sym_children));
-  structAttr = make_hpricot_struct(rb_ary_new3(3, sym_name, sym_parent, sym_raw_attributes));
-  structBasic = make_hpricot_struct(rb_ary_new3(2, sym_name, sym_parent));
+    sym_tagno, sym_children), alloc_hpricot_struct8);
+  structAttr = make_hpricot_struct(
+      rb_ary_new3(3, sym_name, sym_parent, sym_raw_attributes),
+      alloc_hpricot_struct3);
+  structBasic = make_hpricot_struct(
+      rb_ary_new3(2, sym_name, sym_parent),
+      alloc_hpricot_struct2);
 
   cDoc = rb_define_class_under(mHpricot, "Doc", structElem);
   cCData = rb_define_class_under(mHpricot, "CData", structBasic);
