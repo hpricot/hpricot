@@ -625,8 +625,8 @@ void hstruct_mark(void* ptr) {
 void hstruct_free(void* ptr) {
   struct hpricot_struct* st = (struct hpricot_struct*)ptr;
 
-  XFREE(st->ptr);
-  XFREE(st);
+  free(st->ptr);
+  free(st);
 }
 
 static VALUE
