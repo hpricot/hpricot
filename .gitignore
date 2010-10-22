@@ -2,6 +2,7 @@
 *.o
 *.bundle
 *.so
+*.rbc
 mkmf.log
 conftest.dSYM
 lib/*.jar
