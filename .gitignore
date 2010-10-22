@@ -8,6 +8,5 @@ lib/*.jar
 hpricot-*-java
 hpricot-*-mswin32
 pkg
-ext/fast_xs/Makefile
-ext/hpricot_scan/Makefile
 .DS_Store
+tmp

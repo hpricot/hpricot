@@ -1,10 +1,8 @@
-require 'rake'
 require 'rake/clean'
 require 'rake/gempackagetask'
 require 'rake/rdoctask'
 require 'rake/testtask'
-require 'fileutils'
-include FileUtils
+require 'rake/extensiontask'
 
 RbConfig = Config unless defined?(RbConfig)
 
@@ -16,9 +14,10 @@ BIN = "*.{bundle,jar,so,o,obj,pdb,lib,def,exp,class}"
 CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}",
                'ext/fast_xs/Makefile', 'ext/hpricot_scan/Makefile',
                '**/.*.sw?', '*.gem', '.config', 'pkg']
-RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README', '--inline-source']
-PKG_FILES = %w(CHANGELOG COPYING README Rakefile) +
-      Dir.glob("{bin,doc,test,lib,extras}/**/*") +
+RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README.md', '--inline-source']
+PKG_FILES = %w(CHANGELOG COPYING README.md Rakefile) +
+      Dir.glob("{bin,doc,test,extras}/**/*") +
+      Dir.glob("lib/**/*.rb") +
       Dir.glob("ext/**/*.{h,java,c,rb,rl}") +
       %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/hpricot_css.c ext/hpricot_scan/HpricotScanService.java] # needed because they are generated later
 RAGEL_C_CODE_GENERATION_STYLES = {
@@ -39,7 +38,7 @@ SPEC =
     s.platform = Gem::Platform::RUBY
     s.has_rdoc = true
     s.rdoc_options += RDOC_OPTS
-    s.extra_rdoc_files = ["README", "CHANGELOG", "COPYING"]
+    s.extra_rdoc_files = ["README.md", "CHANGELOG", "COPYING"]
     s.summary = "a swift, liberal HTML parser with a fantastic library"
     s.description = s.summary
     s.author = "why the lucky stiff"
@@ -52,12 +51,15 @@ SPEC =
     s.bindir = "bin"
   end
 
-Win32Spec = SPEC.dup
-Win32Spec.platform = 'x86-mswin32'
-Win32Spec.files = PKG_FILES + ["lib/hpricot_scan.so", "lib/fast_xs.so"]
-Win32Spec.extensions = []
-
-WIN32_PKG_DIR = "#{PKG}-mswin32"
+Rake::ExtensionTask.new('hpricot_scan', SPEC) do |ext|
+  ext.cross_compile = true                # enable cross compilation (requires cross compile toolchain)
+  ext.cross_platform = 'i386-mswin32'     # forces the Windows platform instead of the default one
+end
+file 'ext/hpricot_scan/extconf.rb' => :ragel
+Rake::ExtensionTask.new('fast_xs', SPEC) do |ext|
+  ext.cross_compile = true                # enable cross compilation (requires cross compile toolchain)
+  ext.cross_platform = 'i386-mswin32'     # forces the Windows platform instead of the default one
+end
 
 desc "Does a full compile, test run"
 if defined?(JRUBY_VERSION)
@@ -66,12 +68,8 @@ else
 task :default => [:compile, :test]
 end
 
-desc "Packages up Hpricot."
-task :package => [:clean, :ragel]
-
-desc "Releases packages for all Hpricot packages and platforms."
-task :release => [:package, :package_win32, :package_jruby]
-
+desc "Packages up Hpricot for all platforms."
+task :package => [:clean]
 
 desc "Run all the tests"
 Rake::TestTask.new do |t|
@@ -83,8 +81,8 @@ end
 Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_dir = 'doc/rdoc'
     rdoc.options += RDOC_OPTS
-    rdoc.main = "README"
-    rdoc.rdoc_files.add ['README', 'CHANGELOG', 'COPYING', 'lib/**/*.rb']
+    rdoc.main = "README.md"
+    rdoc.rdoc_files.add ['README.md', 'CHANGELOG', 'COPYING', 'lib/**/*.rb']
 end
 
 Rake::GemPackageTask.new(SPEC) do |p|
@@ -92,53 +90,25 @@ Rake::GemPackageTask.new(SPEC) do |p|
     p.gem_spec = SPEC
 end
 
-['hpricot_scan', 'fast_xs'].each do |extension|
-  ext = "ext/#{extension}"
-  ext_so = "#{ext}/#{extension}.#{Config::CONFIG['DLEXT']}"
-  ext_files = FileList[
-    "#{ext}/*.c",
-    "#{ext}/*.h",
-    "#{ext}/*.rl",
-    "#{ext}/extconf.rb",
-    "#{ext}/Makefile",
-    "lib"
-  ]
+### Win32 Packages ###
+Win32Spec = SPEC.dup
+Win32Spec.platform = 'i386-mswin32'
+Win32Spec.files = PKG_FILES + ["lib/hpricot_scan.so", "lib/fast_xs.so"]
+Win32Spec.extensions = []
 
-  desc "Builds just the #{extension} extension"
-  task extension.to_sym => [:ragel, "#{ext}/Makefile", ext_so ]
-
-  file "#{ext}/Makefile" => ["#{ext}/extconf.rb"] do
-    Dir.chdir(ext) do ruby "extconf.rb" end
-  end
-
-  file ext_so => ext_files do
-    Dir.chdir(ext) do
-      sh(RUBY_PLATFORM =~ /mswin/ ? 'nmake' : 'make')
-    end
-    cp ext_so, "lib"
-  end
-
-  desc "Cross-compile the #{extension} extension for win32"
-  file "#{extension}_win32" => [WIN32_PKG_DIR] do
-    cp "extras/mingw-rbconfig.rb", "#{WIN32_PKG_DIR}/ext/#{extension}/rbconfig.rb"
-    sh "cd #{WIN32_PKG_DIR}/ext/#{extension}/ && ruby -I. extconf.rb && make"
-    mv "#{WIN32_PKG_DIR}/ext/#{extension}/#{extension}.so", "#{WIN32_PKG_DIR}/lib"
-  end
+Rake::GemPackageTask.new(Win32Spec) do |p|
+  p.need_tar = false
+  p.gem_spec = Win32Spec
 end
 
-task "lib" do
-  directory "lib"
-end
+JRubySpec = SPEC.dup
+JRubySpec.platform = 'java'
+JRubySpec.files = PKG_FILES + ["lib/hpricot_scan.jar", "lib/fast_xs.jar"]
+JRubySpec.extensions = []
 
-desc "Compiles the Ruby extension"
-task :compile => [:hpricot_scan, :fast_xs] do
-  if Dir.glob(File.join("lib","hpricot_scan.*")).length == 0
-    STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    STDERR.puts "Gem actually failed to build.  Your system is"
-    STDERR.puts "NOT configured properly to build hpricot."
-    STDERR.puts "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    exit(1)
-  end
+Rake::GemPackageTask.new(JRubySpec) do |p|
+  p.need_tar = false
+  p.gem_spec = JRubySpec
 end
 
 desc "Determines the Ragel version and displays it on the console along with the location of the Ragel binary."
@@ -178,27 +148,7 @@ task :ragel_java => [:ragel_version] do
   end
 end
 
-### Win32 Packages ###
-
-desc "Package up the Win32 distribution."
-file WIN32_PKG_DIR => [:package] do
-  sh "tar zxf pkg/#{PKG}.tgz"
-  mv PKG, WIN32_PKG_DIR
-end
-
-desc "Build the binary RubyGems package for win32"
-task :package_win32 => ["fast_xs_win32", "hpricot_scan_win32"] do
-  Dir.chdir("#{WIN32_PKG_DIR}") do
-    Gem::Builder.new(Win32Spec).build
-    verbose(true) {
-      mv Dir["*.gem"].first, "../pkg/"
-    }
-  end
-end
-
-CLEAN.include WIN32_PKG_DIR
-
-### JRuby Packages ###
+### JRuby Compile ###
 
 def java_classpath_arg # myriad of ways to discover JRuby classpath
   begin
@@ -211,7 +161,11 @@ def java_classpath_arg # myriad of ways to discover JRuby classpath
     jruby_cpath = ENV['JRUBY_PARENT_CLASSPATH'] || ENV['JRUBY_HOME'] &&
       FileList["#{ENV['JRUBY_HOME']}/lib/*.jar"].join(File::PATH_SEPARATOR)
   end
-  jruby_cpath ? "-cp \"#{jruby_cpath}\"" : ""
+  unless jruby_cpath || ENV['CLASSPATH'] =~ /jruby/
+    abort %{WARNING: No JRuby classpath has been set up.
+Define JRUBY_HOME=/path/to/jruby on the command line or in the environment}
+  end
+  "-cp \"#{jruby_cpath}\""
 end
 
 def compile_java(filenames, jarname)
@@ -231,42 +185,10 @@ task :fast_xs_java do
   end
 end
 
-desc "Compiles the JRuby extensions"
-task :compile_java => [:hpricot_scan_java, :fast_xs_java] do
-  %w(hpricot_scan fast_xs).each {|ext| mv "ext/#{ext}/#{ext}.jar", "lib"}
-end
-
-JRubySpec = SPEC.dup
-JRubySpec.platform = 'java'
-JRubySpec.files = PKG_FILES + ["lib/hpricot_scan.jar", "lib/fast_xs.jar"]
-JRubySpec.extensions = []
-
-JRUBY_PKG_DIR = "#{PKG}-java"
-
-desc "Package up the JRuby distribution."
-file JRUBY_PKG_DIR => [:ragel_java, :package] do
-  sh "tar zxf pkg/#{PKG}.tgz"
-  mv PKG, JRUBY_PKG_DIR
-end
-
-desc "Build the RubyGems package for JRuby"
-task :package_jruby => JRUBY_PKG_DIR do
-  Dir.chdir("#{JRUBY_PKG_DIR}") do
-    Rake::Task[:compile_java].invoke
-    Gem::Builder.new(JRubySpec).build
-    verbose(true) {
-      mv Dir["*.gem"].first, "../pkg/#{JRUBY_PKG_DIR}.gem"
-    }
+%w(hpricot_scan fast_xs).each do |ext|
+  file "lib/#{ext}.jar" => "#{ext}_java" do |t|
+    mv "ext/#{ext}/#{ext}.jar", "lib"
   end
+  task :compile_java => "lib/#{ext}.jar"
 end
 
-CLEAN.include JRUBY_PKG_DIR
-
-task :install do
-  sh %{rake package}
-  sh %{sudo gem install pkg/#{NAME}-#{VERS}}
-end
-
-task :uninstall => [:clean] do
-  sh %{sudo gem uninstall #{NAME}}
-end

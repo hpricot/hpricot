@@ -1304,7 +1304,7 @@ case 1:
 	while ( _nacts-- > 0 ) {
 		switch ( _hpricot_scan_actions[_acts++] ) {
 	case 21:
-// line 1 "hpricot_scan.java.rl"
+// line 1 "NONE"
 	{ts = p;}
 	break;
 // line 1311 "HpricotScanService.java"
@@ -1458,143 +1458,143 @@ case 3:
   }
 	break;
 	case 15:
-// line 9 "hpricot_scan.java.rl"
+// line 9 "hpricot_common.rl"
 	{curline += 1;}
 	break;
 	case 16:
-// line 46 "hpricot_scan.java.rl"
+// line 46 "hpricot_common.rl"
 	{ TEXT_PASS(); }
 	break;
 	case 17:
-// line 50 "hpricot_scan.java.rl"
+// line 50 "hpricot_common.rl"
 	{ EBLK(comment, 3); {cs = 204; _goto_targ = 2; if (true) continue _goto;} }
 	break;
 	case 18:
-// line 55 "hpricot_scan.java.rl"
+// line 55 "hpricot_common.rl"
 	{ EBLK(cdata, 3); {cs = 204; _goto_targ = 2; if (true) continue _goto;} }
 	break;
 	case 19:
-// line 60 "hpricot_scan.java.rl"
+// line 60 "hpricot_common.rl"
 	{ EBLK(procins, 2); {cs = 204; _goto_targ = 2; if (true) continue _goto;} }
 	break;
 	case 22:
-// line 1 "hpricot_scan.java.rl"
+// line 1 "NONE"
 	{te = p+1;}
 	break;
 	case 23:
-// line 50 "hpricot_scan.java.rl"
+// line 50 "hpricot_common.rl"
 	{te = p+1;}
 	break;
 	case 24:
-// line 51 "hpricot_scan.java.rl"
+// line 51 "hpricot_common.rl"
 	{te = p+1;{ TEXT_PASS(); }}
 	break;
 	case 25:
-// line 51 "hpricot_scan.java.rl"
+// line 51 "hpricot_common.rl"
 	{te = p;p--;{ TEXT_PASS(); }}
 	break;
 	case 26:
-// line 51 "hpricot_scan.java.rl"
+// line 51 "hpricot_common.rl"
 	{{p = ((te))-1;}{ TEXT_PASS(); }}
 	break;
 	case 27:
-// line 55 "hpricot_scan.java.rl"
+// line 55 "hpricot_common.rl"
 	{te = p+1;}
 	break;
 	case 28:
-// line 56 "hpricot_scan.java.rl"
+// line 56 "hpricot_common.rl"
 	{te = p+1;{ TEXT_PASS(); }}
 	break;
 	case 29:
-// line 56 "hpricot_scan.java.rl"
+// line 56 "hpricot_common.rl"
 	{te = p;p--;{ TEXT_PASS(); }}
 	break;
 	case 30:
-// line 56 "hpricot_scan.java.rl"
+// line 56 "hpricot_common.rl"
 	{{p = ((te))-1;}{ TEXT_PASS(); }}
 	break;
 	case 31:
-// line 60 "hpricot_scan.java.rl"
+// line 60 "hpricot_common.rl"
 	{te = p+1;}
 	break;
 	case 32:
-// line 61 "hpricot_scan.java.rl"
+// line 61 "hpricot_common.rl"
 	{te = p+1;{ TEXT_PASS(); }}
 	break;
 	case 33:
-// line 61 "hpricot_scan.java.rl"
+// line 61 "hpricot_common.rl"
 	{te = p;p--;{ TEXT_PASS(); }}
 	break;
 	case 34:
-// line 66 "hpricot_scan.java.rl"
+// line 66 "hpricot_common.rl"
 	{act = 8;}
 	break;
 	case 35:
-// line 68 "hpricot_scan.java.rl"
+// line 68 "hpricot_common.rl"
 	{act = 10;}
 	break;
 	case 36:
-// line 70 "hpricot_scan.java.rl"
+// line 70 "hpricot_common.rl"
 	{act = 12;}
 	break;
 	case 37:
-// line 73 "hpricot_scan.java.rl"
+// line 73 "hpricot_common.rl"
 	{act = 15;}
 	break;
 	case 38:
-// line 65 "hpricot_scan.java.rl"
+// line 65 "hpricot_common.rl"
 	{te = p+1;{ ELE(xmldecl); }}
 	break;
 	case 39:
-// line 66 "hpricot_scan.java.rl"
+// line 66 "hpricot_common.rl"
 	{te = p+1;{ ELE(doctype); }}
 	break;
 	case 40:
-// line 68 "hpricot_scan.java.rl"
+// line 68 "hpricot_common.rl"
 	{te = p+1;{ ELE(stag); }}
 	break;
 	case 41:
-// line 69 "hpricot_scan.java.rl"
+// line 69 "hpricot_common.rl"
 	{te = p+1;{ ELE(etag); }}
 	break;
 	case 42:
-// line 70 "hpricot_scan.java.rl"
+// line 70 "hpricot_common.rl"
 	{te = p+1;{ ELE(emptytag); }}
 	break;
 	case 43:
-// line 71 "hpricot_scan.java.rl"
+// line 71 "hpricot_common.rl"
 	{te = p+1;{ {cs = 214; _goto_targ = 2; if (true) continue _goto;} }}
 	break;
 	case 44:
-// line 72 "hpricot_scan.java.rl"
+// line 72 "hpricot_common.rl"
 	{te = p+1;{ {cs = 216; _goto_targ = 2; if (true) continue _goto;} }}
 	break;
 	case 45:
-// line 73 "hpricot_scan.java.rl"
+// line 73 "hpricot_common.rl"
 	{te = p+1;{ TEXT_PASS(); }}
 	break;
 	case 46:
-// line 66 "hpricot_scan.java.rl"
+// line 66 "hpricot_common.rl"
 	{te = p;p--;{ ELE(doctype); }}
 	break;
 	case 47:
-// line 67 "hpricot_scan.java.rl"
+// line 67 "hpricot_common.rl"
 	{te = p;p--;{ {cs = 218; _goto_targ = 2; if (true) continue _goto;} }}
 	break;
 	case 48:
-// line 73 "hpricot_scan.java.rl"
+// line 73 "hpricot_common.rl"
 	{te = p;p--;{ TEXT_PASS(); }}
 	break;
 	case 49:
-// line 67 "hpricot_scan.java.rl"
+// line 67 "hpricot_common.rl"
 	{{p = ((te))-1;}{ {cs = 218; _goto_targ = 2; if (true) continue _goto;} }}
 	break;
 	case 50:
-// line 73 "hpricot_scan.java.rl"
+// line 73 "hpricot_common.rl"
 	{{p = ((te))-1;}{ TEXT_PASS(); }}
 	break;
 	case 51:
-// line 1 "hpricot_scan.java.rl"
+// line 1 "NONE"
 	{	switch( act ) {
 	case 8:
 	{{p = ((te))-1;} ELE(doctype); }
@@ -1622,7 +1622,7 @@ case 2:
 	while ( _nacts-- > 0 ) {
 		switch ( _hpricot_scan_actions[_acts++] ) {
 	case 20:
-// line 1 "hpricot_scan.java.rl"
+// line 1 "NONE"
 	{ts = -1;}
 	break;
 // line 1629 "HpricotScanService.java"

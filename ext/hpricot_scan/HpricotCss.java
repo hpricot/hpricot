@@ -565,7 +565,7 @@ case 1:
 	while ( _nacts-- > 0 ) {
 		switch ( _hpricot_css_actions[_acts++] ) {
 	case 6:
-// line 1 "hpricot_css.java.rl"
+// line 1 "NONE"
 	{ts = p;}
 	break;
 // line 572 "HpricotCss.java"
@@ -660,7 +660,7 @@ case 3:
   }
 	break;
 	case 7:
-// line 1 "hpricot_css.java.rl"
+// line 1 "NONE"
 	{te = p+1;}
 	break;
 	case 8:
@@ -772,7 +772,7 @@ case 3:
 	{{p = ((te))-1;}}
 	break;
 	case 35:
-// line 1 "hpricot_css.java.rl"
+// line 1 "NONE"
 	{	switch( act ) {
 	case 0:
 	{{cs = 0; _goto_targ = 2; if (true) continue _goto;}}
@@ -809,11 +809,11 @@ case 2:
 	while ( _nacts-- > 0 ) {
 		switch ( _hpricot_css_actions[_acts++] ) {
 	case 4:
-// line 1 "hpricot_css.java.rl"
+// line 1 "NONE"
 	{ts = -1;}
 	break;
 	case 5:
-// line 1 "hpricot_css.java.rl"
+// line 1 "NONE"
 	{act = 0;}
 	break;
 // line 820 "HpricotCss.java"
