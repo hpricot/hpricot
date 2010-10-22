@@ -2,7 +2,11 @@ require 'rake/clean'
 require 'rake/gempackagetask'
 require 'rake/rdoctask'
 require 'rake/testtask'
-require 'rake/extensiontask'
+begin
+  require 'rake/extensiontask'
+rescue LoadError
+  abort "To build, please first gem install rake-compiler"
+end
 
 RbConfig = Config unless defined?(RbConfig)
 
@@ -13,11 +17,11 @@ PKG = "#{NAME}-#{VERS}"
 BIN = "*.{bundle,jar,so,o,obj,pdb,lib,def,exp,class}"
 CLEAN.include ["ext/hpricot_scan/#{BIN}", "ext/fast_xs/#{BIN}", "lib/**/#{BIN}",
                'ext/fast_xs/Makefile', 'ext/hpricot_scan/Makefile',
-               '**/.*.sw?', '*.gem', '.config', 'pkg']
+               '**/.*.sw?', '*.gem', '.config', 'pkg', 'lib/hpricot_scan.rb', 'lib/fast_xs.rb']
 RDOC_OPTS = ['--quiet', '--title', 'The Hpricot Reference', '--main', 'README.md', '--inline-source']
 PKG_FILES = %w(CHANGELOG COPYING README.md Rakefile) +
       Dir.glob("{bin,doc,test,extras}/**/*") +
-      Dir.glob("lib/**/*.rb") +
+      (Dir.glob("lib/**/*.rb") - %w(lib/hpricot_scan.rb lib/fast_xs.rb)) +
       Dir.glob("ext/**/*.{h,java,c,rb,rl}") +
       %w[ext/hpricot_scan/hpricot_scan.c ext/hpricot_scan/hpricot_css.c ext/hpricot_scan/HpricotScanService.java] # needed because they are generated later
 RAGEL_C_CODE_GENERATION_STYLES = {
@@ -51,21 +55,44 @@ SPEC =
     s.bindir = "bin"
   end
 
-Rake::ExtensionTask.new('hpricot_scan', SPEC) do |ext|
-  ext.cross_compile = true                # enable cross compilation (requires cross compile toolchain)
-  ext.cross_platform = 'i386-mswin32'     # forces the Windows platform instead of the default one
+# FAT cross-compile
+# Pass RUBY_CC_VERSION=1.8.7:1.9.2 when packaging for 1.8+1.9 mswin32 binaries
+%w(hpricot_scan fast_xs).each do |target|
+  Rake::ExtensionTask.new(target, SPEC) do |ext|
+    ext.lib_dir = File.join('lib', target) if ENV['RUBY_CC_VERSION']
+    ext.cross_compile = true                # enable cross compilation (requires cross compile toolchain)
+    ext.cross_platform = 'i386-mswin32'     # forces the Windows platform instead of the default one
+  end
+
+  # HACK around 1.9.2 cross .def file creation
+  def_file = "tmp/i386-mswin32/#{target}/1.9.2/#{target}-i386-mingw32.def"
+  directory File.dirname(def_file)
+  file def_file => File.dirname(def_file) do |t|
+    File.open(t.name, "w") do |f|
+      f << "EXPORTS\nInit_#{target}\n"
+    end
+  end
+
+  task File.join(File.dirname(def_file), "Makefile") => def_file
+  # END HACK
+  file "lib/#{target}.rb" do |t|
+    File.open(t.name, "w") do |f|
+      f.puts %{require "#{target}/\#{RUBY_VERSION.sub(/\\.\\d+$/, '')}/#{target}"}
+    end
+  end
 end
 file 'ext/hpricot_scan/extconf.rb' => :ragel
-Rake::ExtensionTask.new('fast_xs', SPEC) do |ext|
-  ext.cross_compile = true                # enable cross compilation (requires cross compile toolchain)
-  ext.cross_platform = 'i386-mswin32'     # forces the Windows platform instead of the default one
-end
 
 desc "Does a full compile, test run"
 if defined?(JRUBY_VERSION)
-task :default => [:compile_java, :test]
+task :default => [:compile_java, :clean_fat_rb, :test]
 else
-task :default => [:compile, :test]
+task :default => [:compile, :clean_fat_rb, :test]
+end
+
+task :clean_fat_rb do
+  rm_f "lib/hpricot_scan.rb"
+  rm_f "lib/fast_xs.rb"
 end
 
 desc "Packages up Hpricot for all platforms."
@@ -93,7 +120,14 @@ end
 ### Win32 Packages ###
 Win32Spec = SPEC.dup
 Win32Spec.platform = 'i386-mswin32'
-Win32Spec.files = PKG_FILES + ["lib/hpricot_scan.so", "lib/fast_xs.so"]
+Win32Spec.files = PKG_FILES + %w(hpricot_scan fast_xs).map do |t|
+  unless ENV['RUBY_CC_VERSION']
+    file "lib/#{t}/1.8/#{t}.so" do
+      abort "ERROR while packaging: re-run for fat win32 gems:\nrake #{ARGV.join(' ')} RUBY_CC_VERSION=1.8.7:1.9.2"
+    end
+  end
+  ["lib/#{t}.rb", "lib/#{t}/1.8/#{t}.so", "lib/#{t}/1.9/#{t}.so"]
+end.flatten
 Win32Spec.extensions = []
 
 Rake::GemPackageTask.new(Win32Spec) do |p|
