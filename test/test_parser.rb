@@ -354,6 +354,11 @@ class TestParser < Test::Unit::TestCase
     assert_equal "HAI", doc.at("body").inner_text
   end
 
+  # http://github.com/hpricot/hpricot/issues#issue/28
+  def test_invalid_inner_text
+    assert_equal "A", Hpricot('A&B;').inner_text[0]
+  end
+
   # Reported by Jonathan Nichols on the Hpricot list (24 May 2007)
   def test_self_closed_form
     doc = Hpricot(<<-edoc)

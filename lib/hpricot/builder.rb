@@ -7,7 +7,7 @@ module Hpricot
   # XML unescape
   def self.uxs(str)
     str.to_s.
-        gsub(/\&(\w+);/) { [NamedCharacters[$1] || ??].pack("U*") }.
+        gsub(/\&(\w+);/) { [NamedCharacters[$1] || 63].pack("U*") }. # 63 = ?? (query char)
         gsub(/\&\#(\d+);/) { [$1.to_i].pack("U*") }
   end
 
