@@ -4,7 +4,7 @@
  * $Author: why $
  * $Date: 2006-05-08 22:03:50 -0600 (Mon, 08 May 2006) $
  *
- * Copyright (C) 2006 why the lucky stiff
+ * Copyright (C) 2006, 2010 why the lucky stiff
  */
 #include <ruby.h>
 #include <assert.h>
@@ -22,7 +22,7 @@ struct hpricot_struct {
 
 VALUE hpricot_css(VALUE, VALUE, VALUE, VALUE, VALUE);
 
-#define NO_WAY_SERIOUSLY "*** This should not happen, please send a bug report with the HTML you're parsing to why@whytheluckystiff.net.  So sorry!"
+#define NO_WAY_SERIOUSLY "*** This should not happen, please file a bug report with the HTML you're parsing at http://github.com/hpricot/hpricot/issues.  So sorry!"
 
 static VALUE sym_xmldecl, sym_doctype, sym_procins, sym_stag, sym_etag, sym_emptytag, sym_comment,
       sym_cdata, sym_name, sym_parent, sym_raw_attributes, sym_raw_string, sym_tagno,
@@ -50,27 +50,42 @@ static VALUE reProcInsParse;
 
 #define OPT(opts, key) (!NIL_P(opts) && RTEST(rb_hash_aref(opts, ID2SYM(rb_intern("" # key)))))
 
-#define ELE(N) \
-  if (te > ts || text == 1) { \
-    char *raw = NULL; \
-    int rawlen = 0; \
-    ele_open = 0; text = 0; \
+#ifdef HAVE_RUBY_ENCODING_H
+#include <ruby/encoding.h>
+# define ASSOCIATE_INDEX(s)  rb_enc_associate_index((s), encoding_index)
+# define ENCODING_INDEX     , encoding_index
+#else
+# define ASSOCIATE_INDEX(s)
+# define ENCODING_INDEX
+#endif
+
+#define ELE(N)                                                          \
+  if (te > ts || text == 1) {                                           \
+    char *raw = NULL;                                                   \
+    int rawlen = 0;                                                     \
+    ele_open = 0; text = 0;                                             \
     if (ts != 0 && sym_##N != sym_cdata && sym_##N != sym_text && sym_##N != sym_procins && sym_##N != sym_comment) { \
-      raw = ts; rawlen = te - ts; \
-    } \
-    if (rb_block_given_p()) { \
-      VALUE raw_string = Qnil; \
-      if (raw != NULL) raw_string = rb_str_new(raw, rawlen); \
-      rb_yield_tokens(sym_##N, tag, attr, Qnil, taint); \
-    } else \
-      rb_hpricot_token(S, sym_##N, tag, attr, raw, rawlen, taint); \
+      raw = ts; rawlen = te - ts;                                       \
+    }                                                                   \
+    if (rb_block_given_p()) {                                           \
+      VALUE raw_string = Qnil;                                          \
+      if (raw != NULL) {                                                \
+        raw_string = rb_str_new(raw, rawlen);                           \
+        ASSOCIATE_INDEX(raw_string);                                    \
+      }                                                                 \
+      rb_yield_tokens(sym_##N, tag, attr, Qnil, taint);                 \
+    } else                                                              \
+      rb_hpricot_token(S, sym_##N, tag, attr, raw, rawlen, taint ENCODING_INDEX); \
   }
 
-#define SET(N, E) \
-  if (mark_##N == NULL || E == mark_##N) \
-    N = rb_str_new2(""); \
-  else if (E > mark_##N) \
-    N = rb_str_new(mark_##N, E - mark_##N);
+#define SET(N, E)                               \
+  if (mark_##N == NULL || E == mark_##N) {      \
+    N = rb_str_new2("");                        \
+    ASSOCIATE_INDEX(N);                         \
+  } else if (E > mark_##N) {                    \
+    N = rb_str_new(mark_##N, E - mark_##N);     \
+    ASSOCIATE_INDEX(N);                         \
+  }
 
 #define CAT(N, E) if (NIL_P(N)) { SET(N, E); } else { rb_str_cat(N, mark_##N, E - mark_##N); }
 
@@ -127,7 +142,18 @@ static VALUE reProcInsParse;
   }
   action akey { SET(akey, p); }
   action xmlver { SET(aval, p); ATTR(ID2SYM(rb_intern("version")), aval); }
-  action xmlenc { SET(aval, p); ATTR(ID2SYM(rb_intern("encoding")), aval); }
+  action xmlenc {
+#ifdef HAVE_RUBY_ENCODING_H
+    if (mark_aval < p) {
+      char psave = *p;
+      *p = '\0';
+      encoding_index = rb_enc_find_index(mark_aval);
+      *p = psave;
+    }
+#endif
+    SET(aval, p);
+    ATTR(ID2SYM(rb_intern("encoding")), aval);
+  }
   action xmlsd  { SET(aval, p); ATTR(ID2SYM(rb_intern("standalone")), aval); }
   action pubid  { SET(aval, p); ATTR(ID2SYM(rb_intern("public_id")), aval); }
   action sysid  { SET(aval, p); ATTR(ID2SYM(rb_intern("system_id")), aval); }
@@ -238,33 +264,41 @@ H_ATTR(standalone);
 H_ATTR(system_id);
 H_ATTR(public_id);
 
-#define H_ELE(klass) \
-  ele = rb_obj_alloc(klass); \
-  if (klass == cElem) { \
-    H_ELE_SET(ele, H_ELE_TAG, tag); \
-    H_ELE_SET(ele, H_ELE_ATTR, attr); \
-    H_ELE_SET(ele, H_ELE_EC, ec); \
+#define H_ELE(klass)                                                    \
+  ele = rb_obj_alloc(klass);                                            \
+  if (klass == cElem) {                                                 \
+    H_ELE_SET(ele, H_ELE_TAG, tag);                                     \
+    H_ELE_SET(ele, H_ELE_ATTR, attr);                                   \
+    H_ELE_SET(ele, H_ELE_EC, ec);                                       \
     if (raw != NULL && (sym == sym_emptytag || sym == sym_stag || sym == sym_doctype)) { \
-      H_ELE_SET(ele, H_ELE_RAW, rb_str_new(raw, rawlen)); \
-    } \
+      VALUE raw_str = rb_str_new(raw, rawlen);                          \
+      ASSOCIATE_INDEX(raw_str);                                         \
+      H_ELE_SET(ele, H_ELE_RAW, raw_str);                               \
+    }                                                                   \
   } else if (klass == cDocType || klass == cProcIns || klass == cXMLDecl || klass == cBogusETag) { \
-    if (klass == cBogusETag) { \
-      H_ELE_SET(ele, H_ELE_TAG, tag); \
-      if (raw != NULL) \
-        H_ELE_SET(ele, H_ELE_ATTR, rb_str_new(raw, rawlen)); \
-    } else { \
-      if (klass == cDocType) \
-        ATTR(ID2SYM(rb_intern("target")), tag); \
-      H_ELE_SET(ele, H_ELE_ATTR, attr); \
-      if (klass != cProcIns) { \
-        tag = Qnil; \
-        if (raw != NULL) tag = rb_str_new(raw, rawlen); \
-      } \
-      H_ELE_SET(ele, H_ELE_TAG, tag); \
-    } \
-  } else { \
-    H_ELE_SET(ele, H_ELE_TAG, tag); \
-  } \
+    if (klass == cBogusETag) {                                          \
+      H_ELE_SET(ele, H_ELE_TAG, tag);                                   \
+      if (raw != NULL) {                                                \
+        VALUE raw_str = rb_str_new(raw, rawlen);                        \
+        ASSOCIATE_INDEX(raw_str);                                       \
+        H_ELE_SET(ele, H_ELE_ATTR, raw_str);                            \
+      }                                                                 \
+    } else {                                                            \
+      if (klass == cDocType)                                            \
+        ATTR(ID2SYM(rb_intern("target")), tag);                         \
+      H_ELE_SET(ele, H_ELE_ATTR, attr);                                 \
+      if (klass != cProcIns) {                                          \
+        tag = Qnil;                                                     \
+        if (raw != NULL) {                                              \
+          tag = rb_str_new(raw, rawlen);                                \
+          ASSOCIATE_INDEX(tag);                                         \
+        }                                                               \
+      }                                                                 \
+      H_ELE_SET(ele, H_ELE_TAG, tag);                                   \
+    }                                                                   \
+  } else {                                                              \
+    H_ELE_SET(ele, H_ELE_TAG, tag);                                     \
+  }                                                                     \
   S->last = ele
 
 //
@@ -272,7 +306,12 @@ H_ATTR(public_id);
 // in the lexer.  this step just pairs up the start and end tags.
 //
 void
-rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, int rawlen, int taint)
+rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr,
+                 char *raw, int rawlen, int taint
+#ifdef HAVE_RUBY_ENCODING_H
+                 , int encoding_index
+#endif
+)
 {
   VALUE ele, ec = Qnil;
 
@@ -294,6 +333,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     {
       sym = sym_text;
       tag = rb_str_new(raw, rawlen);
+      ASSOCIATE_INDEX(tag);
     }
 
     if (!NIL_P(ec)) {
@@ -359,6 +399,7 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     if (S->strict) {
       if (NIL_P(rb_hash_aref(S->EC, tag))) {
         tag = rb_str_new2("div");
+        ASSOCIATE_INDEX(tag);
       }
     }
 
@@ -388,8 +429,10 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
     else
     {
       VALUE ele = Qnil;
-      if (raw != NULL)
+      if (raw != NULL) {
         ele = rb_str_new(raw, rawlen);
+        ASSOCIATE_INDEX(ele);
+      }
       H_ELE_SET(match, H_ELE_ETAG, ele);
       S->focus = H_ELE_GET(match, H_ELE_PARENT);
       S->last = Qnil;
@@ -403,8 +446,13 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr, char *raw, 
   } else if (sym == sym_doctype) {
     H_ELE(cDocType);
     if (S->strict) {
-      rb_hash_aset(attr, ID2SYM(rb_intern("system_id")), rb_str_new2("http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"));
-      rb_hash_aset(attr, ID2SYM(rb_intern("public_id")), rb_str_new2("-//W3C//DTD XHTML 1.0 Strict//EN"));
+      VALUE id;
+      id = rb_str_new2("http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd");
+      ASSOCIATE_INDEX(id);
+      rb_hash_aset(attr, ID2SYM(rb_intern("system_id")), id);
+      id = rb_str_new2("-//W3C//DTD XHTML 1.0 Strict//EN");
+      ASSOCIATE_INDEX(id);
+      rb_hash_aset(attr, ID2SYM(rb_intern("public_id")), id);
     }
     rb_hpricot_add(S->focus, ele);
   } else if (sym == sym_procins) {
@@ -439,6 +487,9 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
   VALUE attr = Qnil, tag = Qnil, akey = Qnil, aval = Qnil, bufsize = Qnil;
   char *mark_tag = 0, *mark_akey = 0, *mark_aval = 0;
   int done = 0, ele_open = 0, buffer_size = 0, taint = 0;
+#ifdef HAVE_RUBY_ENCODING_H
+  int encoding_index = rb_enc_to_index(rb_default_external_encoding());
+#endif
 
   rb_scan_args(argc, argv, "11", &port, &opts);
   taint = OBJ_TAINTED(port);

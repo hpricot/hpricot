@@ -83,6 +83,12 @@ SPEC =
 end
 file 'ext/hpricot_scan/extconf.rb' => :ragel
 
+desc "set environment variables to build and/or test with debug options"
+task :debug do
+  ENV['CFLAGS'] ||= ""
+  ENV['CFLAGS'] += " -g -DDEBUG"
+end
+
 desc "Does a full compile, test run"
 if defined?(JRUBY_VERSION)
 task :default => [:compile_java, :clean_fat_rb, :test]

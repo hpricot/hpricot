@@ -356,7 +356,12 @@ class TestParser < Test::Unit::TestCase
 
   # http://github.com/hpricot/hpricot/issues#issue/28
   def test_invalid_inner_text
-    assert_equal "A", Hpricot('A&B;').inner_text[0]
+    assert_equal "A", Hpricot('A&B;').inner_text[0...1]
+  end
+
+  # http://github.com/hpricot/hpricot/issues#issue/25
+  def test_encoding_compatibility_error
+    Hpricot("<p>\xC3\x9Cber</p><p>M&sup3;</p>").inner_text
   end
 
   # Reported by Jonathan Nichols on the Hpricot list (24 May 2007)

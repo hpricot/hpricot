@@ -950,7 +950,7 @@ public class HpricotScanService implements BasicLibraryService {
         }
     }
 
-    public final static String NO_WAY_SERIOUSLY = "*** This should not happen, please send a bug report with the HTML you're parsing to why@whytheluckystiff.net.  So sorry!";
+    public final static String NO_WAY_SERIOUSLY = "*** This should not happen, please file a bug report with the HTML you're parsing at http://github.com/hpricot/hpricot/issues.  So sorry!";
 
     public final static int H_ELE_TAG = 0;
     public final static int H_ELE_PARENT = 1;

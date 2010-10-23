@@ -1,6 +1,13 @@
 #include <ruby.h>
 #include <assert.h>
 
+#ifdef HAVE_RUBY_ENCODING_H
+#include <ruby/encoding.h>
+# define ASSOCIATE_INDEX(s,enc)  rb_enc_associate_index((s), rb_enc_to_index(enc))
+#else
+# define ASSOCIATE_INDEX(s,enc)
+#endif
+
 #ifndef RARRAY_LEN
 #define RARRAY_LEN(arr)  RARRAY(arr)->len
 #define RARRAY_PTR(arr)  RARRAY(arr)->ptr
@@ -178,6 +185,7 @@ static VALUE fast_xs(VALUE self)
 	}
 
 	rv = rb_str_new(NULL, s_len);
+        ASSOCIATE_INDEX(rv, rb_default_external_encoding());
 	c = RSTRING_PTR(rv);
 
 	for (tmp = RARRAY_PTR(array), i = RARRAY_LEN(array); --i >= 0; tmp++)
@@ -192,7 +200,9 @@ void Init_fast_xs(void)
 
 	unpack_id = rb_intern("unpack");
 	U_fmt = rb_str_new("U*", 2);
+        ASSOCIATE_INDEX(U_fmt, rb_ascii8bit_encoding());
 	C_fmt = rb_str_new("C*", 2);
+        ASSOCIATE_INDEX(C_fmt, rb_ascii8bit_encoding());
 	rb_global_variable(&U_fmt);
 	rb_global_variable(&C_fmt);
 

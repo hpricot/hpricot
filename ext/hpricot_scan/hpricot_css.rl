@@ -16,7 +16,12 @@
   rb_funcall2(mod, rb_intern(filt), fargs, fvals); \
   rb_ary_clear(tmpt); \
   fargs = 1
-#define PUSH(aps, ape) rb_ary_push(tmpt, fvals[fargs++] = rb_str_new(aps, ape - aps))
+#ifdef HAVE_RUBY_ENCODING_H
+#define STRNEW(a, len)  rb_external_str_new((a), (len))
+#else
+#define STRNEW(a, len)  rb_str_new((a), (len))
+#endif
+#define PUSH(aps, ape) rb_ary_push(tmpt, fvals[fargs++] = STRNEW(aps, ape - aps))
 #define P(id) printf(id ": %.*s\n", te - ts, ts);
 
 %%{
