@@ -1,3 +1,16 @@
+= 0.8.3
+=== 3 November, 2010
+* GH#8: Nil-check before downcasing attribute key
+* GH#25: Proper ruby 1.9 encoding support
+* GH#28. Use integers instead of ?? on 1.9, which is just a string.
+* including noscript to ElementInclusions , so that hpricot wont fail
+  when trying to parse a meta tag inside head section when noscript is
+  present.
+* latest changes from fast_xs mainline
+* Fixes to get Hpricot running on Rubinius:
+  * Use free, not XFREE
+  * Remove RSTRUCT craziness, don't break Array#at
+
 = 0.8.2
 === 5 November, 2009
 * Bring JRuby support up to speed, including Java-based hpricot_css support
