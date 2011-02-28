@@ -6811,8 +6811,14 @@ void hstruct_mark(void* ptr) {
   struct hpricot_struct* st = (struct hpricot_struct*)ptr;
   int i;
 
-  for(i = 0; i < st->len; i++) {
-    rb_gc_mark(st->ptr[i]);
+  /* it's likely to hit GC when allocating st->ptr.
+   * that should be checked to avoid segfault.
+   * and simply ignore it.
+   */
+  if (st->ptr) {
+    for(i = 0; i < st->len; i++) {
+      rb_gc_mark(st->ptr[i]);
+    }
   }
 }
 
