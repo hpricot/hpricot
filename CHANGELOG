@@ -1,3 +1,7 @@
+= 0.8.4
+=== 28 February, 2011
+* GH #21, #32, #33, #36: Fix for reported segfaults
+
 = 0.8.3
 === 3 November, 2010
 * GH#8: Nil-check before downcasing attribute key
