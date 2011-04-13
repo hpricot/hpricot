@@ -22,4 +22,15 @@ class TestParser < Test::Unit::TestCase
     doc = Hpricot('<input name="vendor[porkpies][meaty]"/>')
     assert_equal 1, (doc/'input[@name^="vendor[porkpies][meaty]"]').length
   end
+  # Colons should work according to:
+  # http://www.w3.org/TR/2000/REC-xml-20001006#NT-Name
+  def test_attr_double_colon
+    doc = Hpricot('<input name="11:00:00PM"/>')
+    assert_equal 1, (doc/'input[@name^="11:00:00PM"]').length
+  end
+  # This is not a name attribute, but it should not throw exceptions
+  def test_attr_exclamation_mark
+    doc = Hpricot('<input name="hello!"/>')
+    assert_equal 1, (doc/'input[@name^="hello!"]').length
+  end
 end
