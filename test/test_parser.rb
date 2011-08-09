@@ -417,6 +417,14 @@ class TestParser < Test::Unit::TestCase
     end
   end
 
+  def test_uxs_handles_hexadecimal_values
+    if String.method_defined? :encoding
+      assert_equal "é", Hpricot.uxs('&#xe9;')
+    else
+      assert_equal "\303\251", Hpricot.uxs('&#xe9;')
+    end
+  end
+
   def test_uxs_handles_entities
     if String.method_defined? :encoding
       assert_equal "é", Hpricot.uxs('&eacute;')
