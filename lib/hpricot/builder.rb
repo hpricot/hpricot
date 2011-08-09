@@ -8,7 +8,8 @@ module Hpricot
   def self.uxs(str)
     str.to_s.
         gsub(/\&(\w+);/) { [NamedCharacters[$1] || 63].pack("U*") }. # 63 = ?? (query char)
-        gsub(/\&\#(\d+);/) { [$1.to_i].pack("U*") }
+        gsub(/\&\#(\d+);/) { [$1.to_i].pack("U*") }.
+        gsub(/\&\#x([0-9a-fA-F]+);/) { [$1.to_i(16)].pack("U*") }
   end
 
   def self.build(ele = Doc.new, assigns = {}, &blk)
