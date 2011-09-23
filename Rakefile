@@ -1,6 +1,7 @@
+require 'bundler/setup'
 require 'rake/clean'
-require 'rake/gempackagetask'
-require 'rake/rdoctask'
+require 'rubygems/package_task'
+require 'rdoc/task'
 require 'rake/testtask'
 begin
   require 'rake/extensiontask'
@@ -118,7 +119,7 @@ Rake::RDocTask.new do |rdoc|
     rdoc.rdoc_files.add ['README.md', 'CHANGELOG', 'COPYING', 'lib/**/*.rb']
 end
 
-Rake::GemPackageTask.new(SPEC) do |p|
+Gem::PackageTask.new(SPEC) do |p|
     p.need_tar = true
     p.gem_spec = SPEC
 end
@@ -136,7 +137,7 @@ Win32Spec.files = PKG_FILES + %w(hpricot_scan fast_xs).map do |t|
 end.flatten
 Win32Spec.extensions = []
 
-Rake::GemPackageTask.new(Win32Spec) do |p|
+Gem::PackageTask.new(Win32Spec) do |p|
   p.need_tar = false
   p.gem_spec = Win32Spec
 end
@@ -146,7 +147,7 @@ JRubySpec.platform = 'java'
 JRubySpec.files = PKG_FILES + ["lib/hpricot_scan.jar", "lib/fast_xs.jar"]
 JRubySpec.extensions = []
 
-Rake::GemPackageTask.new(JRubySpec) do |p|
+Gem::PackageTask.new(JRubySpec) do |p|
   p.need_tar = false
   p.gem_spec = JRubySpec
 end
