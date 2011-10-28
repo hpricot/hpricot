@@ -31,7 +31,7 @@ function DateCheck(frmMo, frmDy, frmYr)
     else
       returnCode = true;
   }
-  
+
   return (returnCode);
 }
 
@@ -40,7 +40,7 @@ function AutoTabCheck(obj, frmObj)
   if (obj.value.length == obj.maxLength)
   {
     start = obj.id.length - 2;
-    incre = parseInt(obj.id.substr(start, 2));    
+    incre = parseInt(obj.id.substr(start, 2));
     NewIDnum = ZeroPad(incre + 1, 2);
     NewID = obj.id.substr(0, start) + NewIDnum;
     newObj = eval(frmObj.id + "." + NewID);
@@ -69,7 +69,7 @@ function allMoney(num)
       x--;
     }
   }
-  return(num);  
+  return(num);
 }
 
 function allNum(num)
@@ -86,7 +86,7 @@ function allNum(num)
       x--;
     }
   }
-  return(num);  
+  return(num);
 }
 
 function isAlphaNum(str)
@@ -153,14 +153,14 @@ function AddTotalsthenSubmit(j)
       document.frmPace.Yr_Income7.value = Math.round(yrvalue * Math.pow(10, 2)) / Math.pow(10, 2);
       document.frmPace.Sp_Income7.value = Math.round(spvalue * Math.pow(10, 2)) / Math.pow(10, 2);
     }
-  }  
+  }
 }
 
 function IndividualEdits(Indv, obj, NoFocus)
 {
   var Status = true;
   frm6Obj = document.frmSect06;
-  
+
   switch(Indv)
   {
     case "ssn":
@@ -219,7 +219,7 @@ function IndividualEdits(Indv, obj, NoFocus)
         Status = false;
       }
       break;
-      
+
     case "zip4":
       val = obj.value;
       newNum = allNum(val);
@@ -231,7 +231,7 @@ function IndividualEdits(Indv, obj, NoFocus)
         Status = false;
       }
       break;
-      
+
     case "money":
       val = obj.value;
       newNum = allMoney(val);
@@ -243,7 +243,7 @@ function IndividualEdits(Indv, obj, NoFocus)
         Status = false;
       }
       break;
-      
+
     case "divYear":
       val = obj.value;
       if (frm6Obj.Yr_mstat[0].checked || frm6Obj.Yr_mstat[1].checked)
@@ -251,7 +251,7 @@ function IndividualEdits(Indv, obj, NoFocus)
         obj.value = '';
       }
       break;
-      
+
     case "marStat":
       if (frm6Obj.Yr_mstat[0].checked || frm6Obj.Yr_mstat[1].checked)
       {
@@ -260,7 +260,7 @@ function IndividualEdits(Indv, obj, NoFocus)
       break;
     default:
   }
-  
+
   return Status;
 }
 
@@ -479,7 +479,7 @@ function FieldFriendlyDisc(field)
     default:
       FriendlyName = field + ' [discription missing]';
   }
-  
+
   return (FriendlyName + ' is a required field.');
 }
 
@@ -491,7 +491,7 @@ function RequiredFields(page)
 
   switch(page)
   {
-    case "002":    
+    case "002":
       frmObj = document.frmSect02;
       for (i=0; i<frmObj.length; i++)
       {
@@ -516,9 +516,9 @@ function RequiredFields(page)
             break;
           default:
         }
-      } 
+      }
       break;
-    case "003":    
+    case "003":
       frmObj = document.frmSect03;
       for (i=0; i<frmObj.length; i++)
       {
@@ -586,7 +586,7 @@ function RequiredFields(page)
             }
             break;
           */
-          case "Yr_phone7":          
+          case "Yr_phone7":
             frmObj.elements[i].value = frmObj.Yr_phone02.value + frmObj.Yr_phone03.value;
             if (IndividualEdits('phone', frmObj.elements[i], true) == false)
             {
@@ -643,7 +643,7 @@ function RequiredFields(page)
             break;
           default:
         }
-      } 
+      }
       break;
     case "005":
       frmObj = document.frmSect05;
@@ -712,7 +712,7 @@ function RequiredFields(page)
               }
             }
             break;
-          */         
+          */
           case "Sp_phone7":
             frmObj.elements[i].value = frmObj.Sp_phone02.value + frmObj.Sp_phone03.value;
             if (IndividualEdits('phone', frmObj.elements[i], true) == false)
@@ -745,7 +745,7 @@ function RequiredFields(page)
         }
       }
       break;
-      
+
     case "006":
       frmObj = document.frmSect06;
       for (i=0; i<frmObj.length; i++)
@@ -841,11 +841,11 @@ function RequiredFields(page)
       tvalue = tvalue + parseFloat(spInc01.value) + parseFloat(spInc02.value);
       tvalue = tvalue + parseFloat(spInc03.value) + parseFloat(spInc04.value);
       tvalue = tvalue + parseFloat(spInc05.value) + parseFloat(spInc06.value);
-      
+
       frmObj.Tot_Income7.value = Math.round(tvalue * Math.pow(10, 2)) / Math.pow(10, 2);
       blnReqFlds = false;
       break;
-      
+
     case "888":
       //There is a bug here.  Since boolean value can be
       //changed on just either Applicant or spouse being
@@ -875,7 +875,7 @@ function RequiredFields(page)
         }
       }
       break;
-      
+
     case "009":
       frmObj = document.frmSect09;
       for (i=0; i<frmObj.length; i++)
@@ -889,17 +889,17 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.yrPOA_name.id) + "\n";
                 HighlightField(frmObj.yrPOA_name.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
                 UnHighlightField(frmObj.yrPOA_name.style);
-              }              
+              }
               if (frmObj.yrPOA_address.value.length < 1)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.yrPOA_address.id) + "\n";
                 HighlightField(frmObj.yrPOA_address.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -909,7 +909,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.yrPOA_city.id) + "\n";
                 HighlightField(frmObj.yrPOA_city.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -919,7 +919,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.yrPOA_state.id) + "\n";
                 HighlightField(frmObj.yrPOA_state.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -929,7 +929,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.yrPOA_zip01.id) + "\n";
                 HighlightField(frmObj.yrPOA_zip01.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -941,7 +941,7 @@ function RequiredFields(page)
               //{
               //  errmsg = errmsg + FieldFriendlyDisc(frmObj.yrPOA_year.id) + "\n";
               //  HighlightField(frmObj.yrPOA_year.style);
-              //  blnReqFlds = true;                
+              //  blnReqFlds = true;
               //}
               //else
               //{
@@ -952,7 +952,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.yrPOA_phone01.id) + "\n";
                 HighlightField(frmObj.yrPOA_phone01.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -962,7 +962,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.yrPOA_phone02.id) + "\n";
                 HighlightField(frmObj.yrPOA_phone02.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -972,7 +972,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.yrPOA_phone03.id) + "\n";
                 HighlightField(frmObj.yrPOA_phone03.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -999,9 +999,9 @@ function RequiredFields(page)
             break;
           default:
         }
-      } 
+      }
       break;
-    case "010":    
+    case "010":
       frmObj = document.frmSect10;
       for (i=0; i<frmObj.length; i++)
       {
@@ -1014,17 +1014,17 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.spPOA_name.id) + "\n";
                 HighlightField(frmObj.spPOA_name.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
                 UnHighlightField(frmObj.spPOA_name.style);
-              }              
+              }
               if (frmObj.spPOA_address.value.length < 1)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.spPOA_address.id) + "\n";
                 HighlightField(frmObj.spPOA_address.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -1034,7 +1034,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.spPOA_city.id) + "\n";
                 HighlightField(frmObj.spPOA_city.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -1044,7 +1044,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.spPOA_state.id) + "\n";
                 HighlightField(frmObj.spPOA_state.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -1054,7 +1054,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.spPOA_zip01.id) + "\n";
                 HighlightField(frmObj.spPOA_zip01.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -1066,7 +1066,7 @@ function RequiredFields(page)
               //{
               //  errmsg = errmsg + FieldFriendlyDisc(frmObj.spPOA_year.id) + "\n";
               //  HighlightField(frmObj.spPOA_year.style);
-              //  blnReqFlds = true;                
+              //  blnReqFlds = true;
               //}
               //else
               //{
@@ -1077,7 +1077,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.spPOA_phone01.id) + "\n";
                 HighlightField(frmObj.spPOA_phone01.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -1087,7 +1087,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.spPOA_phone02.id) + "\n";
                 HighlightField(frmObj.spPOA_phone02.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -1097,7 +1097,7 @@ function RequiredFields(page)
               {
                 errmsg = errmsg + FieldFriendlyDisc(frmObj.spPOA_phone03.id) + "\n";
                 HighlightField(frmObj.spPOA_phone03.style);
-                blnReqFlds = true;                
+                blnReqFlds = true;
               }
               else
               {
@@ -1124,9 +1124,9 @@ function RequiredFields(page)
             break;
           default:
         }
-      } 
+      }
       break;
-    case "011":    
+    case "011":
       frmObj = document.frmSect11;
       for (i=0; i<frmObj.length; i++)
       {
@@ -1177,9 +1177,9 @@ function RequiredFields(page)
     //    }
     //  }
     //  break;
-    default:    
-  }  
-  
+    default:
+  }
+
   if (blnReqFlds)
   {
     if (errmsg.length > 0)
@@ -1295,7 +1295,7 @@ function AddPrepName(Obj)
         </td>
       </tr>
       <tr>
-        <td width="100%" align=right nowrap colspan=3><br><br>      
+        <td width="100%" align=right nowrap colspan=3><br><br>
         <input type="button" value="Continue" id=button2 name=button2
                onClick="Javascript:GoSubmit(document.frmSect11)">
         <input type="button" value="Cancel" id=button1 name=button1

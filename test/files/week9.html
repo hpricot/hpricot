@@ -150,7 +150,7 @@ surround.excludes=""; // set per arena
 surround.cat = ['a','b','c','d','e','f','g','h','i'];
 surround.cookie = readCookie('surround');
 
-if ( (surround.cookie == false) || (surround.cookie=='a') || (surround.cookie=='b') ) { 
+if ( (surround.cookie == false) || (surround.cookie=='a') || (surround.cookie=='b') ) {
 	surround.pick = Math.floor(Math.random() * surround.cat.length);
     document.cookie=("surround="+surround.pick+";domain=.sportsline.com;path=/" );
    	vTag += ";adv="+surround.cat[surround.pick];
@@ -247,7 +247,7 @@ s.usePlugins=true
 function s_doPlugins(s) {
 	/* Add calls to plugins here */
 	/* Example: s.campaign = s.getQueryParam('cid'); */
-	s.campaign = s.getQueryParam('source'); 
+	s.campaign = s.getQueryParam('source');
 }
 s.doPlugins=s_doPlugins
 /************************** PLUGINS SECTION *************************/
@@ -297,7 +297,7 @@ s.cgif=new Function("t","k",""
  		s_v_videoisplaying = false;
  	}
  }
- 
+
 /************* DO NOT ALTER ANYTHING BELOW THIS LINE ! **************/
 var s_objectID;function s_c2fe(f){var x='',s=0,e,a,b,c;while(1){e=
 f.indexOf('"',s);b=f.indexOf('\\',s);c=f.indexOf("\n",s);if(e<0||(b>=
@@ -610,13 +610,13 @@ if (switchDclk != 'off') {
 </td>
 </tr>
 </table>
-</div> 
+</div>
 
         <!-- _spln_header -->
 		<table width="770" border="0" cellpadding="0" cellspacing="0" bgcolor="#000248">
         <tr valign=top>
         <td width="195" height="77"><a href="/" title="CBS SportsLine.com"><img src="http://images.sportsline.com/images/header327x77/arena_sportsline.jpg" alt="CBS SportsLine.com" width="195" height="77" border="0"></a></td>
-        
+
         <td width="150" height="77"><a href="http://www.sportsline.com/nfl" alt="NFL Football Sports News"><img src="http://images.sportsline.com/images/header150x77/nfl.jpg" width="150" height="77" alt="NFL Football Sports News" border="0" usemap="#arenaheader"></a></td>
         <td width="425" height="77" valign="top" background="http://images.sportsline.com/images/header425x77/arena_sponsor_default.jpg"><script language="JavaScript"><!--//
 var dclkPresenting='http://ad.doubleclick.net/adj/sponsorships.spln.com/as/'+vTag+';'+vTarget+';'+uID+';sz=425x77;tile=2;ord='+random+'?';
@@ -625,8 +625,8 @@ if (switchDclk != 'off') {
     document.write('<scr'+'ipt src="'+dclkPresenting+'"><\/script>');
     }
 // --></script><noscript><a href="http://ad.doubleclick.net/jump/sponsorships.spln.com/as/nfl;arena=nfl;feat=scoreboard;!category=richm;type=psa;user=Anonymous;cust=no;vip=no;sz=425x77;tile=2;ord=864041165131140?" target="_blank"><img src="http://ad.doubleclick.net/ad/sponsorships.spln.com/as/nfl;arena=nfl;feat=scoreboard;!category=richm;type=psa;user=Anonymous;cust=no;vip=no;sz=425x77;tile=2;ord=864041165131140?" width="425" height="77" border="0"></a></noscript></td>
-        
-		
+
+
         </tr></table>
         <script language="JavaScript1.2"><!--
 function ShowLayer(){return};
@@ -687,7 +687,7 @@ function OutLayer(){return};
 </tr>
 </table>
 <!--no border--><!-- <div id="debugbox" style="position:absolute; top:0; left:775px; width:260px; height:300; padding:10px; border:1px dashed #999999; background-color: #f0f0f0; overflow:auto;"></div> -->
-<script language="JavaScript" type="text/javascript"> 
+<script language="JavaScript" type="text/javascript">
 function debug22( title, text, clear ){
     box = document.getElementById('debugbox');
     if( clear ) box.innerHTML = '';
@@ -696,7 +696,7 @@ function debug22( title, text, clear ){
     box.innerHTML += '<b>' + title + '</b>' + text + div;
     return;
 }
-</script> 
+</script>
 <SCRIPT LANGUAGE="JavaScript"><!--
 
 var OmnitureTime=new Object();
@@ -814,7 +814,7 @@ if (switchDclk != 'off') {
 
     </td>
     </tr>
-    </table> 
+    </table>
 </td>
 </tr>
 <tr><td colspan="2"><hr size="1"></td></tr>
@@ -833,7 +833,7 @@ if(tzOffset.charAt(0) == "<")
 	tzOffset = "-1";
 tzOffset = parseInt(tzOffset);
 
-function formatTime(format, gmtTime){ 
+function formatTime(format, gmtTime){
     gmtTime = new String(gmtTime);
 	if(!parseInt(gmtTime) || gmtTime.indexOf(':') != -1 ||  gmtTime.indexOf('.') != -1)
 		return gmtTime;
@@ -867,7 +867,7 @@ function formatTime(format, gmtTime){
 	for(var i=0;i<format.length;i++){
 		if(format.charAt(i)=='%' && (i+1)<format.length){
 			var c = format.charAt(i+1);
-			switch(c){ 
+			switch(c){
 				case 'a':{ t+=days[w]; break; }
 				case 'A':{ t+=DAYS[w]; break; }
 				case 'b':{ t+=months[m]; break; }
@@ -1419,7 +1419,7 @@ if (switchDclk != 'off') {
 </div>
 
 <!-- from content-end-rail-none.html -->
-    <td width="10">&nbsp;</td> 
+    <td width="10">&nbsp;</td>
 </tr>
 </table>
 
@@ -1434,7 +1434,7 @@ if (switchDclk != 'off') {
 <script language="JavaScript">
 <!--  // contextualAdObj Object which determines channelID
   function contextualAdObj( vtag ){
-    
+
     // vtag passed from Request Environment
     this.vtag = vtag;
     // List of Features which Disable Contextual
@@ -1443,11 +1443,11 @@ if (switchDclk != 'off') {
     this.project = 'media';
     this.uri = '/nfl/scoreboard/2006/week9';
     this.server_name = 'ws1625-fe.tm.cbsig.net';
-    // if_this.display == 'none' (from Request Environment) Contextual Disables 
+    // if_this.display == 'none' (from Request Environment) Contextual Disables
     this.display = '';
-                
+
     this.test = ( this.server_name.indexOf('dev') >= 0 || this.server_name.indexOf('qa') >=0 ) ? 'on' : 'off';
-                
+
     // Sets Arena, Feature & Site from vTag Passed from Request Environment
     for( j=0; j < this.vtagSplit.length; j++ ){
       keyValue = this.vtagSplit[j].split("=");
@@ -1464,7 +1464,7 @@ if (switchDclk != 'off') {
       this.channelID = this.arena;
       if( this.feature ) this.channelID += "-"+ this.feature;
       //this.hints = 'CBS SportsLine.com is your home for year around sports news.  Covering NFL football, MLB baseball, NBA basketball, NHL Hockey, NCAA sports, Fantasy leagues, and much more.';
-      
+
       uriSplit = this.uri.split('/');
       if( this.uri == '/' ){
         this.channelID = 'SPLN_Home';
@@ -1487,26 +1487,26 @@ if (switchDclk != 'off') {
         this.channelID = 'other';
       }
     }
-    
+
     // Runs through List of Features which can disable Contextual
     for( j=0; j < this.hideFeatures.length; j++ ){
       if( this.feature == this.hideFeatures[j] ) this.display = 'none';
     }
-    
+
     this.titleTrClass = 'bg0';
     this.titleTdClass = 'fctitle';
-    
+
     // Changes Browser Status When Contextial Hover Over
     this.ss = function(w){
       window.status = w;
       return true;
     }
-    
+
     // Clears Browser Status When Contextial Hover Out
     this.cs = function(){
       window.status = '';
     }
-    
+
     // Contextual Click Function
     this.getGo = function(o, e){
       if (document.getElementById) {
@@ -1514,7 +1514,7 @@ if (switchDclk != 'off') {
         p = "";
         r = "";
         g = e.target;
-        
+
         if (g) {
           t = g.id;
           f = g.parentNode;
@@ -1536,8 +1536,8 @@ if (switchDclk != 'off') {
         window.open(ae.href, target);
       }
     }
-    
-    
+
+
   }
 
   //Function called by google once data is recieved
@@ -1563,9 +1563,9 @@ if (switchDclk != 'off') {
         output += '</td></tr>' ;
       }
       output += "</table>" ;
-      
+
       // Debug Lines
-      
+
       if( '' == '16385' ){
         output += '<div class="SLTables1" align="right"><b>ChannelID:</b>'+ contextual.channelID +'&nbsp;&nbsp; <b>Project:</b>'+ contextual.project;
         if(contextual.site)             output += '&nbsp;&nbsp; <b>Site:</b>'+ contextual.site ;
@@ -1573,16 +1573,16 @@ if (switchDclk != 'off') {
         if(contextual.test == 'on')     output += '&nbsp;&nbsp; <b>Test Mode On</b>';
         output += '</div>' ;
       }
-      
+
     if( google_ads.length >= 1 ){
       document.write( output );
       if( '' != 'false' ) document.write( '<div class="spacer10">&nbsp;</div>' );
     }
   }
-  
+
   //New contextualAdObj Object
   if( ! contextual ) var contextual = new contextualAdObj( 'nfl;arena=nfl;feat=scoreboard;!category=richm;type=psa;user=Anonymous' );
-  
+
   //Loads google required variables
   google_ad_client     = contextual.clientID;  //'ca-sportsline_js';
   google_ad_output     = 'js';
@@ -1595,7 +1595,7 @@ if (switchDclk != 'off') {
   google_hints         = contextual.hints;
   google_kw            = contextual.google_kw;
   google_kw_type       = contextual.google_kw_type;
-  
+
   //Determines wheather or not to call Google Js File which returns Contextual Ad Object and calls `function google_ad_request_done`
   if (!switchCont) {var switchCont='on';}
   if(( contextual.display != 'none' ) && ( switchCont != 'off' ) && ( contextual.googleRequest != true )){
@@ -1604,7 +1604,7 @@ if (switchDclk != 'off') {
   }else{
     contextual.googleRequest = false;
   }
-  
+
 // -->
 </script>
 </td>
@@ -1642,11 +1642,11 @@ document.write('</div>');
 // -->
 </script>
     <script>
-var _l = '1801392231'; // location_ext_id 
-var _p = 720; // 
-var _f = 1; // 
+var _l = '1801392231'; // location_ext_id
+var _p = 720; //
+var _f = 1; //
 var pub_click_url = '';
-var _isaclick=1; 
+var _isaclick=1;
 
 var _extra = (pub_click_url == "" ? "" : ( _isaclick ? "&aclick="+pub_click_url : "&pclick="+pub_click_url));
 var _ta = (document.domain).split ("."); var psd = (_ta.length > 1 ? "." + _ta[_ta.length - 2] + "." + _ta[_ta.length - 1] : document.domain); var _cn = "LO" + _l + "="; var _call = document.cookie.indexOf (_cn); var _il = 1; var _tl = 0; var _ex; var _rnd = (new Date ()).getTime (); if (_call >= 0) { _pos = document.cookie.substring (_call).indexOf (';'); if (_pos > 0) _val = document.cookie.substring (_call + _cn.length, _call + _pos); else _val = document.cookie.substring (_call + _cn.length); if (_val.indexOf ('.') > 0) { _il = _val.substring (0, _val.indexOf ('.')); _ex = _val.substring (_val.indexOf ('.') + 1); _tl = _ex - (new Date ()).getTime (); } if (_tl <= 0) document.cookie = _cn + ";domain=" + psd + ";path=/;expires=" + (new Date ((new Date ()).getTime () - 1000000)).toGMTString () + ";"; } if (_il < _f || _tl <= 0) { var expiry = (new Date((new Date()).getTime()+_p*2*60*1000)).toGMTString(); if (document.cookie.indexOf(_cn) < 0 ) document.cookie=_cn+''+(1)+'.'+((new Date()).getTime()+_p*60*1000)+';domain='+psd+';path=/;expires='+expiry; else document.cookie=_cn+''+(_il-0+1)+'.'+_ex+';domain='+psd+';path=/;expires='+expiry;
@@ -1660,7 +1660,7 @@ var ahY=0;
 var hdrPosition=whereami('hdrIMG');
 ahY=parseInt(hdrPosition[1]);
 var ahX = 2; // show header x times
-var ahName = "media-nfl-scoreboard"; 
+var ahName = "media-nfl-scoreboard";
 var showHdr=mTrack(ahName,ahX);
 var deadman='';
 
@@ -1672,7 +1672,7 @@ if ( (switchDclk!='off') && (showHdr==true) && (deadman!='Yes') ) {
 </script>
 
 <script language="JavaScript" src="http://images.sportsline.com/u/includes/script/ForeseeMediaTriggerParams.js?0003"></script>
-        
+
 <script language="JavaScript" src="http://images.sportsline.com/u/includes/script/ForeseeMediaLauncher.js?0001"></script>
 <script language="JavaScript">
 <!--
@@ -1695,7 +1695,7 @@ Poll();
 <a href="http://www.sportsline.com/info/siteindex">Site Index</a> <b>&#183;</b>
 <a href="http://www.sportsline.com/info/about/privacy">Privacy Policy</a> <b>&#183;</b>
 <a href="http://www.sportsline.com/info/about/">About Us</a> <b>&#183;</b>
-<a href="http://www.sportsline.com/info/about/tos">Terms of Service</a> 
+<a href="http://www.sportsline.com/info/about/tos">Terms of Service</a>
 <br />
 <a href="http://www.cbs.com" target="_blank" title="TV listings">CBS.com</a> <b>&#183;</b>
 <a href="http://www.cbsnews.com" target="_blank" title="Breaking World News">CBSNews.com</a> <b>&#183;</b>
@@ -1713,7 +1713,7 @@ Poll();
 <tr class="ftbg1">
 <td height="30" align="center" class="fttxt1">
 Copyright &copy; 1995 - 2006 SportsLine.com, Inc. All rights reserved. SportsLine is a registered service mark of SportsLine.com, Inc.<br>
-CBS "eye device" is a registered trademark of CBS Broadcasting, Inc. 
+CBS "eye device" is a registered trademark of CBS Broadcasting, Inc.
 
 </td></tr>
 </table>

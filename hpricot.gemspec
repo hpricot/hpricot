@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name = %q{hpricot}
   s.version = "0.8.4"
- 
+
   s.authors = ["why the lucky stiff"]
   s.date = %q{2011-02-28}
   s.description = %q{a swift, liberal HTML parser with a fantastic library}
