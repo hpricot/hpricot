@@ -41,9 +41,9 @@ public class FastXsService implements BasicLibraryService {
  * The ASF licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -55,13 +55,13 @@ public class FastXsService implements BasicLibraryService {
  * <p>
  * Provides HTML and XML entity utilities.
  * </p>
- * 
+ *
  * @see <a href="http://hotwired.lycos.com/webmonkey/reference/special_characters/">ISO Entities</a>
  * @see <a href="http://www.w3.org/TR/REC-html32#latin1">HTML 3.2 Character Entities for ISO Latin-1</a>
  * @see <a href="http://www.w3.org/TR/REC-html40/sgml/entities.html">HTML 4.0 Character entity references</a>
  * @see <a href="http://www.w3.org/TR/html401/charset.html#h-5.3">HTML 4.01 Character References</a>
  * @see <a href="http://www.w3.org/TR/html401/charset.html#code-position">HTML 4.01 Code positions</a>
- * 
+ *
  * @author <a href="mailto:alex@purpletech.com">Alexander Day Chaffee</a>
  * @author <a href="mailto:ggregory@seagullsw.com">Gary Gregory</a>
  * @since 2.0
@@ -430,7 +430,7 @@ class Entities {
      * <p>
      * Fills the specified entities instance with HTML 40 entities.
      * </p>
-     * 
+     *
      * @param entities
      *            the instance to be filled.
      */
@@ -445,7 +445,7 @@ class Entities {
          * <p>
          * Add an entry to this entity map.
          * </p>
-         * 
+         *
          * @param name
          *            the entity name
          * @param value
@@ -457,7 +457,7 @@ class Entities {
          * <p>
          * Returns the name of the entity identified by the specified value.
          * </p>
-         * 
+         *
          * @param value
          *            the value to locate
          * @return entity name associated with the specified value
@@ -468,7 +468,7 @@ class Entities {
          * <p>
          * Returns the value of the entity identified by the specified name.
          * </p>
-         * 
+         *
          * @param name
          *            the name to locate
          * @return entity value associated with the specified name
@@ -484,15 +484,15 @@ class Entities {
 
 
         private int threshold;
- 
+
         private final float loadFactor;
- 
+
         private static class Entry {
             final int hash;
             final int key;
             Object value;
             Entry next;
- 
+
             protected Entry(int hash, int key, Object value, Entry next) {
                 this.hash = hash;
                 this.key = key;
@@ -500,7 +500,7 @@ class Entities {
                 this.next = next;
             }
         }
- 
+
         public IntHashMap() {
             this.loadFactor = 0.75f;
             table = new Entry[20];
@@ -518,22 +518,22 @@ class Entities {
             }
             return null;
         }
- 
+
         protected void rehash() {
             int oldCapacity = table.length;
             Entry oldMap[] = table;
- 
+
             int newCapacity = oldCapacity * 2 + 1;
             Entry newMap[] = new Entry[newCapacity];
- 
+
             threshold = (int) (newCapacity * loadFactor);
             table = newMap;
- 
+
             for (int i = oldCapacity; i-- > 0;) {
                 for (Entry old = oldMap[i]; old != null;) {
                     Entry e = old;
                     old = old.next;
- 
+
                     int index = (e.hash & 0x7FFFFFFF) % newCapacity;
                     e.next = newMap[index];
                     newMap[index] = e;
@@ -553,15 +553,15 @@ class Entities {
                     return old;
                 }
             }
- 
+
             if (count >= threshold) {
                 // Rehash the table if the threshold is exceeded
                 rehash();
- 
+
                 tab = table;
                 index = (hash & 0x7FFFFFFF) % tab.length;
             }
- 
+
             // Creates the new entry.
             Entry e = new Entry(hash, key, value, tab[index]);
             tab[index] = e;
@@ -673,7 +673,7 @@ class Entities {
          * <p>
          * Returns the lookup table for this entity map. The lookup table is created if it has not been previously.
          * </p>
-         * 
+         *
          * @return the lookup table
          */
         private String[] lookupTable() {
@@ -716,7 +716,7 @@ class Entities {
         /**
          * Constructs a new instance of <code>ArrayEntityMap</code> specifying the size by which the array should
          * grow.
-         * 
+         *
          * @param growBy
          *            array will be initialized to and will grow by this amount
          */
@@ -738,7 +738,7 @@ class Entities {
 
         /**
          * Verifies the capacity of the entity array, adjusting the size if necessary.
-         * 
+         *
          * @param capacity
          *            size the array should be
          */
@@ -791,7 +791,7 @@ class Entities {
         /**
          * Constructs a new instance of <code>ArrayEntityMap</code> specifying the size by which the underlying array
          * should grow.
-         * 
+         *
          * @param growBy
          *            array will be initialized to and will grow by this amount
          */
@@ -802,7 +802,7 @@ class Entities {
         /**
          * Performs a binary search of the entity array for the specified key. This method is based on code in
          * {@link java.util.Arrays}.
-         * 
+         *
          * @param key
          *            the key to be found
          * @return the index of the entity array matching the specified key
@@ -862,7 +862,7 @@ class Entities {
      * <p>
      * Adds entities to this entity.
      * </p>
-     * 
+     *
      * @param entityArray
      *            array of entities to be added
      */
@@ -876,7 +876,7 @@ class Entities {
      * <p>
      * Add an entity to this entity.
      * </p>
-     * 
+     *
      * @param name
      *            name of the entity
      * @param value
@@ -890,7 +890,7 @@ class Entities {
      * <p>
      * Returns the name of the entity identified by the specified value.
      * </p>
-     * 
+     *
      * @param value
      *            the value to locate
      * @return entity name associated with the specified value
@@ -903,7 +903,7 @@ class Entities {
      * <p>
      * Returns the value of the entity identified by the specified name.
      * </p>
-     * 
+     *
      * @param name
      *            the name to locate
      * @return entity value associated with the specified name
@@ -916,12 +916,12 @@ class Entities {
      * <p>
      * Escapes the characters in a <code>String</code>.
      * </p>
-     * 
+     *
      * <p>
      * For example, if you have called addEntity(&quot;foo&quot;, 0xA1), escape(&quot;\u00A1&quot;) will return
      * &quot;&amp;foo;&quot;
      * </p>
-     * 
+     *
      * @param str
      *            The <code>String</code> to escape.
      * @return A new escaped <code>String</code>.
@@ -943,7 +943,7 @@ class Entities {
      * Escapes the characters in the <code>String</code> passed and writes the result to the <code>Writer</code>
      * passed.
      * </p>
-     * 
+     *
      * @param writer
      *            The <code>Writer</code> to write the results of the escaping to. Assumed to be a non-null value.
      * @param str
@@ -951,7 +951,7 @@ class Entities {
      * @throws IOException
      *             when <code>Writer</code> passed throws the exception from calls to the {@link Writer#write(int)}
      *             methods.
-     * 
+     *
      * @see #escape(String)
      * @see Writer
      */
@@ -980,12 +980,12 @@ class Entities {
      * <p>
      * Unescapes the entities in a <code>String</code>.
      * </p>
-     * 
+     *
      * <p>
      * For example, if you have called addEntity(&quot;foo&quot;, 0xA1), unescape(&quot;&amp;foo;&quot;) will return
      * &quot;\u00A1&quot;
      * </p>
-     * 
+     *
      * @param str
      *            The <code>String</code> to escape.
      * @return A new escaped <code>String</code>.
@@ -999,7 +999,7 @@ class Entities {
             try {
                 this.doUnescape(stringWriter, str, firstAmp);
             } catch (IOException e) {
-                // This should never happen because ALL the StringWriter methods called by #escape(Writer, String) 
+                // This should never happen because ALL the StringWriter methods called by #escape(Writer, String)
                 // do not throw IOExceptions.
                 throw new RuntimeException(e);
             }
@@ -1022,7 +1022,7 @@ class Entities {
      * Unescapes the escaped entities in the <code>String</code> passed and writes the result to the
      * <code>Writer</code> passed.
      * </p>
-     * 
+     *
      * @param writer
      *            The <code>Writer</code> to write the results to; assumed to be non-null.
      * @param str
@@ -1030,7 +1030,7 @@ class Entities {
      * @throws IOException
      *             when <code>Writer</code> passed throws the exception from calls to the {@link Writer#write(int)}
      *             methods.
-     * 
+     *
      * @see #escape(String)
      * @see Writer
      */

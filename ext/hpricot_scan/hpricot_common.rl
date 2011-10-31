@@ -20,7 +20,7 @@
   Q1Attr = Q1Char* >_aval %aval ;
   Q2Char = ( "\\\"" | [^"] ) ;
   Q2Attr = Q2Char* >_aval %aval ;
-  UnqAttr = ( space >_aval | [^ \t\r\n<>"'] >_aval [^ \t\r\n<>]* %aunq ) ; 
+  UnqAttr = ( space >_aval | [^ \t\r\n<>"'] >_aval [^ \t\r\n<>]* %aunq ) ;
   Nmtoken = NameChar+ >_akey %akey ;
 
   Attr =  NameAttr space* "=" space* ('"' Q2Attr '"' | "'" Q1Attr "'" | UnqAttr space+ ) space* ;

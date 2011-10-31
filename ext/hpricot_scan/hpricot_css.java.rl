@@ -78,7 +78,7 @@ public class HpricotCss {
         pe = p + bl.realSize;
         eof = pe;
     }
-    
+
 %%{
   machine hpricot_css;
 
@@ -88,7 +88,7 @@ public class HpricotCss {
 
   action b {
     ape = p;
-    PUSH(aps, ape); 
+    PUSH(aps, ape);
   }
 
   action c {
@@ -105,12 +105,12 @@ public class HpricotCss {
   commas    = space* "," space*;
   traverse  = [>+~];
   sdot      = "\\.";
-  utfw      = alnum | "_" | "-" | 
+  utfw      = alnum | "_" | "-" |
               (0xc4 0xa8..0xbf) | (0xc5..0xdf 0x80..0xbf) |
               (0xe0..0xef 0x80..0xbf 0x80..0xbf) |
               (0xf0..0xf4 0x80..0xbf 0x80..0xbf 0x80..0xbf);
   utfword   = utfw+;
-  utfname   = (utfw | sdot)+; 
+  utfname   = (utfw | sdot)+;
   quote1    = "'" [^']* "'";
   quote2    = '"' [^"]* '"';
 

@@ -98,7 +98,7 @@ document.write('<LINK href="/styles/angebotsliste/standard/mac_ns.css" REL="styl
 if (navigator.userAgent.toLowerCase().indexOf('linux') > -1) {
 document.write('<LINK href="/styles/angebotsliste/standard/linux_ns.css" REL="styleSheet" TYPE="text/css">');
 }
-</script> 
+</script>
 <link rel="stylesheet" type="text/css" href="/styles/layout_extended.css">
 <link rel="stylesheet" type="text/css" href="/styles/angebotsliste/standard/layout.css">
 <script language="JavaScript" type="text/javascript" src="/de/scripts/popup10.js"> </script>
@@ -163,7 +163,7 @@ function popup_foto()       { open_window( '', 'foto', 640, 440 ); }
 function popup_video()       { open_window( '', 'video', 640, 440 ); }
 function popup_large() { open_window( '', 'tracks', 640, 600 ); }
 function yellow()      { open_window( '', 'yellow', 640, 620 ); }
-function clearField( Formname, Fieldname, Fieldvalue) { if ( document.forms[Formname].elements[Fieldname].value == Fieldvalue ) document.forms[Formname].elements[Fieldname].value = ''; } 
+function clearField( Formname, Fieldname, Fieldvalue) { if ( document.forms[Formname].elements[Fieldname].value == Fieldvalue ) document.forms[Formname].elements[Fieldname].value = ''; }
 function FMsetCookie(name, val) {
 //var today = new Date();
 //var expire = 3600000*24*30; // 30 Tage
@@ -173,7 +173,7 @@ function FMsetCookie(name, val) {
 document.cookie = name + "=" + val;
 }
 function isPopupClosed() {
-if (  window.MyScout != null && window.MyScout.closed == true ) { 
+if (  window.MyScout != null && window.MyScout.closed == true ) {
 FMsetCookie('myscoutCookie', 1);
 }
 }
@@ -198,13 +198,13 @@ return 0;
 <script language="JavaScript" type="text/javascript" src="/de/scripts/select_all_checkboxes.js"> </script>
 
 </head>
-<body 
+<body
 background  =""
-bgcolor     ="#ffffff" 
-text        ="#000000" 
-marginheight="10" 
-marginwidth ="10" 
-leftmargin  ="10" 
+bgcolor     ="#ffffff"
+text        ="#000000"
+marginheight="10"
+marginwidth ="10"
+leftmargin  ="10"
 topmargin   ="10"
 
 link="#000066"alink="#ff6600"hlink="#ff6600"vlink="#000000"
@@ -212,12 +212,12 @@ link="#000066"alink="#ff6600"hlink="#ff6600"vlink="#000000"
 <script language="javascript">
 <!--
 FMsetCookie('ImmobilienScout24_cookieAccept', '1');
-if ( FMgetCookie('ImmobilienScout24_cookieAccept') == 0 ) {	
+if ( FMgetCookie('ImmobilienScout24_cookieAccept') == 0 ) {
 document.write('<br><center><table border="0" cellpadding="1" cellspacing="0" width="80%" bgcolor="#ff0000"><tr><td>');
-document.write('<table cellpadding="2" cellspacing="0" width="100%" border="0"><tr><td bgcolor="#ffffff">');					
-document.write('<b>Ihre Cookies sind wahrscheinlich deaktiviert.</b><br>');					
+document.write('<table cellpadding="2" cellspacing="0" width="100%" border="0"><tr><td bgcolor="#ffffff">');
+document.write('<b>Ihre Cookies sind wahrscheinlich deaktiviert.</b><br>');
 document.write('Um alle Funktionen optimal zu nutzen, aktivieren Sie bitte Ihre Cookies.<br>');
-document.write('<' + 'a href="/de/popup/cookie/info.jsp;jsessionid=12627B9BE00FA2F8EFA63959108C60F2.worker1" onclick="popup()" target="tracks">Wie aktiviere ich die Cookies?</a> (eine Info-Seite von ImmobilienScout24)');					
+document.write('<' + 'a href="/de/popup/cookie/info.jsp;jsessionid=12627B9BE00FA2F8EFA63959108C60F2.worker1" onclick="popup()" target="tracks">Wie aktiviere ich die Cookies?</a> (eine Info-Seite von ImmobilienScout24)');
 document.write('</td></tr></table>');
 document.write('</td></tr></table>');
 document.write('</center><br>');
