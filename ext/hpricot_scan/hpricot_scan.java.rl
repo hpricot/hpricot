@@ -252,11 +252,11 @@ public class HpricotScanService implements BasicLibraryService {
             if(te > ts || text) {
                 int raw = -1;
                 int rawlen = 0;
-                ele_open = false; 
+                ele_open = false;
                 text = false;
 
                 if(ts != -1 && N != x.sym_cdata && N != x.sym_text && N != x.sym_procins && N != x.sym_comment) {
-                    raw = ts; 
+                    raw = ts;
                     rawlen = te - ts;
                 }
 
@@ -271,7 +271,7 @@ public class HpricotScanService implements BasicLibraryService {
                 }
             }
         }
-        
+
 
         public void EBLK(IRubyObject N, int T) {
             tag = CAT(tag, mark_tag, p - T + 1);
@@ -347,8 +347,8 @@ public class HpricotScanService implements BasicLibraryService {
                         }
                     }
 
-                    if(H_ELE_GET(S.focus, H_ELE_EC) == x.sym_CDATA && 
-                       (sym != x.sym_procins && sym != x.sym_comment && sym != x.sym_cdata && sym != x.sym_text) && 
+                    if(H_ELE_GET(S.focus, H_ELE_EC) == x.sym_CDATA &&
+                       (sym != x.sym_procins && sym != x.sym_comment && sym != x.sym_cdata && sym != x.sym_text) &&
                        !(sym == x.sym_etag && runtime.newFixnum(tag.hashCode()).equals(H_ELE_GET(S.focus, H_ELE_HASH)))) {
                         sym = x.sym_text;
                         tag = RubyString.newString(runtime, scanner.data, raw, rawlen);
@@ -392,7 +392,7 @@ public class HpricotScanService implements BasicLibraryService {
                             }
                             e = H_ELE_GET(e, H_ELE_PARENT);
                         }
-                    
+
                         if(match.isNil()) {
                             match = S.focus;
                         }
@@ -659,7 +659,7 @@ public class HpricotScanService implements BasicLibraryService {
                 data = new byte[buffer_size];
             }
         }
-        
+
         private int len, space;
         // hpricot_scan
         public IRubyObject scan() {
@@ -667,7 +667,7 @@ public class HpricotScanService implements BasicLibraryService {
             while(!done) {
                 p = pe = len = buf;
                 space = buffer_size - have;
-                
+
                 if(io) {
                     if(space == 0) {
                         /* We've used up the entire buffer storing an already-parsed token
@@ -1057,7 +1057,7 @@ public class HpricotScanService implements BasicLibraryService {
             klass.defineMethod(id, ref_func[i]);
             klass.defineMethod(id + "=", set_func[i]);
         }
-    
+
         return klass;
     }
 
@@ -1067,11 +1067,11 @@ public class HpricotScanService implements BasicLibraryService {
     }
 
     public static class Extra {
-        IRubyObject symAllow, symDeny, sym_xmldecl, sym_doctype, 
-            sym_procins, sym_stag, sym_etag, sym_emptytag, 
-            sym_allowed, sym_children, sym_comment, 
-            sym_cdata, sym_name, sym_parent, 
-            sym_raw_attributes, sym_raw_string, sym_tagno, 
+        IRubyObject symAllow, symDeny, sym_xmldecl, sym_doctype,
+            sym_procins, sym_stag, sym_etag, sym_emptytag,
+            sym_allowed, sym_children, sym_comment,
+            sym_cdata, sym_name, sym_parent,
+            sym_raw_attributes, sym_raw_string, sym_tagno,
             sym_text, sym_EMPTY, sym_CDATA;
 
         public RubyModule mHpricot;

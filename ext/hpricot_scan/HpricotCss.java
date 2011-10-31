@@ -80,7 +80,7 @@ public class HpricotCss {
         pe = p + bl.realSize;
         eof = pe;
     }
-    
+
 
 // line 86 "HpricotCss.java"
 private static byte[] init__hpricot_css_actions_0()
@@ -641,7 +641,7 @@ case 3:
 // line 89 "hpricot_css.java.rl"
 	{
     ape = p;
-    PUSH(aps, ape); 
+    PUSH(aps, ape);
   }
 	break;
 	case 2:
