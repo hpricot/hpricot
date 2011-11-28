@@ -376,6 +376,14 @@ class TestParser < Test::Unit::TestCase
     assert_equal "button", doc.at("//form/input")['type']
   end
 
+  def test_escaped_quote
+    # Backslash '\' is not an escape character in HTML.
+    doc = Hpricot("<div><input type='text' value='C:\\dir\\' /><p id='test_id'>test</p></div>")
+    assert_equal "C:\\dir\\", doc.at("input")["value"]
+    doc = Hpricot('<div><input type="text" value="C:\\dir\\" /><p id="test_id">test</p></div>')
+    assert_equal "C:\\dir\\", doc.at("input")["value"]
+  end
+
   def test_filters
     @basic = Hpricot.parse(TestFiles::BASIC)
     assert_equal 0, (@basic/"title:parent").size
