@@ -461,5 +461,10 @@ class TestParser < Test::Unit::TestCase
    edoc
     assert_equal "7ff5e90iormq5niy6x98j75", doc.at("/html/head/meta[@name='verification']")['content']
  end
+ 
+ def test_nil_attr
+   # parsing this file was failing on JRuby
+   assert_nothing_raised {Hpricot.parse(TestFiles::BNQT)}
+ end
 
 end
