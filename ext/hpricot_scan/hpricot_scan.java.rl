@@ -551,7 +551,7 @@ public class HpricotScanService implements BasicLibraryService {
   }
 
   action save_attr {
-      if(!S.xml) {
+      if(!S.xml && !akey.isNil()) {
           akey = akey.callMethod(runtime.getCurrentContext(), "downcase");
       }
       ATTR(akey, aval);
