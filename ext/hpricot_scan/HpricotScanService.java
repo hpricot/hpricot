@@ -1281,7 +1281,7 @@ static final int hpricot_scan_en_main = 204;
 
                 pe = p + len;
 
-
+                
 // line 1286 "HpricotScanService.java"
 	{
 	int _klen;
@@ -1451,7 +1451,7 @@ case 3:
 	case 14:
 // line 553 "hpricot_scan.java.rl"
 	{
-      if(!S.xml) {
+      if(!S.xml && !akey.isNil()) {
           akey = akey.callMethod(runtime.getCurrentContext(), "downcase");
       }
       ATTR(akey, aval);
