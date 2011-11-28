@@ -16,9 +16,9 @@
 
   NameCap = Name >_tag %tag;
   NameAttr = NameChar+ >_akey %akey ;
-  Q1Char = ( "\\\'" | [^'] ) ;
+  Q1Char = [^'] ;
   Q1Attr = Q1Char* >_aval %aval ;
-  Q2Char = ( "\\\"" | [^"] ) ;
+  Q2Char = [^"] ;
   Q2Attr = Q2Char* >_aval %aval ;
   UnqAttr = ( space >_aval | [^ \t\r\n<>"'] >_aval [^ \t\r\n<>]* %aunq ) ;
   Nmtoken = NameChar+ >_akey %akey ;
