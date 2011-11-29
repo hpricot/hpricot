@@ -1,3 +1,9 @@
+= 0.8.5
+=== 29 November 2011
+* Remove escaped quote (\') from matching (#55)
+* Fix 'undefined method downcase for nil:NilClass' on JRuby (#58)
+* Unescape hex numeric character references
+
 = 0.8.4
 === 28 February, 2011
 * GH #21, #32, #33, #36: Fix for reported segfaults
