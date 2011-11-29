@@ -1,4 +1,5 @@
 require 'bundler/setup'
+ENV.delete('RUBYOPT')           # Don't propagate RUBYOPT/Bundler to subprocesses
 require 'rake/clean'
 require 'rubygems/package_task'
 require 'rdoc/task'
@@ -55,6 +56,9 @@ SPEC =
     s.extensions = FileList["ext/**/extconf.rb"].to_a
     s.bindir = "bin"
   end
+# Dup the spec before any of its calculated ivars are set (e.g., #cache_file)
+Win32Spec = SPEC.dup
+JRubySpec = SPEC.dup
 
 # FAT cross-compile
 # Pass RUBY_CC_VERSION=1.8.7:1.9.2 when packaging for 1.8+1.9 mswin32 binaries
@@ -125,7 +129,6 @@ Gem::PackageTask.new(SPEC) do |p|
 end
 
 ### Win32 Packages ###
-Win32Spec = SPEC.dup
 Win32Spec.platform = 'i386-mswin32'
 Win32Spec.files = PKG_FILES + %w(hpricot_scan fast_xs).map do |t|
   unless ENV['RUBY_CC_VERSION']
@@ -142,7 +145,6 @@ Gem::PackageTask.new(Win32Spec) do |p|
   p.gem_spec = Win32Spec
 end
 
-JRubySpec = SPEC.dup
 JRubySpec.platform = 'java'
 JRubySpec.files = PKG_FILES + ["lib/hpricot_scan.jar", "lib/fast_xs.jar"]
 JRubySpec.extensions = []
