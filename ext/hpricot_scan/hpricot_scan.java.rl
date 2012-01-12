@@ -389,6 +389,10 @@ public class HpricotScanService implements BasicLibraryService {
                                         match = runtime.getNil();
                                     }
                                 }
+                            } else {
+                                if(match.isNil()) {
+                                    match = e;
+                                }
                             }
                             e = H_ELE_GET(e, H_ELE_PARENT);
                         }

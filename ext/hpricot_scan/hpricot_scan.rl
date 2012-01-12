@@ -371,6 +371,9 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr,
               match = Qnil;
             }
           }
+        } else {
+          if (match == Qnil)
+            match = e;
         }
 
         e = H_ELE_GET(e, H_ELE_PARENT);

@@ -328,6 +328,9 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr,
               match = Qnil;
             }
           }
+        } else {
+          if (match == Qnil)
+            match = e;
         }
 
         e = H_ELE_GET(e, H_ELE_PARENT);
@@ -495,7 +498,7 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
     buf = ALLOC_N(char, buffer_size);
 
   
-#line 499 "hpricot_scan.c"
+#line 502 "hpricot_scan.c"
 	{
 	cs = hpricot_scan_start;
 	ts = 0;
@@ -503,7 +506,7 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
 	act = 0;
 	}
 
-#line 541 "hpricot_scan.rl"
+#line 544 "hpricot_scan.rl"
 
   while (!done) {
     VALUE str;
@@ -556,7 +559,7 @@ VALUE hpricot_scan(int argc, VALUE *argv, VALUE self)
 
     pe = p + len;
     
-#line 560 "hpricot_scan.c"
+#line 563 "hpricot_scan.c"
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -733,7 +736,7 @@ st198:
 case 198:
 #line 1 "NONE"
 	{ts = p;}
-#line 737 "hpricot_scan.c"
+#line 740 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 10: goto tr398;
 		case 60: goto tr399;
@@ -761,7 +764,7 @@ st199:
 	if ( ++p == pe )
 		goto _test_eof199;
 case 199:
-#line 765 "hpricot_scan.c"
+#line 768 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 33: goto st0;
 		case 47: goto st59;
@@ -869,7 +872,7 @@ st10:
 	if ( ++p == pe )
 		goto _test_eof10;
 case 10:
-#line 873 "hpricot_scan.c"
+#line 876 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr13;
 		case 62: goto tr15;
@@ -900,7 +903,7 @@ st11:
 	if ( ++p == pe )
 		goto _test_eof11;
 case 11:
-#line 904 "hpricot_scan.c"
+#line 907 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st11;
 		case 62: goto tr18;
@@ -997,7 +1000,7 @@ st20:
 	if ( ++p == pe )
 		goto _test_eof20;
 case 20:
-#line 1001 "hpricot_scan.c"
+#line 1004 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 9: goto st20;
 		case 34: goto tr33;
@@ -1030,7 +1033,7 @@ st21:
 	if ( ++p == pe )
 		goto _test_eof21;
 case 21:
-#line 1034 "hpricot_scan.c"
+#line 1037 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st22;
 		case 62: goto tr18;
@@ -1068,7 +1071,7 @@ st24:
 	if ( ++p == pe )
 		goto _test_eof24;
 case 24:
-#line 1072 "hpricot_scan.c"
+#line 1075 "hpricot_scan.c"
 	if ( (*p) == 34 )
 		goto tr41;
 	goto st24;
@@ -1086,7 +1089,7 @@ st25:
 	if ( ++p == pe )
 		goto _test_eof25;
 case 25:
-#line 1090 "hpricot_scan.c"
+#line 1093 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st25;
 		case 62: goto tr18;
@@ -1103,7 +1106,7 @@ st26:
 	if ( ++p == pe )
 		goto _test_eof26;
 case 26:
-#line 1107 "hpricot_scan.c"
+#line 1110 "hpricot_scan.c"
 	if ( (*p) == 93 )
 		goto st27;
 	goto st26;
@@ -1133,7 +1136,7 @@ st29:
 	if ( ++p == pe )
 		goto _test_eof29;
 case 29:
-#line 1137 "hpricot_scan.c"
+#line 1140 "hpricot_scan.c"
 	if ( (*p) == 39 )
 		goto tr41;
 	goto st29;
@@ -1170,7 +1173,7 @@ st31:
 	if ( ++p == pe )
 		goto _test_eof31;
 case 31:
-#line 1174 "hpricot_scan.c"
+#line 1177 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 9: goto st31;
 		case 39: goto tr49;
@@ -1220,7 +1223,7 @@ st32:
 	if ( ++p == pe )
 		goto _test_eof32;
 case 32:
-#line 1224 "hpricot_scan.c"
+#line 1227 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 9: goto st33;
 		case 32: goto st33;
@@ -1287,7 +1290,7 @@ st34:
 	if ( ++p == pe )
 		goto _test_eof34;
 case 34:
-#line 1291 "hpricot_scan.c"
+#line 1294 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 9: goto tr52;
 		case 32: goto tr52;
@@ -1320,7 +1323,7 @@ st35:
 	if ( ++p == pe )
 		goto _test_eof35;
 case 35:
-#line 1324 "hpricot_scan.c"
+#line 1327 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 9: goto st35;
 		case 32: goto st35;
@@ -1353,7 +1356,7 @@ st36:
 	if ( ++p == pe )
 		goto _test_eof36;
 case 36:
-#line 1357 "hpricot_scan.c"
+#line 1360 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st36;
 		case 34: goto st37;
@@ -1381,7 +1384,7 @@ st38:
 	if ( ++p == pe )
 		goto _test_eof38;
 case 38:
-#line 1385 "hpricot_scan.c"
+#line 1388 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 34: goto tr70;
 		case 39: goto tr71;
@@ -1405,7 +1408,7 @@ st39:
 	if ( ++p == pe )
 		goto _test_eof39;
 case 39:
-#line 1409 "hpricot_scan.c"
+#line 1412 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st39;
 		case 39: goto tr41;
@@ -1433,7 +1436,7 @@ st200:
 	if ( ++p == pe )
 		goto _test_eof200;
 case 200:
-#line 1437 "hpricot_scan.c"
+#line 1440 "hpricot_scan.c"
 	if ( (*p) == 39 )
 		goto tr41;
 	goto st29;
@@ -1445,7 +1448,7 @@ st40:
 	if ( ++p == pe )
 		goto _test_eof40;
 case 40:
-#line 1449 "hpricot_scan.c"
+#line 1452 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 39: goto tr73;
 		case 93: goto st42;
@@ -1459,7 +1462,7 @@ st41:
 	if ( ++p == pe )
 		goto _test_eof41;
 case 41:
-#line 1463 "hpricot_scan.c"
+#line 1466 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st41;
 		case 62: goto tr76;
@@ -1478,7 +1481,7 @@ st201:
 	if ( ++p == pe )
 		goto _test_eof201;
 case 201:
-#line 1482 "hpricot_scan.c"
+#line 1485 "hpricot_scan.c"
 	if ( (*p) == 93 )
 		goto st27;
 	goto st26;
@@ -1508,7 +1511,7 @@ st43:
 	if ( ++p == pe )
 		goto _test_eof43;
 case 43:
-#line 1512 "hpricot_scan.c"
+#line 1515 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st43;
 		case 34: goto tr41;
@@ -1528,7 +1531,7 @@ st202:
 	if ( ++p == pe )
 		goto _test_eof202;
 case 202:
-#line 1532 "hpricot_scan.c"
+#line 1535 "hpricot_scan.c"
 	if ( (*p) == 34 )
 		goto tr41;
 	goto st24;
@@ -1561,7 +1564,7 @@ st46:
 	if ( ++p == pe )
 		goto _test_eof46;
 case 46:
-#line 1565 "hpricot_scan.c"
+#line 1568 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr81;
 		case 39: goto tr38;
@@ -1579,7 +1582,7 @@ st47:
 	if ( ++p == pe )
 		goto _test_eof47;
 case 47:
-#line 1583 "hpricot_scan.c"
+#line 1586 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 9: goto st47;
 		case 39: goto tr82;
@@ -1700,7 +1703,7 @@ st60:
 	if ( ++p == pe )
 		goto _test_eof60;
 case 60:
-#line 1704 "hpricot_scan.c"
+#line 1707 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr95;
 		case 62: goto tr97;
@@ -1730,7 +1733,7 @@ st61:
 	if ( ++p == pe )
 		goto _test_eof61;
 case 61:
-#line 1734 "hpricot_scan.c"
+#line 1737 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st61;
 		case 62: goto tr99;
@@ -1746,7 +1749,7 @@ st62:
 	if ( ++p == pe )
 		goto _test_eof62;
 case 62:
-#line 1750 "hpricot_scan.c"
+#line 1753 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr100;
 		case 47: goto tr102;
@@ -1774,7 +1777,7 @@ st63:
 	if ( ++p == pe )
 		goto _test_eof63;
 case 63:
-#line 1778 "hpricot_scan.c"
+#line 1781 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st63;
 		case 47: goto st66;
@@ -1826,7 +1829,7 @@ st64:
 	if ( ++p == pe )
 		goto _test_eof64;
 case 64:
-#line 1830 "hpricot_scan.c"
+#line 1833 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr108;
 		case 47: goto tr110;
@@ -1871,7 +1874,7 @@ st65:
 	if ( ++p == pe )
 		goto _test_eof65;
 case 65:
-#line 1875 "hpricot_scan.c"
+#line 1878 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st65;
 		case 47: goto tr115;
@@ -1918,7 +1921,7 @@ st66:
 	if ( ++p == pe )
 		goto _test_eof66;
 case 66:
-#line 1922 "hpricot_scan.c"
+#line 1925 "hpricot_scan.c"
 	if ( (*p) == 62 )
 		goto tr118;
 	goto tr39;
@@ -1930,7 +1933,7 @@ st67:
 	if ( ++p == pe )
 		goto _test_eof67;
 case 67:
-#line 1934 "hpricot_scan.c"
+#line 1937 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr120;
 		case 32: goto tr120;
@@ -1954,7 +1957,7 @@ st68:
 	if ( ++p == pe )
 		goto _test_eof68;
 case 68:
-#line 1958 "hpricot_scan.c"
+#line 1961 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr126;
 		case 32: goto tr126;
@@ -1989,7 +1992,7 @@ st69:
 	if ( ++p == pe )
 		goto _test_eof69;
 case 69:
-#line 1993 "hpricot_scan.c"
+#line 1996 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st69;
 		case 47: goto tr115;
@@ -2030,7 +2033,7 @@ st70:
 	if ( ++p == pe )
 		goto _test_eof70;
 case 70:
-#line 2034 "hpricot_scan.c"
+#line 2037 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr126;
 		case 32: goto tr126;
@@ -2095,7 +2098,7 @@ st71:
 	if ( ++p == pe )
 		goto _test_eof71;
 case 71:
-#line 2099 "hpricot_scan.c"
+#line 2102 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr134;
 		case 32: goto tr134;
@@ -2141,7 +2144,7 @@ st72:
 	if ( ++p == pe )
 		goto _test_eof72;
 case 72:
-#line 2145 "hpricot_scan.c"
+#line 2148 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr140;
 		case 32: goto tr140;
@@ -2252,7 +2255,7 @@ st73:
 	if ( ++p == pe )
 		goto _test_eof73;
 case 73:
-#line 2256 "hpricot_scan.c"
+#line 2259 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr126;
 		case 32: goto tr126;
@@ -2278,7 +2281,7 @@ st74:
 	if ( ++p == pe )
 		goto _test_eof74;
 case 74:
-#line 2282 "hpricot_scan.c"
+#line 2285 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr143;
 		case 32: goto tr143;
@@ -2311,7 +2314,7 @@ st75:
 	if ( ++p == pe )
 		goto _test_eof75;
 case 75:
-#line 2315 "hpricot_scan.c"
+#line 2318 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr148;
 		case 32: goto tr148;
@@ -2355,7 +2358,7 @@ st76:
 	if ( ++p == pe )
 		goto _test_eof76;
 case 76:
-#line 2359 "hpricot_scan.c"
+#line 2362 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr143;
 		case 32: goto tr143;
@@ -2408,7 +2411,7 @@ st78:
 	if ( ++p == pe )
 		goto _test_eof78;
 case 78:
-#line 2412 "hpricot_scan.c"
+#line 2415 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr160;
 		case 32: goto tr160;
@@ -2457,7 +2460,7 @@ st79:
 	if ( ++p == pe )
 		goto _test_eof79;
 case 79:
-#line 2461 "hpricot_scan.c"
+#line 2464 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st79;
 		case 34: goto tr167;
@@ -2486,7 +2489,7 @@ st80:
 	if ( ++p == pe )
 		goto _test_eof80;
 case 80:
-#line 2490 "hpricot_scan.c"
+#line 2493 "hpricot_scan.c"
 	if ( (*p) == 34 )
 		goto tr167;
 	goto st80;
@@ -2530,7 +2533,7 @@ st81:
 	if ( ++p == pe )
 		goto _test_eof81;
 case 81:
-#line 2534 "hpricot_scan.c"
+#line 2537 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr171;
 		case 34: goto tr167;
@@ -2576,7 +2579,7 @@ st82:
 	if ( ++p == pe )
 		goto _test_eof82;
 case 82:
-#line 2580 "hpricot_scan.c"
+#line 2583 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st82;
 		case 34: goto tr167;
@@ -2630,7 +2633,7 @@ st83:
 	if ( ++p == pe )
 		goto _test_eof83;
 case 83:
-#line 2634 "hpricot_scan.c"
+#line 2637 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 34: goto tr167;
 		case 62: goto tr178;
@@ -2777,7 +2780,7 @@ st203:
 	if ( ++p == pe )
 		goto _test_eof203;
 case 203:
-#line 2781 "hpricot_scan.c"
+#line 2784 "hpricot_scan.c"
 	if ( (*p) == 34 )
 		goto tr167;
 	goto st80;
@@ -2789,7 +2792,7 @@ st84:
 	if ( ++p == pe )
 		goto _test_eof84;
 case 84:
-#line 2793 "hpricot_scan.c"
+#line 2796 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr179;
 		case 32: goto tr179;
@@ -2813,7 +2816,7 @@ st85:
 	if ( ++p == pe )
 		goto _test_eof85;
 case 85:
-#line 2817 "hpricot_scan.c"
+#line 2820 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr184;
 		case 32: goto tr184;
@@ -2846,7 +2849,7 @@ st86:
 	if ( ++p == pe )
 		goto _test_eof86;
 case 86:
-#line 2850 "hpricot_scan.c"
+#line 2853 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr184;
 		case 32: goto tr184;
@@ -2890,7 +2893,7 @@ st87:
 	if ( ++p == pe )
 		goto _test_eof87;
 case 87:
-#line 2894 "hpricot_scan.c"
+#line 2897 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr187;
 		case 32: goto tr187;
@@ -2925,7 +2928,7 @@ st88:
 	if ( ++p == pe )
 		goto _test_eof88;
 case 88:
-#line 2929 "hpricot_scan.c"
+#line 2932 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr153;
 		case 32: goto tr153;
@@ -2981,7 +2984,7 @@ st89:
 	if ( ++p == pe )
 		goto _test_eof89;
 case 89:
-#line 2985 "hpricot_scan.c"
+#line 2988 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr160;
 		case 32: goto tr160;
@@ -3047,7 +3050,7 @@ st90:
 	if ( ++p == pe )
 		goto _test_eof90;
 case 90:
-#line 3051 "hpricot_scan.c"
+#line 3054 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr196;
 		case 32: goto tr196;
@@ -3094,7 +3097,7 @@ st91:
 	if ( ++p == pe )
 		goto _test_eof91;
 case 91:
-#line 3098 "hpricot_scan.c"
+#line 3101 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr202;
 		case 32: goto tr202;
@@ -3206,7 +3209,7 @@ st92:
 	if ( ++p == pe )
 		goto _test_eof92;
 case 92:
-#line 3210 "hpricot_scan.c"
+#line 3213 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr160;
 		case 32: goto tr160;
@@ -3233,7 +3236,7 @@ st93:
 	if ( ++p == pe )
 		goto _test_eof93;
 case 93:
-#line 3237 "hpricot_scan.c"
+#line 3240 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr187;
 		case 32: goto tr187;
@@ -3276,7 +3279,7 @@ st95:
 	if ( ++p == pe )
 		goto _test_eof95;
 case 95:
-#line 3280 "hpricot_scan.c"
+#line 3283 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr214;
 		case 32: goto tr214;
@@ -3316,7 +3319,7 @@ st96:
 	if ( ++p == pe )
 		goto _test_eof96;
 case 96:
-#line 3320 "hpricot_scan.c"
+#line 3323 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st96;
 		case 34: goto tr222;
@@ -3346,7 +3349,7 @@ st97:
 	if ( ++p == pe )
 		goto _test_eof97;
 case 97:
-#line 3350 "hpricot_scan.c"
+#line 3353 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 34: goto tr222;
 		case 39: goto tr223;
@@ -3392,7 +3395,7 @@ st98:
 	if ( ++p == pe )
 		goto _test_eof98;
 case 98:
-#line 3396 "hpricot_scan.c"
+#line 3399 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st98;
 		case 39: goto tr167;
@@ -3421,7 +3424,7 @@ st99:
 	if ( ++p == pe )
 		goto _test_eof99;
 case 99:
-#line 3425 "hpricot_scan.c"
+#line 3428 "hpricot_scan.c"
 	if ( (*p) == 39 )
 		goto tr167;
 	goto st99;
@@ -3465,7 +3468,7 @@ st100:
 	if ( ++p == pe )
 		goto _test_eof100;
 case 100:
-#line 3469 "hpricot_scan.c"
+#line 3472 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr232;
 		case 39: goto tr167;
@@ -3511,7 +3514,7 @@ st101:
 	if ( ++p == pe )
 		goto _test_eof101;
 case 101:
-#line 3515 "hpricot_scan.c"
+#line 3518 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st101;
 		case 39: goto tr167;
@@ -3565,7 +3568,7 @@ st102:
 	if ( ++p == pe )
 		goto _test_eof102;
 case 102:
-#line 3569 "hpricot_scan.c"
+#line 3572 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 39: goto tr167;
 		case 62: goto tr239;
@@ -3712,7 +3715,7 @@ st204:
 	if ( ++p == pe )
 		goto _test_eof204;
 case 204:
-#line 3716 "hpricot_scan.c"
+#line 3719 "hpricot_scan.c"
 	if ( (*p) == 39 )
 		goto tr167;
 	goto st99;
@@ -3724,7 +3727,7 @@ st103:
 	if ( ++p == pe )
 		goto _test_eof103;
 case 103:
-#line 3728 "hpricot_scan.c"
+#line 3731 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr241;
 		case 32: goto tr241;
@@ -3748,7 +3751,7 @@ st104:
 	if ( ++p == pe )
 		goto _test_eof104;
 case 104:
-#line 3752 "hpricot_scan.c"
+#line 3755 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr247;
 		case 32: goto tr247;
@@ -3799,7 +3802,7 @@ st105:
 	if ( ++p == pe )
 		goto _test_eof105;
 case 105:
-#line 3803 "hpricot_scan.c"
+#line 3806 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr247;
 		case 32: goto tr247;
@@ -3865,7 +3868,7 @@ st106:
 	if ( ++p == pe )
 		goto _test_eof106;
 case 106:
-#line 3869 "hpricot_scan.c"
+#line 3872 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr254;
 		case 32: goto tr254;
@@ -3912,7 +3915,7 @@ st107:
 	if ( ++p == pe )
 		goto _test_eof107;
 case 107:
-#line 3916 "hpricot_scan.c"
+#line 3919 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr260;
 		case 32: goto tr260;
@@ -4024,7 +4027,7 @@ st108:
 	if ( ++p == pe )
 		goto _test_eof108;
 case 108:
-#line 4028 "hpricot_scan.c"
+#line 4031 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr247;
 		case 32: goto tr247;
@@ -4051,7 +4054,7 @@ st109:
 	if ( ++p == pe )
 		goto _test_eof109;
 case 109:
-#line 4055 "hpricot_scan.c"
+#line 4058 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr263;
 		case 32: goto tr263;
@@ -4084,7 +4087,7 @@ st110:
 	if ( ++p == pe )
 		goto _test_eof110;
 case 110:
-#line 4088 "hpricot_scan.c"
+#line 4091 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr268;
 		case 32: goto tr268;
@@ -4128,7 +4131,7 @@ st111:
 	if ( ++p == pe )
 		goto _test_eof111;
 case 111:
-#line 4132 "hpricot_scan.c"
+#line 4135 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr263;
 		case 32: goto tr263;
@@ -4194,7 +4197,7 @@ st113:
 	if ( ++p == pe )
 		goto _test_eof113;
 case 113:
-#line 4198 "hpricot_scan.c"
+#line 4201 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr214;
 		case 32: goto tr214;
@@ -4261,7 +4264,7 @@ st114:
 	if ( ++p == pe )
 		goto _test_eof114;
 case 114:
-#line 4265 "hpricot_scan.c"
+#line 4268 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr276;
 		case 32: goto tr276;
@@ -4313,7 +4316,7 @@ st115:
 	if ( ++p == pe )
 		goto _test_eof115;
 case 115:
-#line 4317 "hpricot_scan.c"
+#line 4320 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st115;
 		case 34: goto tr222;
@@ -4376,7 +4379,7 @@ st116:
 	if ( ++p == pe )
 		goto _test_eof116;
 case 116:
-#line 4380 "hpricot_scan.c"
+#line 4383 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr284;
 		case 34: goto tr222;
@@ -4431,7 +4434,7 @@ st117:
 	if ( ++p == pe )
 		goto _test_eof117;
 case 117:
-#line 4435 "hpricot_scan.c"
+#line 4438 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 34: goto tr222;
 		case 39: goto tr223;
@@ -4579,7 +4582,7 @@ st205:
 	if ( ++p == pe )
 		goto _test_eof205;
 case 205:
-#line 4583 "hpricot_scan.c"
+#line 4586 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 34: goto tr222;
 		case 39: goto tr223;
@@ -4593,7 +4596,7 @@ st118:
 	if ( ++p == pe )
 		goto _test_eof118;
 case 118:
-#line 4597 "hpricot_scan.c"
+#line 4600 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr290;
 		case 32: goto tr290;
@@ -4617,7 +4620,7 @@ st119:
 	if ( ++p == pe )
 		goto _test_eof119;
 case 119:
-#line 4621 "hpricot_scan.c"
+#line 4624 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr295;
 		case 32: goto tr295;
@@ -4650,7 +4653,7 @@ st120:
 	if ( ++p == pe )
 		goto _test_eof120;
 case 120:
-#line 4654 "hpricot_scan.c"
+#line 4657 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr295;
 		case 32: goto tr295;
@@ -4694,7 +4697,7 @@ st121:
 	if ( ++p == pe )
 		goto _test_eof121;
 case 121:
-#line 4698 "hpricot_scan.c"
+#line 4701 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr298;
 		case 32: goto tr298;
@@ -4729,7 +4732,7 @@ st122:
 	if ( ++p == pe )
 		goto _test_eof122;
 case 122:
-#line 4733 "hpricot_scan.c"
+#line 4736 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr206;
 		case 32: goto tr206;
@@ -4841,7 +4844,7 @@ st123:
 	if ( ++p == pe )
 		goto _test_eof123;
 case 123:
-#line 4845 "hpricot_scan.c"
+#line 4848 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr214;
 		case 32: goto tr214;
@@ -4865,7 +4868,7 @@ st124:
 	if ( ++p == pe )
 		goto _test_eof124;
 case 124:
-#line 4869 "hpricot_scan.c"
+#line 4872 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr206;
 		case 32: goto tr206;
@@ -4900,7 +4903,7 @@ st125:
 	if ( ++p == pe )
 		goto _test_eof125;
 case 125:
-#line 4904 "hpricot_scan.c"
+#line 4907 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr304;
 		case 34: goto tr305;
@@ -4930,7 +4933,7 @@ st126:
 	if ( ++p == pe )
 		goto _test_eof126;
 case 126:
-#line 4934 "hpricot_scan.c"
+#line 4937 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr304;
 		case 34: goto tr310;
@@ -4964,7 +4967,7 @@ st127:
 	if ( ++p == pe )
 		goto _test_eof127;
 case 127:
-#line 4968 "hpricot_scan.c"
+#line 4971 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr298;
 		case 32: goto tr298;
@@ -5000,7 +5003,7 @@ st128:
 	if ( ++p == pe )
 		goto _test_eof128;
 case 128:
-#line 5004 "hpricot_scan.c"
+#line 5007 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr311;
 		case 32: goto tr311;
@@ -5036,7 +5039,7 @@ st129:
 	if ( ++p == pe )
 		goto _test_eof129;
 case 129:
-#line 5040 "hpricot_scan.c"
+#line 5043 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr314;
 		case 32: goto tr314;
@@ -5079,7 +5082,7 @@ st131:
 	if ( ++p == pe )
 		goto _test_eof131;
 case 131:
-#line 5083 "hpricot_scan.c"
+#line 5086 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr318;
 		case 39: goto tr319;
@@ -5108,7 +5111,7 @@ st132:
 	if ( ++p == pe )
 		goto _test_eof132;
 case 132:
-#line 5112 "hpricot_scan.c"
+#line 5115 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr268;
 		case 32: goto tr268;
@@ -5132,7 +5135,7 @@ st133:
 	if ( ++p == pe )
 		goto _test_eof133;
 case 133:
-#line 5136 "hpricot_scan.c"
+#line 5139 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr323;
 		case 34: goto tr319;
@@ -5202,7 +5205,7 @@ st138:
 	if ( ++p == pe )
 		goto _test_eof138;
 case 138:
-#line 5206 "hpricot_scan.c"
+#line 5209 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 13: goto tr148;
 		case 32: goto tr148;
@@ -5241,7 +5244,7 @@ st140:
 	if ( ++p == pe )
 		goto _test_eof140;
 case 140:
-#line 5245 "hpricot_scan.c"
+#line 5248 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st206;
 		case 63: goto st140;
@@ -5279,7 +5282,7 @@ st141:
 	if ( ++p == pe )
 		goto _test_eof141;
 case 141:
-#line 5283 "hpricot_scan.c"
+#line 5286 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st206;
 		case 63: goto st140;
@@ -5358,7 +5361,7 @@ st207:
 	if ( ++p == pe )
 		goto _test_eof207;
 case 207:
-#line 5362 "hpricot_scan.c"
+#line 5365 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto tr334;
 		case 118: goto st144;
@@ -5457,7 +5460,7 @@ st153:
 	if ( ++p == pe )
 		goto _test_eof153;
 case 153:
-#line 5461 "hpricot_scan.c"
+#line 5464 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 34: goto tr346;
 		case 95: goto st153;
@@ -5482,7 +5485,7 @@ st154:
 	if ( ++p == pe )
 		goto _test_eof154;
 case 154:
-#line 5486 "hpricot_scan.c"
+#line 5489 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st155;
 		case 62: goto tr349;
@@ -5602,7 +5605,7 @@ st167:
 	if ( ++p == pe )
 		goto _test_eof167;
 case 167:
-#line 5606 "hpricot_scan.c"
+#line 5609 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 34: goto tr364;
 		case 95: goto st167;
@@ -5638,7 +5641,7 @@ st168:
 	if ( ++p == pe )
 		goto _test_eof168;
 case 168:
-#line 5642 "hpricot_scan.c"
+#line 5645 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st169;
 		case 62: goto tr349;
@@ -5763,7 +5766,7 @@ st182:
 	if ( ++p == pe )
 		goto _test_eof182;
 case 182:
-#line 5767 "hpricot_scan.c"
+#line 5770 "hpricot_scan.c"
 	if ( (*p) == 111 )
 		goto st183;
 	goto tr335;
@@ -5782,7 +5785,7 @@ st184:
 	if ( ++p == pe )
 		goto _test_eof184;
 case 184:
-#line 5786 "hpricot_scan.c"
+#line 5789 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 32: goto st184;
 		case 62: goto tr349;
@@ -5799,7 +5802,7 @@ st185:
 	if ( ++p == pe )
 		goto _test_eof185;
 case 185:
-#line 5803 "hpricot_scan.c"
+#line 5806 "hpricot_scan.c"
 	if ( (*p) == 101 )
 		goto st186;
 	goto tr335;
@@ -5827,7 +5830,7 @@ st188:
 	if ( ++p == pe )
 		goto _test_eof188;
 case 188:
-#line 5831 "hpricot_scan.c"
+#line 5834 "hpricot_scan.c"
 	if ( (*p) == 111 )
 		goto st189;
 	goto tr335;
@@ -5846,7 +5849,7 @@ st190:
 	if ( ++p == pe )
 		goto _test_eof190;
 case 190:
-#line 5850 "hpricot_scan.c"
+#line 5853 "hpricot_scan.c"
 	if ( (*p) == 101 )
 		goto st191;
 	goto tr335;
@@ -5875,7 +5878,7 @@ st193:
 	if ( ++p == pe )
 		goto _test_eof193;
 case 193:
-#line 5879 "hpricot_scan.c"
+#line 5882 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 39: goto tr364;
 		case 95: goto st193;
@@ -5918,7 +5921,7 @@ st195:
 	if ( ++p == pe )
 		goto _test_eof195;
 case 195:
-#line 5922 "hpricot_scan.c"
+#line 5925 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 39: goto tr346;
 		case 95: goto st195;
@@ -5967,7 +5970,7 @@ st208:
 case 208:
 #line 1 "NONE"
 	{ts = p;}
-#line 5971 "hpricot_scan.c"
+#line 5974 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 10: goto tr409;
 		case 45: goto tr410;
@@ -5981,7 +5984,7 @@ st209:
 	if ( ++p == pe )
 		goto _test_eof209;
 case 209:
-#line 5985 "hpricot_scan.c"
+#line 5988 "hpricot_scan.c"
 	if ( (*p) == 45 )
 		goto st196;
 	goto tr411;
@@ -6024,7 +6027,7 @@ st210:
 case 210:
 #line 1 "NONE"
 	{ts = p;}
-#line 6028 "hpricot_scan.c"
+#line 6031 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 10: goto tr414;
 		case 93: goto tr415;
@@ -6038,7 +6041,7 @@ st211:
 	if ( ++p == pe )
 		goto _test_eof211;
 case 211:
-#line 6042 "hpricot_scan.c"
+#line 6045 "hpricot_scan.c"
 	if ( (*p) == 93 )
 		goto st197;
 	goto tr416;
@@ -6077,7 +6080,7 @@ st212:
 case 212:
 #line 1 "NONE"
 	{ts = p;}
-#line 6081 "hpricot_scan.c"
+#line 6084 "hpricot_scan.c"
 	switch( (*p) ) {
 		case 10: goto tr419;
 		case 62: goto tr420;
@@ -6526,7 +6529,7 @@ case 213:
 
 	}
 
-#line 593 "hpricot_scan.rl"
+#line 596 "hpricot_scan.rl"
 
     if (cs == hpricot_scan_error) {
       if (buf != NULL)
