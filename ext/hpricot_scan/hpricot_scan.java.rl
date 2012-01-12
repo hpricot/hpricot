@@ -375,23 +375,31 @@ public class HpricotScanService implements BasicLibraryService {
                     if(!S.xml) {
                         IRubyObject match = runtime.getNil(), e = S.focus;
                         while(e != S.doc) {
-                            IRubyObject hEC = H_ELE_GET(e, H_ELE_EC);
-                            if(hEC instanceof RubyHash) {
-                                IRubyObject has = ((RubyHash)hEC).op_aref(scanner.ctx, name);
-                                if(!has.isNil()) {
-                                    if(has == runtime.getTrue()) {
-                                        if(match.isNil()) {
-                                            match = e;
-                                        }
-                                    } else if(has == x.symAllow) {
-                                        match = S.focus;
-                                    } else if(has == x.symDeny) {
-                                        match = runtime.getNil();
-                                    }
-                                }
-                            } else {
+                            if (ec.isNil()) {
+                                // Anything can contain an unknown element
                                 if(match.isNil()) {
                                     match = e;
+                                }
+                            } else {
+                                IRubyObject hEC = H_ELE_GET(e, H_ELE_EC);
+                                if(hEC instanceof RubyHash) {
+                                    IRubyObject has = ((RubyHash)hEC).op_aref(scanner.ctx, name);
+                                    if(!has.isNil()) {
+                                        if(has == runtime.getTrue()) {
+                                            if(match.isNil()) {
+                                                match = e;
+                                            }
+                                        } else if(has == x.symAllow) {
+                                            match = S.focus;
+                                        } else if(has == x.symDeny) {
+                                            match = runtime.getNil();
+                                        }
+                                    }
+                                } else {
+                                    // Unknown elements can contain anything
+                                    if(match.isNil()) {
+                                        match = e;
+                                    }
                                 }
                             }
                             e = H_ELE_GET(e, H_ELE_PARENT);

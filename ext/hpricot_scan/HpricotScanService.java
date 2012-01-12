@@ -377,23 +377,31 @@ public class HpricotScanService implements BasicLibraryService {
                     if(!S.xml) {
                         IRubyObject match = runtime.getNil(), e = S.focus;
                         while(e != S.doc) {
-                            IRubyObject hEC = H_ELE_GET(e, H_ELE_EC);
-                            if(hEC instanceof RubyHash) {
-                                IRubyObject has = ((RubyHash)hEC).op_aref(scanner.ctx, name);
-                                if(!has.isNil()) {
-                                    if(has == runtime.getTrue()) {
-                                        if(match.isNil()) {
-                                            match = e;
-                                        }
-                                    } else if(has == x.symAllow) {
-                                        match = S.focus;
-                                    } else if(has == x.symDeny) {
-                                        match = runtime.getNil();
-                                    }
-                                }
-                            } else {
+                            if (ec.isNil()) {
+                                // Anything can contain an unknown element
                                 if(match.isNil()) {
                                     match = e;
+                                }
+                            } else {
+                                IRubyObject hEC = H_ELE_GET(e, H_ELE_EC);
+                                if(hEC instanceof RubyHash) {
+                                    IRubyObject has = ((RubyHash)hEC).op_aref(scanner.ctx, name);
+                                    if(!has.isNil()) {
+                                        if(has == runtime.getTrue()) {
+                                            if(match.isNil()) {
+                                                match = e;
+                                            }
+                                        } else if(has == x.symAllow) {
+                                            match = S.focus;
+                                        } else if(has == x.symDeny) {
+                                            match = runtime.getNil();
+                                        }
+                                    }
+                                } else {
+                                    // Unknown elements can contain anything
+                                    if(match.isNil()) {
+                                        match = e;
+                                    }
                                 }
                             }
                             e = H_ELE_GET(e, H_ELE_PARENT);
@@ -515,11 +523,11 @@ public class HpricotScanService implements BasicLibraryService {
         }
 
 
-// line 565 "hpricot_scan.java.rl"
+// line 573 "hpricot_scan.java.rl"
 
 
 
-// line 523 "HpricotScanService.java"
+// line 531 "HpricotScanService.java"
 private static byte[] init__hpricot_scan_actions_0()
 {
 	return new byte [] {
@@ -1100,7 +1108,7 @@ static final int hpricot_scan_en_html_procins = 212;
 static final int hpricot_scan_en_main = 198;
 
 
-// line 568 "hpricot_scan.java.rl"
+// line 576 "hpricot_scan.java.rl"
 
         public final static int BUFSIZE = 16384;
 
@@ -1204,7 +1212,7 @@ static final int hpricot_scan_en_main = 198;
         // hpricot_scan
         public IRubyObject scan() {
 
-// line 1208 "HpricotScanService.java"
+// line 1216 "HpricotScanService.java"
 	{
 	cs = hpricot_scan_start;
 	ts = -1;
@@ -1212,7 +1220,7 @@ static final int hpricot_scan_en_main = 198;
 	act = 0;
 	}
 
-// line 671 "hpricot_scan.java.rl"
+// line 679 "hpricot_scan.java.rl"
             while(!done) {
                 p = pe = len = buf;
                 space = buffer_size - have;
@@ -1260,7 +1268,7 @@ static final int hpricot_scan_en_main = 198;
                 pe = p + len;
 
                 
-// line 1264 "HpricotScanService.java"
+// line 1272 "HpricotScanService.java"
 	{
 	int _klen;
 	int _trans = 0;
@@ -1285,7 +1293,7 @@ case 1:
 // line 1 "NONE"
 	{ts = p;}
 	break;
-// line 1289 "HpricotScanService.java"
+// line 1297 "HpricotScanService.java"
 		}
 	}
 
@@ -1350,7 +1358,7 @@ case 3:
 			switch ( _hpricot_scan_actions[_acts++] )
 			{
 	case 0:
-// line 518 "hpricot_scan.java.rl"
+// line 526 "hpricot_scan.java.rl"
 	{
     if(text) {
         tag = CAT(tag, mark_tag, p);
@@ -1364,27 +1372,27 @@ case 3:
   }
 	break;
 	case 1:
-// line 530 "hpricot_scan.java.rl"
+// line 538 "hpricot_scan.java.rl"
 	{ mark_tag = p; }
 	break;
 	case 2:
-// line 531 "hpricot_scan.java.rl"
+// line 539 "hpricot_scan.java.rl"
 	{ mark_aval = p; }
 	break;
 	case 3:
-// line 532 "hpricot_scan.java.rl"
+// line 540 "hpricot_scan.java.rl"
 	{ mark_akey = p; }
 	break;
 	case 4:
-// line 533 "hpricot_scan.java.rl"
+// line 541 "hpricot_scan.java.rl"
 	{ tag = SET(mark_tag, p, tag); }
 	break;
 	case 5:
-// line 535 "hpricot_scan.java.rl"
+// line 543 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); }
 	break;
 	case 6:
-// line 536 "hpricot_scan.java.rl"
+// line 544 "hpricot_scan.java.rl"
 	{
       if(data[p-1] == '"' || data[p-1] == '\'') {
           aval = SET(mark_aval, p-1, aval);
@@ -1394,31 +1402,31 @@ case 3:
   }
 	break;
 	case 7:
-// line 543 "hpricot_scan.java.rl"
+// line 551 "hpricot_scan.java.rl"
 	{   akey = SET(mark_akey, p, akey); }
 	break;
 	case 8:
-// line 544 "hpricot_scan.java.rl"
+// line 552 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("version"), aval); }
 	break;
 	case 9:
-// line 545 "hpricot_scan.java.rl"
+// line 553 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("encoding"), aval); }
 	break;
 	case 10:
-// line 546 "hpricot_scan.java.rl"
+// line 554 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("standalone"), aval); }
 	break;
 	case 11:
-// line 547 "hpricot_scan.java.rl"
+// line 555 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("public_id"), aval); }
 	break;
 	case 12:
-// line 548 "hpricot_scan.java.rl"
+// line 556 "hpricot_scan.java.rl"
 	{ aval = SET(mark_aval, p, aval); ATTR(runtime.newSymbol("system_id"), aval); }
 	break;
 	case 13:
-// line 550 "hpricot_scan.java.rl"
+// line 558 "hpricot_scan.java.rl"
 	{
       akey = runtime.getNil();
       aval = runtime.getNil();
@@ -1427,7 +1435,7 @@ case 3:
   }
 	break;
 	case 14:
-// line 557 "hpricot_scan.java.rl"
+// line 565 "hpricot_scan.java.rl"
 	{
       if(!S.xml && !akey.isNil()) {
           akey = akey.callMethod(runtime.getCurrentContext(), "downcase");
@@ -1589,7 +1597,7 @@ case 3:
 	}
 	}
 	break;
-// line 1593 "HpricotScanService.java"
+// line 1601 "HpricotScanService.java"
 			}
 		}
 	}
@@ -1603,7 +1611,7 @@ case 2:
 // line 1 "NONE"
 	{ts = -1;}
 	break;
-// line 1607 "HpricotScanService.java"
+// line 1615 "HpricotScanService.java"
 		}
 	}
 
@@ -1626,7 +1634,7 @@ case 5:
 	break; }
 	}
 
-// line 718 "hpricot_scan.java.rl"
+// line 726 "hpricot_scan.java.rl"
 
                 if(cs == hpricot_scan_error) {
                     if(!tag.isNil()) {
