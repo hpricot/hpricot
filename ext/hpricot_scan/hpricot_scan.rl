@@ -356,23 +356,32 @@ rb_hpricot_token(hpricot_state *S, VALUE sym, VALUE tag, VALUE attr,
       VALUE match = Qnil, e = S->focus;
       while (e != S->doc)
       {
-        VALUE hEC = H_ELE_GET(e, H_ELE_EC);
+        if (ec == Qnil) {
+          // anything can contain unknown elements
+          if (match == Qnil)
+            match = e;
+        } else {
+          VALUE hEC = H_ELE_GET(e, H_ELE_EC);
 
-        if (TYPE(hEC) == T_HASH)
-        {
-          VALUE has = rb_hash_lookup(hEC, name);
-          if (has != Qnil) {
-            if (has == Qtrue) {
-              if (match == Qnil)
-                match = e;
-            } else if (has == symAllow) {
-              match = S->focus;
-            } else if (has == symDeny) {
-              match = Qnil;
+          if (TYPE(hEC) == T_HASH)
+          {
+            VALUE has = rb_hash_lookup(hEC, name);
+            if (has != Qnil) {
+              if (has == Qtrue) {
+                if (match == Qnil)
+                  match = e;
+              } else if (has == symAllow) {
+                match = S->focus;
+              } else if (has == symDeny) {
+                match = Qnil;
+              }
             }
+          } else {
+            // Unknown elements can contain anything
+            if (match == Qnil)
+              match = e;
           }
         }
-
         e = H_ELE_GET(e, H_ELE_PARENT);
       }
 

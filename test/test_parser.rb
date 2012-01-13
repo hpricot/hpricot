@@ -475,4 +475,22 @@ class TestParser < Test::Unit::TestCase
    assert_nothing_raised {Hpricot.parse(TestFiles::BNQT)}
  end
 
+ def test_unknown_tag
+   header = <<-edoc
+<header id="htest">
+  <div id="dtest">blah</div>
+</header>
+   edoc
+   doc = Hpricot(<<-edoc)
+      <div>#{header}</div>
+    edoc
+   assert_equal header.chomp, (doc/"#htest").to_html
+ end
+
+ def test_nested_unknown_tags
+   header =
+     %(<header id="htest"><div id="dtest"><nav>blah</nav></div></header>)
+   doc = Hpricot(%(<div>#{header}</div>))
+   assert_equal header.chomp, (doc/"#htest").to_html
+ end
 end
