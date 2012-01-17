@@ -1,3 +1,7 @@
+= 0.8.6
+=== 17 January 2012
+* Allow any tags to contain unknown tags (Steven Parkes)
+
 = 0.8.5
 === 29 November 2011
 * Remove escaped quote (\') from matching (#55)

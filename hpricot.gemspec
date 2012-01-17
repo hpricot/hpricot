@@ -1,9 +1,9 @@
 Gem::Specification.new do |s|
   s.name = %q{hpricot}
-  s.version = "0.8.4"
+  s.version = "0.8.6"
 
   s.authors = ["why the lucky stiff"]
-  s.date = %q{2011-02-28}
+  s.date = %q{2012-01-17}
   s.description = %q{a swift, liberal HTML parser with a fantastic library}
   s.email = %q{why@ruby-lang.org}
   s.extensions = ["ext/fast_xs/extconf.rb", "ext/hpricot_scan/extconf.rb"]
