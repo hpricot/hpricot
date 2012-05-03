@@ -1,3 +1,22 @@
+# Hpricot is over.
+
+After years of lack of a proper maintainer for one of why's jewels, it has been
+decided to finally close the book on hpricot. Most users have migrated to alternatives
+and there is simply no time or energy to continue with the current codebase.
+
+If you feel that you have the time and wish to take it over, I suggest you instead
+think about making the hpricot-like API within nokogiri 100% compatible, that is a better
+use of your time.
+
+But if you still feel like "No damnit, I wanna work on hpricot itself still!" then fork
+this repo and start work. Send @evanphx or @nicksieger a message if you feel like you
+want to take over the gem name with new releases under the hpricot name.
+
+Thanks to \_why for all the fun. We'll never forget it.
+
+## Now back to your original README content...
+
+
 # Hpricot, Read Any HTML
 
 Hpricot is a fast, flexible HTML parser written in C.  It's designed to be very
