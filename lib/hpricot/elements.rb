@@ -295,6 +295,7 @@ module Hpricot
             elsif "#{m[0]}#{m[1]}" =~ /^(:first|:last)$/
                 nodes = [nodes.send(m[1])]
             else
+                args = []
                 meth = "filter[#{m[0]}#{m[1]}]" unless m[0].empty?
                 if meth and Traverse.method_defined? meth
                     args = m[2..-1]
